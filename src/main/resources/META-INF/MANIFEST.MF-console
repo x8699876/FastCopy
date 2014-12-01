@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Class-Path:
+Build-Jdk: 1.7.0_55
+Built-By: zxue
+Created-By: IntelliJ IDEA
+Main-Class: org.mhisoft.rdpro.RdPro
+

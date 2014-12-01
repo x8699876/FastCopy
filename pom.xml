@@ -1,0 +1,264 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.mhisoft</groupId>
+    <artifactId>FastCopy</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+    <name>Fast Copy</name>
+    <description>Fast Copy</description>
+
+    <!--
+
+    notes, for now we need to use the intelliJ's "make project" to generate the extra com.intelliJ.uiDesigner.core
+    classes into the classes folder.
+
+    -->
+
+
+    <build>
+        <!--<finalName>rdpro</finalName>-->
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>ideauidesigner-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>javac2</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                    <fork>true</fork>
+                    <debug>true</debug>
+                    <failOnError>true</failOnError>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>copy-batch-files</id>
+                        <!-- here the phase you need -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/target/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>dist\rdpro.bat</include>
+                                        <include>dist\rdproui.bat</include>
+                                        <include>dist\rdpro.sh</include>
+                                        <include>dist\rdproui.sh</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+
+
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+          <!--  <plugin>
+                &lt;!&ndash; Build an executable JAR &ndash;&gt;
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifestFile>${manifest-file}</manifestFile>
+                        &lt;!&ndash;
+                                                <manifest>
+                                                    <addClasspath>true</addClasspath>
+                                                    &lt;!&ndash;<classpathPrefix>lib/</classpathPrefix>&ndash;&gt;
+                                                    &lt;!&ndash;<mainClass>org.mhisoft.rdpro.RdPro</mainClass>&ndash;&gt;
+                                                    <mainClass>org.mhisoft.rdpro.ui.ReproMainForm</mainClass>
+                                                </manifest>
+                        &ndash;&gt;
+
+                    </archive>
+                    &lt;!&ndash;intelliJ build careate these three under classes&ndash;&gt;
+                    <excludes>
+                        <exclude>MANIFEST.MF</exclude>
+                        <exclude>images.jar</exclude>
+                        <exclude>forms_rt-5.0.jar</exclude>
+                    </excludes>
+                    &lt;!&ndash;  <includes>
+                          <include>${project.build.directory}/lib/*.jar</include>
+                          <include>${project.build.directory}/classes/**/*</include>
+                      </includes>&ndash;&gt;
+                </configuration>
+            </plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+            </plugin>
+
+
+        </plugins>
+
+
+    </build>
+
+
+    <!-- ==========================================
+     ========== rdpro UI version ==========
+     ============================================ -->
+
+    <profiles>
+        <profile>
+            <id>rdproui</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <manifest-file>src/main/resources/META-INF/MANIFEST.MF</manifest-file>
+            </properties>
+            <build>
+                <finalName>rdpro-ui</finalName>
+
+
+                <resources>
+                    <resource>
+                        <filtering>false</filtering>
+                        <directory>${project.basedir}</directory>
+                        <includes>
+                            <include>lib/*.jar</include>
+                        </includes>
+                    </resource>
+                    <resource>
+                        <filtering>false</filtering>
+                        <directory>${project.basedir}/src/main/resources</directory>
+                        <includes>
+                            <include>images/*.png</include>
+                        </includes>
+                    </resource>
+                </resources>
+
+
+                <plugins>
+
+                    <plugin>
+                        <!-- Build an executable JAR -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>2.4</version>
+                        <configuration>
+                            <outputDirectory>dist\</outputDirectory>
+                            <archive>
+                                <manifestFile>${manifest-file}</manifestFile>
+                            </archive>
+                            <!--intelliJ build careate these three under classes-->
+                            <excludes>
+                                <exclude>META-INF\MANIFEST.MF*</exclude>
+                                <exclude>images.jar</exclude>
+                                <exclude>forms_rt-5.0.jar</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+
+            </build>
+        </profile>
+
+
+<!-- ==========================================
+ ========== rdpro console  version ==========
+ ============================================ -->
+
+        <profile>
+            <id>rdpro-console</id>
+            <properties>
+                <manifest-file>src/main/resources/META-INF/MANIFEST.MF-console</manifest-file>
+            </properties>
+            <build>
+                <finalName>rdpro-console</finalName>
+                <plugins>
+
+                    <plugin>
+                        <!-- Build an executable JAR -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>2.4</version>
+                        <configuration>
+                            <outputDirectory>dist\</outputDirectory>
+                            <archive>
+                                <manifest>
+                                    <mainClass>org.mhisoft.fc.FastCopy</mainClass>
+                                </manifest>
+                            </archive>
+                            <!--intelliJ build careate these three under classes-->
+                            <excludes>
+                                <exclude>MANIFEST.MF</exclude>
+                                <exclude>META-INF\MANIFEST.MF*</exclude>
+                                <exclude>lib\*</exclude>
+                                <exclude>images.jar</exclude>
+                                <exclude>forms_rt-5.0.jar</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+
+
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jgoodies</groupId>
+            <artifactId>forms</artifactId>
+            <version>1.0.5</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
