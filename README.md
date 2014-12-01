@@ -1,4 +1,4 @@
-## Fast Copy
+## Fast File and Directory Copy
 
 * Copies files and directories fast
 
