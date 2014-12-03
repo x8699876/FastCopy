@@ -32,7 +32,6 @@ import org.mhisoft.fc.ui.RdProUI;
  */
 public class FileWalker {
 
-
 	FastCopy.RunTimeProperties props;
 	//Integer threads;
 	boolean lastAnsweredDeleteAll = false;
@@ -58,7 +57,9 @@ public class FileWalker {
 			File f = new File(file);
 			if (f.isFile()) {
 				File targetFile = new File(destDir + File.separator + f.getName());
-				FileUtils.nioBufferCopy(f, targetFile, statistics, rdProUI);
+				//FileUtils.nioBufferCopy(f, targetFile, statistics, rdProUI);
+				CopyFileThread t = new CopyFileThread(rdProUI, f, targetFile, props.verbose, statistics);
+				workerPool.addTask(t);
 			} else if (f.isDirectory()) {
 				walkDir(f, destDir);
 			}
@@ -94,7 +95,11 @@ public class FileWalker {
 			else {
 
 				String newDestFile =  targetDir +File.separator + childFile.getName();
-				FileUtils.nioBufferCopy(childFile, new File(newDestFile), statistics, rdProUI);
+				//FileUtils.nioBufferCopy(childFile, new File(newDestFile), statistics, rdProUI);
+
+				CopyFileThread t = new CopyFileThread(rdProUI, childFile, new File(newDestFile), props.verbose, statistics);
+				workerPool.addTask(t);
+
 			}
 		}   //loop all the files and dires under root
 

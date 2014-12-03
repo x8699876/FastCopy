@@ -59,7 +59,7 @@ public class FastCopy {
 		String destDir = null;
 		boolean success;
 		boolean verbose;
-		int numOfThreads;
+		int numOfThreads=5;
 
 		public String getSourceDir() {
 			return sourceDir;
@@ -102,20 +102,20 @@ public class FastCopy {
 		}
 	}
 
+	static DecimalFormat df = new DecimalFormat("#,###.##");
 
 	public void run(RunTimeProperties props) {
-		//workerPool = new Workers(props.getNumOfThreads(), rdProUI);
+		workerPool = new Workers(props.getNumOfThreads(), rdProUI);
 		FileWalker fw = new FileWalker(rdProUI, workerPool, props, frs);
 		long t1 = System.currentTimeMillis();
 
 		String[] files = props.sourceDir.split(";");
 		fw.walk( files, props.getDestDir());
-		//workerPool.shutDownandWaitForAllThreadsToComplete();
+		workerPool.shutDownandWaitForAllThreadsToComplete();
 
-		DecimalFormat df = new DecimalFormat("#.##");
+
 		rdProUI.println("\nDone in " + (System.currentTimeMillis() - t1) / 1000 + " seconds.");
-		rdProUI.println(String.format("Min Speed:%s, Max Speed: %s"
-				, df.format(frs.minSpeed), df.format(frs.maxSpeed)));
+		rdProUI.println(frs.printSpeed());
 		rdProUI.println("Dir copied:" + frs.dirCount + ", Files copied:" + frs.filesCount);
 	}
 

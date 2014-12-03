@@ -19,6 +19,10 @@
  */
 package org.mhisoft.fc;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.text.DecimalFormat;
+
 /**
 * Description: Statistics on files and directories copied.
 *
@@ -28,9 +32,31 @@ package org.mhisoft.fc;
 public class FileCopyStatistics {
 	long filesCount;
 	long dirCount;
-	double  speed ; //Byte Per Seconds
-	double  minSpeed=Double.MAX_VALUE ; //Byte Per Seconds
-	double  maxSpeed=0; //Byte Per Seconds
+
+	public static class BucketBySize {
+		String name ;
+		long size ;
+		double  speed ; //Byte Per Seconds
+		double  minSpeed=0 ; //Byte Per Seconds
+		double  maxSpeed=0; //Byte Per Seconds
+
+		public BucketBySize(long size, String name) {
+			this.size = size;
+			this.name = name;
+		}
+	}
+
+	List<BucketBySize> bucketBySizeList;
+
+	public FileCopyStatistics() {
+		this.bucketBySizeList = new ArrayList<BucketBySize>();
+		//4k, 1M, 100M, 500M
+		bucketBySizeList.add(new BucketBySize(4l, "4K"));
+		bucketBySizeList.add(new BucketBySize(1000L, "1M"));
+		bucketBySizeList.add(new BucketBySize(100000L, "100M"));
+		bucketBySizeList.add(new BucketBySize(500000L, "500M"));
+
+	}
 
 	public long getFilesCount() {
 		return filesCount;
@@ -48,15 +74,43 @@ public class FileCopyStatistics {
 		this.dirCount = dirCount;
 	}
 
-	public void setSpeed(double speed) {
-		this.speed = speed;
-		if (speed<minSpeed)
-			minSpeed =  speed;
-		if (speed>maxSpeed)
-			maxSpeed= speed;
+	//fsize is in KB.
+	public void setSpeed(double fsize, double speed) {
+
+		BucketBySize bucketBySize = null;
+		for (BucketBySize entry : bucketBySizeList) {
+			if (fsize<entry.size) {
+				bucketBySize = entry;
+				break;
+			}
+		}
+		if (bucketBySize==null) {
+			bucketBySize =  bucketBySizeList.get(3);
+		}
+
+		if (speed>0) {
+			bucketBySize.speed = speed;
+			if (bucketBySize.minSpeed==0 || speed < bucketBySize.minSpeed)
+				bucketBySize.minSpeed = speed;
+			if (bucketBySize.maxSpeed==0 || speed > bucketBySize.maxSpeed)
+				bucketBySize.maxSpeed = speed;
+		}
 	}
 
-	public double getSpeed() {
-		return speed;
+	public String  printSpeed() {
+		DecimalFormat df = new DecimalFormat("#,###.##");
+		StringBuilder sb = new StringBuilder();
+
+		for (BucketBySize entry : bucketBySizeList) {
+			sb.append("Files <").append(entry.name).append(": ")
+					.append(String.format("Min Speed:%s, Max Speed: %s", df.format(entry.minSpeed), df.format(entry.maxSpeed)))
+					.append("\n");
+
+		}
+
+		return sb.toString();
+
 	}
+
+
 }

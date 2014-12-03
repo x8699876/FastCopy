@@ -89,7 +89,17 @@ public class FileUtils {
 	}
 
 	private static final int BUFFER = 8192;
-	static final DecimalFormat df = new DecimalFormat("#.##");
+	static final DecimalFormat df = new DecimalFormat("#,###.##");
+
+	public static void showPercent(final RdProUI rdProUI, double digital) {
+		long p = (long)digital*100;
+		DecimalFormat df = new DecimalFormat("000");
+		String s = df.format(p);
+
+		rdProUI.printf("\u0008\u0008\u0008\u0008%s", df.format(p)+"%");
+	}
+
+
 
 	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final RdProUI rdProUI)  {
 		FileChannel in = null;
@@ -101,29 +111,39 @@ public class FileUtils {
 			in = new FileInputStream(source).getChannel();
 			out = new FileOutputStream(target).getChannel();
 			size = in.size();
+			double size2 = size/1024/8;
+			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getName() ,df.format(size2) ));
 
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
-			while (in.read(buffer) != -1) {
+			int readSize = in.read(buffer);
+			long totalSize =0;
+
+			while (readSize != -1) {
+
+				totalSize= totalSize + readSize;
 				buffer.flip();
 
 				while(buffer.hasRemaining()){
 					out.write(buffer);
-				}
+					//System.out.printf(".");
+					//showPercent(rdProUI, totalSize/size );
 
+				}
 				buffer.clear();
+				readSize = in.read(buffer);
 			}
 
 			statistics.filesCount++;
 			long t2 = System.currentTimeMillis();
-			double size2 = size/1024/8;
-			if (size>0 && t2-t1>0)
-				statistics.setSpeed( size2*(10^6)/(t2-t1) );
 
-			rdProUI.println(String.format("\tCopied file %s, size:%s KBytes, speed:%s KByte/Second."
-					,target.getName()
-					,df.format(size2)
-					,df.format(statistics.getSpeed())));
+			double speed =0;
+			if (size>0 && t2-t1>0) {
+				speed = size2*(10^6)/(t2-t1);
+				statistics.setSpeed(size2, speed);
+			}
+
+			rdProUI.println(String.format(", speed:%s KByte/Second.",df.format(speed) ));
 
 		}
 		catch (IOException e) {
