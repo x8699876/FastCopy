@@ -118,7 +118,6 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 
 		FastCopy.RunTimeProperties props= new FastCopy.RunTimeProperties();
 
-
 		if (args.length<1 || args[0]==null || args[0].trim().length()==0) {
 			//JOptionPane.showMessageDialog(null, "The root dir to start with can't be determined from args[].", "Error"
 			//		, JOptionPane.ERROR_MESSAGE);
@@ -126,16 +125,10 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 			props.setSourceDir(null);
 		}
 		else {
-
-			// in case of the directory got spaces , concatenate them together
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < args.length; i++) {
-				String arg = args[i];
-				if (i>0)
-					sb.append(" ");
-				sb.append(arg);
-			}
-			props.setSourceDir(sb.toString());
+			if (args.length>=1)
+				props.setSourceDir(args[0]);
+			if (args.length>=2)
+				props.setDestDir(args[1]);
 		}
 		return props;
 	}

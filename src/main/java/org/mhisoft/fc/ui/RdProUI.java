@@ -29,8 +29,8 @@ import org.mhisoft.fc.FastCopy;
  */
 public interface RdProUI {
 
-	public static final String version = "v1.1.2 ";
-	public static final String build = "build 105";
+	public static final String version = "v0.9 ";
+	public static final String build = "build 001";
 
 	public  enum Confirmation {
 		YES, NO, YES_TO_ALL, HELP

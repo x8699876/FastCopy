@@ -31,12 +31,8 @@ package org.mhisoft.fc.ui;
 public abstract class AbstractRdProUIImpl implements RdProUI {
 
 	public void printBuildAndDisclaimer() {
-		println("RdPro  - A Powerful Recursive Directory Purge Utility (" +
+		println("Fast Copy (" +
 				version + build + " by Tony Xue, MHISoft)");
-		println("Disclaimer:");
-		println("\tDeleted files does not go to recycle bean and can't be recovered.");
-		println("\tThe author is not responsible for any lost of files or damage incurred by running this utility.");
-
 	}
 
 }

@@ -32,6 +32,7 @@ import org.mhisoft.fc.ui.RdProUI;
  */
 public class FastCopy {
 	public static boolean debug = Boolean.getBoolean("debug");
+	public static final int DEFAULT_THREAD_NUM =5;
 
 	FileCopyStatistics frs = new FileCopyStatistics();
 	Workers workerPool;
@@ -50,6 +51,24 @@ public class FastCopy {
 		return frs;
 	}
 
+	public static boolean stopThreads=false;
+	private boolean running;
+
+	public static boolean isStopThreads() {
+		return stopThreads;
+	}
+
+	public static void setStopThreads(boolean stopThreads) {
+		FastCopy.stopThreads = stopThreads;
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
 
 	/**
 	 * Run time properties
@@ -59,7 +78,8 @@ public class FastCopy {
 		String destDir = null;
 		boolean success;
 		boolean verbose;
-		int numOfThreads=5;
+		int numOfThreads=1;
+		boolean overwrite;
 
 		public String getSourceDir() {
 			return sourceDir;
@@ -100,6 +120,14 @@ public class FastCopy {
 		public void setNumOfThreads(int numOfThreads) {
 			this.numOfThreads = numOfThreads;
 		}
+
+		public boolean isOverwrite() {
+			return overwrite;
+		}
+
+		public void setOverwrite(boolean overwrite) {
+			this.overwrite = overwrite;
+		}
 	}
 
 	static DecimalFormat df = new DecimalFormat("#,###.##");
@@ -111,6 +139,7 @@ public class FastCopy {
 
 		String[] files = props.sourceDir.split(";");
 		fw.walk( files, props.getDestDir());
+
 		workerPool.shutDownandWaitForAllThreadsToComplete();
 
 

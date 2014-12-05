@@ -3,5 +3,5 @@ Class-Path: lib/forms_rt-5.0.jar lib/images.jar
 Build-Jdk: 1.7.0_55
 Built-By: zxue
 Created-By: IntelliJ IDEA
-Main-Class: org.mhisoft.fc.ui.ReproMainForm
+Main-Class: org.mhisoft.fc.ui.FastCopyMainForm
 

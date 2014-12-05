@@ -132,6 +132,12 @@ public class FileUtils {
 				}
 				buffer.clear();
 				readSize = in.read(buffer);
+
+
+				if (FastCopy.isStopThreads()) {
+					break;
+				}
+
 			}
 
 			statistics.filesCount++;

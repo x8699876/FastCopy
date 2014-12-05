@@ -101,6 +101,13 @@ public class FileWalker {
 				workerPool.addTask(t);
 
 			}
+
+			if (FastCopy.isStopThreads()) {
+				rdProUI.print("[warn]Cancelled by user.");
+				return;
+			}
+
+
 		}   //loop all the files and dires under root
 
 	}
