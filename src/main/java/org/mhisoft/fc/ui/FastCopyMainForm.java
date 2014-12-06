@@ -65,7 +65,7 @@ public class FastCopyMainForm {
 	private JTextField fldTargetDir;
 	private JLabel labelStatus;
 	private JTextField fldSourceDir;
-	private JCheckBox chkOverride;
+	private JCheckBox chkOverrideAlways;
 	private JProgressBar progressBar1;
 	private JCheckBox chkFlat;
 	private JCheckBox overrideOnlyIfNewerCheckBox;
@@ -130,6 +130,15 @@ public class FastCopyMainForm {
 
 			}
 		});
+		overrideOnlyIfNewerCheckBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				chkOverrideAlways.setSelected(!overrideOnlyIfNewerCheckBox.isSelected());
+			}
+
+
+		});
 	}
 
 
@@ -167,6 +176,8 @@ public class FastCopyMainForm {
 		frame.setContentPane(layoutPanel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		progressBar1.setVisible(false);
+		progressBar1.setMaximum(100);
+		progressBar1.setMinimum(0);
 
 		frame.pack();
 
@@ -194,6 +205,7 @@ public class FastCopyMainForm {
 
 
 
+
 	public boolean refreshDataModel() {
 		if (fldSourceDir.getText()==null || fldSourceDir.getText().trim().length()==0 ) {
 			JOptionPane.showMessageDialog(null, "Specify the source directory.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -216,7 +228,7 @@ public class FastCopyMainForm {
 			props.setNumOfThreads(1);
 		}
 
-		props.setOverwrite(chkOverride.isSelected());
+		props.setOverwrite(chkOverrideAlways.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
 		return  true;
@@ -247,6 +259,7 @@ public class FastCopyMainForm {
 		GraphicsRdProUIImpl rdProUI = new GraphicsRdProUIImpl();
 		rdProUI.setOutputTextArea(rdProMain.outputTextArea);
 		rdProUI.setLabelStatus(rdProMain.labelStatus);
+		rdProUI.setProgressBar(rdProMain.progressBar1);
 
 		if (FastCopy.debug) {
 			int i = 0;

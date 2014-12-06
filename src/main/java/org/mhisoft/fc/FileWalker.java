@@ -57,13 +57,14 @@ public class FileWalker {
 		for (String file : files) {
 			File f = new File(file);
 			if (f.isFile()) {
-				File targetFile = new File(destDir + File.separator + f.getName());
+				String sTarget = destDir + File.separator + f.getName();
+				File targetFile = new File(sTarget);
 				if (createTargetFile(targetFile)) {
 					CopyFileThread t = new CopyFileThread(rdProUI, f, targetFile, props.verbose, statistics);
 					workerPool.addTask(t);
 				}
 				else
-					rdProUI.println("\tFile exists in the target. Skips. ");
+					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", sTarget ) );
 			} else if (f.isDirectory()) {
 				walkSubDir(f, destDir);
 			}
@@ -125,7 +126,7 @@ public class FileWalker {
 					workerPool.addTask(t);
 				}
 				else {
-					rdProUI.println("\tFile exists in the target. Skips. ");
+					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", newDestFile ) );
 				}
 
 			}

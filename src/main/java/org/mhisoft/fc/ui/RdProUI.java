@@ -79,4 +79,10 @@ public interface RdProUI {
 	 * @return
 	 */
 	public Confirmation getConfirmation(String question, String... options);
+
+	/**
+	 * show progress
+	 * @param value
+	 */
+	public void showProgress(int value);
 }

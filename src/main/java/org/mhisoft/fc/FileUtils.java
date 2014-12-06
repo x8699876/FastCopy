@@ -50,7 +50,7 @@ public class FileUtils {
 				frs.dirCount++;
 			}
 		} catch (Exception e) {
-			ui.println("\t[error]:" +e.getMessage());
+			ui.println("\t[error]:" + e.getMessage());
 		}
 	}
 
@@ -60,13 +60,13 @@ public class FileUtils {
 		if (!theDir.exists()) {
 			//ui.println("creating directory: " + theDir.getName());
 			boolean result = false;
-			try{
+			try {
 				theDir.mkdir();
 				result = true;
-			} catch(SecurityException se){
+			} catch (SecurityException se) {
 				ui.println(String.format("[error] Failed to create directory: %s", theDir.getName()));
 			}
-			if(result) {
+			if (result) {
 				ui.println(String.format("Directory created: %s", theDir.getName()));
 				frs.setDirCount(frs.getDirCount() + 1);
 			}
@@ -92,39 +92,41 @@ public class FileUtils {
 	static final DecimalFormat df = new DecimalFormat("#,###.##");
 
 	public static void showPercent(final RdProUI rdProUI, double digital) {
-		long p = (long)digital*100;
+		long p = (long) digital * 100;
 		DecimalFormat df = new DecimalFormat("000");
 		String s = df.format(p);
 
-		rdProUI.printf("\u0008\u0008\u0008\u0008%s", df.format(p)+"%");
+		rdProUI.printf("\u0008\u0008\u0008\u0008%s", df.format(p) + "%");
 	}
 
 
-
-	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final RdProUI rdProUI)  {
+	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final RdProUI rdProUI) {
 		FileChannel in = null;
 		FileChannel out = null;
 		long t1 = System.currentTimeMillis();
-		double  size=0;
+		double size = 0;
 
 		try {
 			in = new FileInputStream(source).getChannel();
 			out = new FileOutputStream(target).getChannel();
 			size = in.size();
-			double size2 = size/1024/8;
-			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getName() ,df.format(size2) ));
+			double size2 = size / 1024 / 8;
+			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getName(), df.format(size2)));
 
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 			int readSize = in.read(buffer);
-			long totalSize =0;
+			long totalSize = 0;
+			int progress = 0;
 
 			while (readSize != -1) {
+				totalSize = totalSize + readSize;
+				progress = (int) (totalSize * 100 / size);
+				rdProUI.showProgress(progress);
 
-				totalSize= totalSize + readSize;
 				buffer.flip();
 
-				while(buffer.hasRemaining()){
+				while (buffer.hasRemaining()) {
 					out.write(buffer);
 					//System.out.printf(".");
 					//showPercent(rdProUI, totalSize/size );
@@ -144,27 +146,24 @@ public class FileUtils {
 			statistics.filesCount++;
 			long t2 = System.currentTimeMillis();
 
-			double speed =0;
-			if (size>0 && t2-t1>0) {
-				speed = size2*(10^6)/(t2-t1);
+			double speed = 0;
+			if (size > 0 && t2 - t1 > 0) {
+				speed = size2 * (10 ^ 6) / (t2 - t1);
 				statistics.setSpeed(size2, speed);
 			}
 
-			rdProUI.println(String.format(", speed:%s KByte/Second.",df.format(speed) ));
+			rdProUI.println(String.format(", speed:%s KByte/Second.", df.format(speed)));
 
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
-		}
-
-		finally {
+		} finally {
 			close(in);
 			close(out);
 
 		}
 	}
 
-	private static void close(Closeable closable)  {
+	private static void close(Closeable closable) {
 		if (closable != null) {
 			try {
 				closable.close();

@@ -199,5 +199,8 @@ public class ConsoleRdProUIImpl extends AbstractRdProUIImpl{
 
 	}
 
-
+	@Override
+	public void showProgress(int value) {
+		//none.
+	}
 }

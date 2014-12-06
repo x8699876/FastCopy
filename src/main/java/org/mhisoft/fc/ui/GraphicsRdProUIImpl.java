@@ -21,6 +21,7 @@ package org.mhisoft.fc.ui;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
@@ -36,6 +37,7 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 
 	JTextArea outputTextArea;
 	JLabel labelStatus;
+	JProgressBar progressBar;
 
 	public GraphicsRdProUIImpl(JTextArea outputTextArea) {
 		this.outputTextArea = outputTextArea;
@@ -58,6 +60,10 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 
 	public void setLabelStatus(JLabel labelStatus) {
 		this.labelStatus = labelStatus;
+	}
+
+	public void setProgressBar(JProgressBar progressBar) {
+		this.progressBar = progressBar;
 	}
 
 	@Override
@@ -131,5 +137,14 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 				props.setDestDir(args[1]);
 		}
 		return props;
+	}
+
+	//0..100
+	public void showProgress(int value) {
+		if (!progressBar.isVisible())
+			progressBar.setVisible(true);
+		progressBar.setValue(value);
+
+
 	}
 }
