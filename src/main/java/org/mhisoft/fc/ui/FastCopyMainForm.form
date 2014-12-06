@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.mhisoft.fc.ui.FastCopyMainForm">
-  <grid id="27dc6" binding="layoutPanel1" layout-manager="GridLayoutManager" row-count="9" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="layoutPanel1" layout-manager="GridLayoutManager" row-count="10" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="20" y="20" width="619" height="466"/>
+      <xy x="20" y="20" width="674" height="466"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
       <component id="f10f5" class="javax.swing.JCheckBox" binding="chkMultiThread">
         <constraints>
-          <grid row="2" column="1" row-span="1" col-span="6" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+          <grid row="2" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="Ebrima" size="11" style="0"/>
@@ -19,7 +19,7 @@
       </component>
       <scrollpane id="e452" binding="outputTextAreaScrollPane">
         <constraints>
-          <grid row="5" column="1" row-span="1" col-span="6" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="2" use-parent-layout="false">
+          <grid row="6" column="1" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="2" use-parent-layout="false">
             <preferred-size width="400" height="164"/>
           </grid>
         </constraints>
@@ -41,7 +41,7 @@
       </scrollpane>
       <component id="8cbc" class="javax.swing.JCheckBox" binding="chkShowInfo">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="6" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+          <grid row="5" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="Ebrima" size="11" style="0"/>
@@ -49,38 +49,9 @@
           <text value="Show details"/>
         </properties>
       </component>
-      <grid id="f98a3" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="true" same-size-vertically="true" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="8" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false">
-            <preferred-size width="322" height="35"/>
-          </grid>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="ea30" class="javax.swing.JButton" binding="btnOk">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="1" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <icon value="images/btn-purge.png"/>
-              <text value="&amp;Start Copy"/>
-            </properties>
-          </component>
-          <component id="88319" class="javax.swing.JButton" binding="btnCancel">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="&amp;Close"/>
-            </properties>
-          </component>
-        </children>
-      </grid>
       <component id="7d9fb" class="javax.swing.JLabel" binding="labelStatus">
         <constraints>
-          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Status:"/>
@@ -88,7 +59,7 @@
       </component>
       <grid id="6941" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
@@ -119,7 +90,7 @@
       </grid>
       <grid id="5da4b" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
         <constraints>
-          <grid row="1" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
@@ -152,16 +123,16 @@
       </grid>
       <component id="d753" class="javax.swing.JCheckBox" binding="chkOverride">
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="Ebrima" size="11" style="0"/>
-          <text value="Override if exists"/>
+          <text value="Override always"/>
         </properties>
       </component>
       <component id="95599" class="javax.swing.JButton" binding="btnHelp">
         <constraints>
-          <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <horizontalAlignment value="4"/>
@@ -171,10 +142,59 @@
       </component>
       <component id="97bd2" class="javax.swing.JProgressBar" binding="progressBar1" default-binding="true">
         <constraints>
-          <grid row="7" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="8" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
       </component>
+      <component id="6aa6d" class="javax.swing.JCheckBox" binding="chkFlat">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <font name="Ebrima" size="11" style="0"/>
+          <text value="Flat copy"/>
+          <toolTipText value="will not create nested directories on the destination"/>
+        </properties>
+      </component>
+      <component id="3788a" class="javax.swing.JCheckBox" binding="overrideOnlyIfNewerCheckBox" default-binding="true">
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font name="Ebrima" size="11" style="0"/>
+          <text value="Override only if newer"/>
+        </properties>
+      </component>
+      <grid id="f98a3" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="true" same-size-vertically="true" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="9" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false">
+            <preferred-size width="322" height="35"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="ea30" class="javax.swing.JButton" binding="btnOk">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="1" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <icon value="images/btn-purge.png"/>
+              <text value="&amp;Start Copy"/>
+            </properties>
+          </component>
+          <component id="88319" class="javax.swing.JButton" binding="btnCancel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="&amp;Close"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
     </children>
   </grid>
 </form>

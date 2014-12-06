@@ -80,6 +80,8 @@ public class FastCopy {
 		boolean verbose;
 		int numOfThreads=1;
 		boolean overwrite;
+		boolean flatCopy;
+
 
 		public String getSourceDir() {
 			return sourceDir;
@@ -128,6 +130,14 @@ public class FastCopy {
 		public void setOverwrite(boolean overwrite) {
 			this.overwrite = overwrite;
 		}
+
+		public boolean isFlatCopy() {
+			return flatCopy;
+		}
+
+		public void setFlatCopy(boolean flatCopy) {
+			this.flatCopy = flatCopy;
+		}
 	}
 
 	static DecimalFormat df = new DecimalFormat("#,###.##");
@@ -137,11 +147,16 @@ public class FastCopy {
 		FileWalker fw = new FileWalker(rdProUI, workerPool, props, frs);
 		long t1 = System.currentTimeMillis();
 
+		running= true;
+
 		String[] files = props.sourceDir.split(";");
 		fw.walk( files, props.getDestDir());
 
 		workerPool.shutDownandWaitForAllThreadsToComplete();
 
+		//reset the flags
+		running= false;
+		stopThreads = false;
 
 		rdProUI.println("\nDone in " + (System.currentTimeMillis() - t1) / 1000 + " seconds.");
 		rdProUI.println(frs.printSpeed());

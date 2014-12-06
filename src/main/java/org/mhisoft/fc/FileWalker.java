@@ -53,27 +53,51 @@ public class FileWalker {
 
 
 	public void walk(final String[] files, final String destDir) {
+		//FileUtils.createDir(new File(destDir), rdProUI, statistics);
 		for (String file : files) {
 			File f = new File(file);
 			if (f.isFile()) {
 				File targetFile = new File(destDir + File.separator + f.getName());
-				//FileUtils.nioBufferCopy(f, targetFile, statistics, rdProUI);
-				CopyFileThread t = new CopyFileThread(rdProUI, f, targetFile, props.verbose, statistics);
-				workerPool.addTask(t);
+				if (createTargetFile(targetFile)) {
+					CopyFileThread t = new CopyFileThread(rdProUI, f, targetFile, props.verbose, statistics);
+					workerPool.addTask(t);
+				}
+				else
+					rdProUI.println("\tFile exists in the target. Skips. ");
 			} else if (f.isDirectory()) {
-				walkDir(f, destDir);
+				walkSubDir(f, destDir);
 			}
 		}
 
 	}
 
+	private boolean createTargetFile(final File f) {
+		boolean createFile = true;
+		if (f.exists()) { //target file exists
+			//todo support newer file override.
+			if (!props.overwrite) {
+				createFile = false;
+			}
+		}
+		return createFile;
 
-	public void walkDir(final File rootDir, final String destRootDir) {
+	}
 
-		String targetDir = destRootDir+File.separator+rootDir.getName();
-		File targetDirF = new File(targetDir);
 
-		FileUtils.createDir(targetDirF, rdProUI, statistics);
+	public void walkSubDir(final File rootDir, final String destRootDir) {
+
+		String targetDir ;
+
+		if (!props.flatCopy) {
+			//create the mirror dir in the dest
+			targetDir = destRootDir + File.separator + rootDir.getName();
+			FileUtils.createDir(new File(targetDir), rdProUI, statistics);
+		}
+		else {
+			targetDir = props.getDestDir();
+		}
+
+
 
 		File[] list = rootDir.listFiles(new FilenameFilter() {
 			@Override
@@ -89,21 +113,25 @@ public class FileWalker {
 		for (File childFile : list) {
 			if (childFile.isDirectory()) {
 					//keep walking down
-				walkDir(childFile,  targetDir);
+				walkSubDir(childFile, targetDir);
 
 			}
 			else {
 
 				String newDestFile =  targetDir +File.separator + childFile.getName();
-				//FileUtils.nioBufferCopy(childFile, new File(newDestFile), statistics, rdProUI);
-
-				CopyFileThread t = new CopyFileThread(rdProUI, childFile, new File(newDestFile), props.verbose, statistics);
-				workerPool.addTask(t);
+				File targetFile = new File(newDestFile);
+				if (createTargetFile(targetFile)) {
+					CopyFileThread t = new CopyFileThread(rdProUI, childFile, targetFile, props.verbose, statistics);
+					workerPool.addTask(t);
+				}
+				else {
+					rdProUI.println("\tFile exists in the target. Skips. ");
+				}
 
 			}
 
 			if (FastCopy.isStopThreads()) {
-				rdProUI.print("[warn]Cancelled by user.");
+				rdProUI.println("[warn]Cancelled by user.");
 				return;
 			}
 

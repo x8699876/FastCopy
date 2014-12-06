@@ -67,6 +67,8 @@ public class FastCopyMainForm {
 	private JTextField fldSourceDir;
 	private JCheckBox chkOverride;
 	private JProgressBar progressBar1;
+	private JCheckBox chkFlat;
+	private JCheckBox overrideOnlyIfNewerCheckBox;
 
 
 	public FastCopyMainForm() {
@@ -86,7 +88,12 @@ public class FastCopyMainForm {
 		btnCancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				frame.dispose();
+				if (fastCopy.isRunning()) {
+					fastCopy.setStopThreads(true);
+					btnCancel.setText("Close");
+				}
+				else
+					frame.dispose();
 			}
 		});
 
@@ -135,6 +142,7 @@ public class FastCopyMainForm {
 //			frame.pack();
 
 		}
+		frame.pack();
 
 		chkShowInfo.setSelected(visible);
 	}
@@ -210,6 +218,7 @@ public class FastCopyMainForm {
 
 		props.setOverwrite(chkOverride.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
+		props.setFlatCopy(chkFlat.isSelected());
 		return  true;
 
 	}
@@ -222,8 +231,12 @@ public class FastCopyMainForm {
 			fastCopy.getRdProUI().println("working...");
 			labelStatus.setText("Working...");
 			labelStatus.setText("");
-
+			btnCancel.setText("Cancel");
+			btnOk.setEnabled(false);
 			fastCopy.run(props);
+
+			btnOk.setEnabled(true);
+			btnCancel.setText("Close");
 			labelStatus.setText("Dir copied:" + fastCopy.getStatistics().getDirCount() + ", Files copied:" + fastCopy.getStatistics().getFilesCount());
 		}
 	}
