@@ -110,8 +110,8 @@ public class FileUtils {
 			in = new FileInputStream(source).getChannel();
 			out = new FileOutputStream(target).getChannel();
 			size = in.size();
-			double size2 = size / 1024 / 8;
-			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getName(), df.format(size2)));
+			double size2InKB = size / 1024 ;
+			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getName(), df.format(size2InKB)));
 
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
@@ -148,8 +148,8 @@ public class FileUtils {
 
 			double speed = 0;
 			if (size > 0 && t2 - t1 > 0) {
-				speed = size2 * (10 ^ 6) / (t2 - t1);
-				statistics.setSpeed(size2, speed);
+				speed = size2InKB * (10 ^ 6) / (t2 - t1);  //KB/s
+				statistics.setSpeed(size2InKB, speed);
 			}
 
 			rdProUI.println(String.format(", speed:%s KByte/Second.", df.format(speed)));

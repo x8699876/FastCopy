@@ -141,8 +141,6 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 
 	//0..100
 	public void showProgress(int value) {
-		if (!progressBar.isVisible())
-			progressBar.setVisible(true);
 		progressBar.setValue(value);
 
 

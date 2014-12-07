@@ -51,10 +51,11 @@ public class FileCopyStatistics {
 	public FileCopyStatistics() {
 		this.bucketBySizeList = new ArrayList<BucketBySize>();
 		//4k, 1M, 100M, 500M
-		bucketBySizeList.add(new BucketBySize(4l, "4K"));
-		bucketBySizeList.add(new BucketBySize(1000L, "1M"));
-		bucketBySizeList.add(new BucketBySize(100000L, "100M"));
-		bucketBySizeList.add(new BucketBySize(500000L, "500M"));
+		bucketBySizeList.add(new BucketBySize(4L, "<4K"));
+		bucketBySizeList.add(new BucketBySize(1000L, "4K-1M"));
+		bucketBySizeList.add(new BucketBySize(100000L, "1M-100M"));
+		bucketBySizeList.add(new BucketBySize(500000L, "100M-500M"));
+		bucketBySizeList.add(new BucketBySize(-1L, "500M+"));
 
 	}
 
@@ -85,7 +86,7 @@ public class FileCopyStatistics {
 			}
 		}
 		if (bucketBySize==null) {
-			bucketBySize =  bucketBySizeList.get(3);
+			bucketBySize =  bucketBySizeList.get(4);
 		}
 
 		if (speed>0) {
@@ -102,8 +103,8 @@ public class FileCopyStatistics {
 		StringBuilder sb = new StringBuilder();
 
 		for (BucketBySize entry : bucketBySizeList) {
-			sb.append("Files <").append(entry.name).append(": ")
-					.append(String.format("Min Speed:%s, Max Speed: %s", df.format(entry.minSpeed), df.format(entry.maxSpeed)))
+			sb.append("Files ").append(entry.name).append(": ")
+					.append(String.format("Min Speed:%s KB/s, Max Speed: %s KB/s", df.format(entry.minSpeed), df.format(entry.maxSpeed)))
 					.append("\n");
 
 		}

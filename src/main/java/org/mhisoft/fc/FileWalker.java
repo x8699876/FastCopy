@@ -53,7 +53,7 @@ public class FileWalker {
 
 
 	public void walk(final String[] files, final String destDir) {
-		//FileUtils.createDir(new File(destDir), rdProUI, statistics);
+		FileUtils.createDir(new File(destDir), rdProUI, statistics);
 		for (String file : files) {
 			File f = new File(file);
 			if (f.isFile()) {

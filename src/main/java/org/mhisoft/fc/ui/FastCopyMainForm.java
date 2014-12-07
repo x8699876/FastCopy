@@ -175,7 +175,7 @@ public class FastCopyMainForm {
 		frame = new JFrame("Fast Copy"+RdProUI.version);
 		frame.setContentPane(layoutPanel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		progressBar1.setVisible(false);
+		//progressBar1.setVisible(false);
 		progressBar1.setMaximum(100);
 		progressBar1.setMinimum(0);
 
@@ -245,6 +245,9 @@ public class FastCopyMainForm {
 			labelStatus.setText("");
 			btnCancel.setText("Cancel");
 			btnOk.setEnabled(false);
+			progressBar1.setVisible(true);
+			//frame.pack();
+
 			fastCopy.run(props);
 
 			btnOk.setEnabled(true);
