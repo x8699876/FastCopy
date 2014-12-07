@@ -80,6 +80,7 @@ public class FastCopy {
 		boolean verbose;
 		int numOfThreads=1;
 		boolean overwrite;
+		boolean overwriteIfNewerOrDifferent;
 		boolean flatCopy;
 
 
@@ -137,6 +138,14 @@ public class FastCopy {
 
 		public void setFlatCopy(boolean flatCopy) {
 			this.flatCopy = flatCopy;
+		}
+
+		public boolean isOverwriteIfNewerOrDifferent() {
+			return overwriteIfNewerOrDifferent;
+		}
+
+		public void setOverwriteIfNewerOrDifferent(boolean overwriteIfNewerOrDifferent) {
+			this.overwriteIfNewerOrDifferent = overwriteIfNewerOrDifferent;
 		}
 	}
 

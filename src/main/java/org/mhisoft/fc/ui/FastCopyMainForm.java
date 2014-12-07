@@ -69,6 +69,7 @@ public class FastCopyMainForm {
 	private JProgressBar progressBar1;
 	private JCheckBox chkFlat;
 	private JCheckBox overrideOnlyIfNewerCheckBox;
+	private JPanel progressPanel;
 
 
 	public FastCopyMainForm() {
@@ -90,6 +91,7 @@ public class FastCopyMainForm {
 			public void actionPerformed(ActionEvent e) {
 				if (fastCopy.isRunning()) {
 					fastCopy.setStopThreads(true);
+					progressPanel.setVisible(false);
 					btnCancel.setText("Close");
 				}
 				else
@@ -179,6 +181,8 @@ public class FastCopyMainForm {
 		progressBar1.setMaximum(100);
 		progressBar1.setMinimum(0);
 
+		progressPanel.setVisible(false);
+
 		frame.pack();
 
 		/*position it*/
@@ -193,6 +197,10 @@ public class FastCopyMainForm {
 
 		frame.setVisible(true);
 
+	}
+
+	private void createUIComponents() {
+		// TODO: place custom component creation code here
 	}
 
 
@@ -229,6 +237,7 @@ public class FastCopyMainForm {
 		}
 
 		props.setOverwrite(chkOverrideAlways.isSelected());
+		props.setOverwriteIfNewerOrDifferent(overrideOnlyIfNewerCheckBox.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
 		return  true;
@@ -245,10 +254,10 @@ public class FastCopyMainForm {
 			labelStatus.setText("");
 			btnCancel.setText("Cancel");
 			btnOk.setEnabled(false);
-			progressBar1.setVisible(true);
-			//frame.pack();
+			progressPanel.setVisible(true);
 
 			fastCopy.run(props);
+			progressPanel.setVisible(false);
 
 			btnOk.setEnabled(true);
 			btnCancel.setText("Close");

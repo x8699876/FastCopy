@@ -105,6 +105,7 @@ public class FileUtils {
 		FileChannel out = null;
 		long t1 = System.currentTimeMillis();
 		double size = 0;
+		rdProUI.showProgress(0);
 
 		try {
 			in = new FileInputStream(source).getChannel();
@@ -120,6 +121,12 @@ public class FileUtils {
 			int progress = 0;
 
 			while (readSize != -1) {
+
+				if (FastCopy.isStopThreads()) {
+					rdProUI.println("[warn]Cancelled by user. Stoping copying.");
+					break;
+				}
+
 				totalSize = totalSize + readSize;
 				progress = (int) (totalSize * 100 / size);
 				rdProUI.showProgress(progress);
@@ -135,11 +142,6 @@ public class FileUtils {
 				buffer.clear();
 				readSize = in.read(buffer);
 
-
-				if (FastCopy.isStopThreads()) {
-					rdProUI.println("[warn]Cancelled by user. Stoping copying.");
-					break;
-				}
 
 			}
 

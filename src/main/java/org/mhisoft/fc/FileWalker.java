@@ -55,16 +55,21 @@ public class FileWalker {
 	public void walk(final String[] files, final String destDir) {
 		FileUtils.createDir(new File(destDir), rdProUI, statistics);
 		for (String file : files) {
+
+			if (FastCopy.isStopThreads()) {
+				rdProUI.println("[warn]Cancelled by user. stop walk. ");
+				return;
+			}
+
 			File f = new File(file);
 			if (f.isFile()) {
 				String sTarget = destDir + File.separator + f.getName();
 				File targetFile = new File(sTarget);
-				if (createTargetFile(targetFile)) {
+				if (overrideTargetFile(f, targetFile)) {
 					CopyFileThread t = new CopyFileThread(rdProUI, f, targetFile, props.verbose, statistics);
 					workerPool.addTask(t);
-				}
-				else
-					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", sTarget ) );
+				} else
+					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", sTarget));
 			} else if (f.isDirectory()) {
 				walkSubDir(f, destDir);
 			}
@@ -72,32 +77,46 @@ public class FileWalker {
 
 	}
 
-	private boolean createTargetFile(final File f) {
-		boolean createFile = true;
-		if (f.exists()) { //target file exists
-			//todo support newer file override.
-			if (!props.overwrite) {
-				createFile = false;
+
+	private boolean overrideTargetFile(final File srcFile, final File targetFile) {
+		if (targetFile.exists()) { //target file exists
+			if (props.overwrite) {
+				return true;
+			} else if (props.isOverwriteIfNewerOrDifferent()) {
+				if (srcFile.lastModified() > targetFile.lastModified()
+						|| (srcFile.length() != targetFile.length())
+						)
+					return true;
+				else
+					return false;
+
 			}
+			else
+				return false;
+
+
 		}
-		return createFile;
+		return true;
 
 	}
 
 
 	public void walkSubDir(final File rootDir, final String destRootDir) {
 
-		String targetDir ;
+		if (FastCopy.isStopThreads()) {
+			rdProUI.println("[warn]Cancelled by user. stop walk. ");
+			return;
+		}
+
+		String targetDir;
 
 		if (!props.flatCopy) {
 			//create the mirror dir in the dest
 			targetDir = destRootDir + File.separator + rootDir.getName();
 			FileUtils.createDir(new File(targetDir), rdProUI, statistics);
-		}
-		else {
+		} else {
 			targetDir = props.getDestDir();
 		}
-
 
 
 		File[] list = rootDir.listFiles(new FilenameFilter() {
@@ -113,26 +132,24 @@ public class FileWalker {
 
 		for (File childFile : list) {
 			if (childFile.isDirectory()) {
-					//keep walking down
+				//keep walking down
 				walkSubDir(childFile, targetDir);
 
-			}
-			else {
+			} else {
 
-				String newDestFile =  targetDir +File.separator + childFile.getName();
+				String newDestFile = targetDir + File.separator + childFile.getName();
 				File targetFile = new File(newDestFile);
-				if (createTargetFile(targetFile)) {
+				if (overrideTargetFile(childFile, targetFile)) {
 					CopyFileThread t = new CopyFileThread(rdProUI, childFile, targetFile, props.verbose, statistics);
 					workerPool.addTask(t);
-				}
-				else {
-					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", newDestFile ) );
+				} else {
+					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip based on the input. ", newDestFile));
 				}
 
 			}
 
 			if (FastCopy.isStopThreads()) {
-				rdProUI.println("[warn]Cancelled by user.");
+				rdProUI.println("[warn]Cancelled by user. stop walk. ");
 				return;
 			}
 
