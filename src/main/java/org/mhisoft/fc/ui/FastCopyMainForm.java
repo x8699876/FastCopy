@@ -70,6 +70,7 @@ public class FastCopyMainForm {
 	private JCheckBox chkFlat;
 	private JCheckBox overrideOnlyIfNewerCheckBox;
 	private JPanel progressPanel;
+	private JTextArea textArea1;
 
 
 	public FastCopyMainForm() {
