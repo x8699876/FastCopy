@@ -2,16 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e0e9f11-f851-41b4-8cd2-87b0b93cc905" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FastCopy.java" afterPath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FastCopy.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.form" afterPath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.form" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.java" afterPath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileUtils.java" afterPath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileUtils.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileWalker.java" afterPath="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileWalker.java" />
-    </list>
-    <list id="aaccda16-8108-4e10-a04e-394ac4727ccf" name="Local changes" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../pom.xml" afterPath="$PROJECT_DIR$/../pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
+    <list id="aaccda16-8108-4e10-a04e-394ac4727ccf" name="Local changes" comment="" />
     <ignored path="FastCopy.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/../target/" />
@@ -40,7 +35,7 @@
         <entry file="file://$PROJECT_DIR$/../doc/test.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-2.9642856" vertical-offset="313317" max-vertical-offset="321500">
-              <caret line="15670" column="76" selection-start-line="15670" selection-start-column="54" selection-end-line="15670" selection-end-column="54" />
+              <caret line="15670" column="54" selection-start-line="15670" selection-start-column="54" selection-end-line="15670" selection-end-column="54" />
               <folding />
             </state>
           </provider>
@@ -52,8 +47,8 @@
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="55" max-vertical-offset="5380">
-              <caret line="51" column="56" selection-start-line="51" selection-start-column="56" selection-end-line="51" selection-end-column="56" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="3252" max-vertical-offset="5380">
+              <caret line="173" column="70" selection-start-line="173" selection-start-column="35" selection-end-line="173" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -63,7 +58,7 @@
         <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileWalker.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-11.36" vertical-offset="1476" max-vertical-offset="2820">
-              <caret line="109" column="65" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
+              <caret line="109" column="0" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -73,7 +68,7 @@
         <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/GraphicsRdProUIImpl.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="1638" max-vertical-offset="2240">
-              <caret line="138" column="20" selection-start-line="138" selection-start-column="20" selection-end-line="138" selection-end-column="20" />
+              <caret line="132" column="14" selection-start-line="132" selection-start-column="14" selection-end-line="132" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -138,123 +133,12 @@
         <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="4288" max-vertical-offset="5540">
-              <caret line="256" column="50" selection-start-line="256" selection-start-column="43" selection-end-line="257" selection-end-column="0" />
+              <caret line="247" column="0" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
               <folding>
                 <element signature="e#0#7532#0" expanded="true" />
                 <element signature="imports" expanded="true" />
                 <element signature="e#5277#5278#0" expanded="true" />
                 <element signature="e#5292#5293#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Window.java" pinned="false" current-in-tab="false">
-        <entry file="jar://S:/bin/jdk1.7.0_55/src.zip!/java/awt/Window.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="14403" max-vertical-offset="79040">
-              <caret line="800" column="16" selection-start-line="800" selection-start-column="16" selection-end-line="800" selection-end-column="16" />
-              <folding>
-                <element signature="e#0#154260#0" expanded="false" />
-                <element signature="imports" expanded="false" />
-                <element signature="e#14788#14789#0" expanded="false" />
-                <element signature="e#14812#14813#0" expanded="false" />
-                <element signature="e#26728#26735#0" expanded="false" />
-                <element signature="e#31559#31560#0" expanded="false" />
-                <element signature="e#31591#31592#0" expanded="false" />
-                <element signature="e#32282#32283#0" expanded="false" />
-                <element signature="e#32326#32327#0" expanded="false" />
-                <element signature="e#32722#32723#0" expanded="false" />
-                <element signature="e#32761#32762#0" expanded="false" />
-                <element signature="e#33152#33153#0" expanded="false" />
-                <element signature="e#33188#33189#0" expanded="false" />
-                <element signature="e#36307#36308#0" expanded="false" />
-                <element signature="e#36342#36343#0" expanded="false" />
-                <element signature="e#41102#41103#0" expanded="false" />
-                <element signature="e#41129#41130#0" expanded="false" />
-                <element signature="e#46736#46737#0" expanded="false" />
-                <element signature="e#46774#46775#0" expanded="false" />
-                <element signature="e#48739#48740#0" expanded="false" />
-                <element signature="e#48776#48777#0" expanded="false" />
-                <element signature="e#49529#49530#0" expanded="false" />
-                <element signature="e#49579#49580#0" expanded="false" />
-                <element signature="e#50468#50469#0" expanded="false" />
-                <element signature="e#50504#50505#0" expanded="false" />
-                <element signature="e#52963#52964#0" expanded="false" />
-                <element signature="e#53009#53010#0" expanded="false" />
-                <element signature="e#53052#53053#0" expanded="false" />
-                <element signature="e#53089#53090#0" expanded="false" />
-                <element signature="e#53249#53250#0" expanded="false" />
-                <element signature="e#53302#53303#0" expanded="false" />
-                <element signature="e#54395#54396#0" expanded="false" />
-                <element signature="e#54438#54439#0" expanded="false" />
-                <element signature="e#54798#54799#0" expanded="false" />
-                <element signature="e#54833#54834#0" expanded="false" />
-                <element signature="e#55164#55172#0" expanded="false" />
-                <element signature="e#55420#55428#0" expanded="false" />
-                <element signature="e#57403#57404#0" expanded="false" />
-                <element signature="e#57464#57465#0" expanded="false" />
-                <element signature="e#61497#61498#0" expanded="false" />
-                <element signature="e#61538#61539#0" expanded="false" />
-                <element signature="e#61976#61984#0" expanded="false" />
-                <element signature="e#82875#82876#0" expanded="false" />
-                <element signature="e#82950#82951#0" expanded="false" />
-                <element signature="e#83239#83240#0" expanded="false" />
-                <element signature="e#83273#83274#0" expanded="false" />
-                <element signature="e#89263#89264#0" expanded="false" />
-                <element signature="e#89290#89291#0" expanded="false" />
-                <element signature="e#89596#89597#0" expanded="false" />
-                <element signature="e#89623#89624#0" expanded="false" />
-                <element signature="e#92493#92494#0" expanded="false" />
-                <element signature="e#92536#92537#0" expanded="false" />
-                <element signature="e#96272#96273#0" expanded="false" />
-                <element signature="e#96328#96329#0" expanded="false" />
-                <element signature="e#96800#96801#0" expanded="false" />
-                <element signature="e#96839#96840#0" expanded="false" />
-                <element signature="e#101019#101020#0" expanded="false" />
-                <element signature="e#101046#101047#0" expanded="false" />
-                <element signature="e#101787#101788#0" expanded="false" />
-                <element signature="e#101817#101818#0" expanded="false" />
-                <element signature="e#101846#101847#0" expanded="false" />
-                <element signature="e#101878#101879#0" expanded="false" />
-                <element signature="e#102406#102407#0" expanded="false" />
-                <element signature="e#102475#102476#0" expanded="false" />
-                <element signature="e#104169#104170#0" expanded="false" />
-                <element signature="e#104227#104228#0" expanded="false" />
-                <element signature="e#114686#114687#0" expanded="false" />
-                <element signature="e#114738#114739#0" expanded="false" />
-                <element signature="e#122646#122647#0" expanded="false" />
-                <element signature="e#122700#122701#0" expanded="false" />
-                <element signature="e#124250#124251#0" expanded="false" />
-                <element signature="e#124298#124299#0" expanded="false" />
-                <element signature="e#124343#124344#0" expanded="false" />
-                <element signature="e#124388#124389#0" expanded="false" />
-                <element signature="e#130372#130373#0" expanded="false" />
-                <element signature="e#130426#130427#0" expanded="false" />
-                <element signature="e#139231#139232#0" expanded="false" />
-                <element signature="e#139275#139276#0" expanded="false" />
-                <element signature="e#147936#147937#0" expanded="false" />
-                <element signature="e#147963#147964#0" expanded="false" />
-                <element signature="e#148644#148645#0" expanded="false" />
-                <element signature="e#148682#148683#0" expanded="false" />
-                <element signature="e#151009#151010#0" expanded="false" />
-                <element signature="e#151062#151063#0" expanded="false" />
-                <element signature="e#151129#151130#0" expanded="false" />
-                <element signature="e#151187#151188#0" expanded="false" />
-                <element signature="e#151238#151239#0" expanded="false" />
-                <element signature="e#151294#151295#0" expanded="false" />
-                <element signature="e#151357#151358#0" expanded="false" />
-                <element signature="e#151411#151412#0" expanded="false" />
-                <element signature="e#151853#151854#0" expanded="false" />
-                <element signature="e#151906#151907#0" expanded="false" />
-                <element signature="e#153326#153327#0" expanded="false" />
-                <element signature="e#153389#153390#0" expanded="false" />
-                <element signature="e#153448#153449#0" expanded="false" />
-                <element signature="e#153505#153506#0" expanded="false" />
-                <element signature="e#153562#153563#0" expanded="false" />
-                <element signature="e#153619#153620#0" expanded="false" />
-                <element signature="e#153700#153701#0" expanded="false" />
-                <element signature="e#153769#153770#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -310,7 +194,7 @@
         <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/AbstractRdProUIImpl.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="260" max-vertical-offset="480">
-              <caret line="33" column="43" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
+              <caret line="33" column="31" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
               <folding>
                 <element signature="e#0#1203#0" expanded="false" />
               </folding>
@@ -322,7 +206,7 @@
         <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileUtils.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="2060" max-vertical-offset="3720">
-              <caret line="121" column="42" selection-start-line="121" selection-start-column="0" selection-end-line="121" selection-end-column="0" />
+              <caret line="121" column="0" selection-start-line="121" selection-start-column="0" selection-end-line="121" selection-end-column="0" />
               <folding>
                 <element signature="e#0#4980#0" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -415,7 +299,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/../pom.xml" />
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileRemoveStatistics.java" />
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/DeleteDirWorkerThread.java" />
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/CopyFileThread.java" />
@@ -431,6 +314,7 @@
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileUtils.java" />
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileWalker.java" />
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.java" />
+        <option value="$PROJECT_DIR$/../pom.xml" />
         <option value="$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.form" />
       </list>
     </option>
@@ -445,6 +329,54 @@
         <option name="importAutomatically" value="true" />
       </MavenImportingSettings>
     </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$RootNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Fast Copy" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$ProjectNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$RootNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Fast Copy" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$ProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Plugins" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$PluginsNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$RootNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Fast Copy" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$ProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="Lifecycle" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$LifecycleNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="org.jetbrains.idea.maven.navigator.MavenProjectsStructure$RootNode" />
+        </PATH_ELEMENT>
+      </PATH>
+    </treeState>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
@@ -687,6 +619,28 @@
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
       <option name="PROGRAM_PARAMETERS" />
+      <method />
+    </configuration>
+    <configuration default="true" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list />
+            </option>
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
       <method />
     </configuration>
     <configuration default="true" type="Remote" factoryName="Remote">
@@ -1004,7 +958,7 @@
       <workItem from="1417578521960" duration="1928000" />
       <workItem from="1417751091961" duration="4398000" />
       <workItem from="1417821185936" duration="8635000" />
-      <workItem from="1417917707853" duration="4456000" />
+      <workItem from="1417917707853" duration="5182000" />
     </task>
     <task id="LOCAL-00001" summary="GUI working in progress">
       <created>1417755250187</created>
@@ -1034,7 +988,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="35171000" />
+    <option name="totallyTimeSpent" value="35897000" />
   </component>
   <component name="TodoView" selected-index="0">
     <todo-panel id="selected-file">
@@ -1067,7 +1021,7 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="IvyIDEA" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="simpleUML" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1085,7 +1039,7 @@
       <window_info id="FindBugs-IDEA" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3303671" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14164004" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
@@ -1282,14 +1236,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="55" max-vertical-offset="5380">
-          <caret line="51" column="56" selection-start-line="51" selection-start-column="56" selection-end-line="51" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../LICENSE">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.29816514" vertical-offset="0" max-vertical-offset="4140">
@@ -1318,8 +1264,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/AbstractRdProUIImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
-          <caret line="33" column="43" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="260" max-vertical-offset="480">
+          <caret line="33" column="31" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
           <folding>
             <element signature="e#0#1203#0" expanded="false" />
           </folding>
@@ -1525,20 +1471,12 @@
     <entry file="file://$PROJECT_DIR$/../doc/test.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-2.9642856" vertical-offset="313317" max-vertical-offset="321500">
-          <caret line="15670" column="76" selection-start-line="15670" selection-start-column="54" selection-end-line="15670" selection-end-column="54" />
+          <caret line="15670" column="54" selection-start-line="15670" selection-start-column="54" selection-end-line="15670" selection-end-column="54" />
           <folding />
         </state>
       </provider>
       <provider editor-type-id="com.intellij.database.editor.CsvTableFileEditorProvider">
         <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/GraphicsRdProUIImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1638" max-vertical-offset="2240">
-          <caret line="138" column="20" selection-start-line="138" selection-start-column="20" selection-end-line="138" selection-end-column="20" />
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/CopyFileThread.java">
@@ -1578,7 +1516,7 @@
     <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileUtils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="2060" max-vertical-offset="3720">
-          <caret line="121" column="42" selection-start-line="121" selection-start-column="0" selection-end-line="121" selection-end-column="0" />
+          <caret line="121" column="0" selection-start-line="121" selection-start-column="0" selection-end-line="121" selection-end-column="0" />
           <folding>
             <element signature="e#0#4980#0" expanded="true" />
             <element signature="imports" expanded="true" />
@@ -1589,7 +1527,7 @@
     <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/FileWalker.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-11.36" vertical-offset="1476" max-vertical-offset="2820">
-          <caret line="109" column="65" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
+          <caret line="109" column="0" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1612,13 +1550,29 @@
     <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/FastCopyMainForm.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="4288" max-vertical-offset="5540">
-          <caret line="256" column="50" selection-start-line="256" selection-start-column="43" selection-end-line="257" selection-end-column="0" />
+          <caret line="247" column="0" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
           <folding>
             <element signature="e#0#7532#0" expanded="true" />
             <element signature="imports" expanded="true" />
             <element signature="e#5277#5278#0" expanded="true" />
             <element signature="e#5292#5293#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../src/main/java/org/mhisoft/fc/ui/GraphicsRdProUIImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1638" max-vertical-offset="2240">
+          <caret line="132" column="14" selection-start-line="132" selection-start-column="14" selection-end-line="132" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3252" max-vertical-offset="5380">
+          <caret line="173" column="70" selection-start-line="173" selection-start-column="35" selection-end-line="173" selection-end-column="35" />
+          <folding />
         </state>
       </provider>
     </entry>
