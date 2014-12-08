@@ -52,16 +52,18 @@ public class FileWalker {
 	}
 
 
-	public void walk(final String[] files, final String destDir) {
+	public void walk(final String[] dirs, final String destDir) {
+
 		FileUtils.createDir(new File(destDir), rdProUI, statistics);
-		for (String file : files) {
+
+		for (String dir : dirs) {
 
 			if (FastCopy.isStopThreads()) {
 				rdProUI.println("[warn]Cancelled by user. stop walk. ");
 				return;
 			}
 
-			File f = new File(file);
+			File f = new File(dir);
 			if (f.isFile()) {
 				String sTarget = destDir + File.separator + f.getName();
 				File targetFile = new File(sTarget);
@@ -110,14 +112,14 @@ public class FileWalker {
 
 		String targetDir;
 
-		if (!props.flatCopy) {
+	/*	if (!props.flatCopy) {
 			//create the mirror dir in the dest
 			targetDir = destRootDir + File.separator + rootDir.getName();
 			FileUtils.createDir(new File(targetDir), rdProUI, statistics);
 		} else {
 			targetDir = props.getDestDir();
 		}
-
+*/
 
 		File[] list = rootDir.listFiles(new FilenameFilter() {
 			@Override
@@ -131,11 +133,35 @@ public class FileWalker {
 
 
 		for (File childFile : list) {
+
+			if (FastCopy.isStopThreads()) {
+				rdProUI.println("[warn]Cancelled by user. stop walk. ");
+				return;
+			}
+
 			if (childFile.isDirectory()) {
 				//keep walking down
+
+				if (!props.flatCopy) {
+					//create the mirror child dir
+					targetDir = destRootDir + File.separator + childFile.getName();
+					FileUtils.createDir(new File(targetDir), rdProUI, statistics);
+				} else {
+					targetDir = props.getDestDir();
+				}
+
 				walkSubDir(childFile, targetDir);
 
-			} else {
+			}
+			else {
+
+
+				if (!props.flatCopy) {
+					targetDir = destRootDir ;
+				} else {
+					targetDir = props.getDestDir();
+				}
+
 
 				String newDestFile = targetDir + File.separator + childFile.getName();
 				File targetFile = new File(newDestFile);
@@ -146,11 +172,6 @@ public class FileWalker {
 					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip based on the input. ", newDestFile));
 				}
 
-			}
-
-			if (FastCopy.isStopThreads()) {
-				rdProUI.println("[warn]Cancelled by user. stop walk. ");
-				return;
 			}
 
 

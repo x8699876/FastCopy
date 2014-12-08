@@ -19,6 +19,7 @@
  */
 package org.mhisoft.fc.ui;
 
+import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
@@ -70,7 +71,6 @@ public class FastCopyMainForm {
 	private JCheckBox chkFlat;
 	private JCheckBox overrideOnlyIfNewerCheckBox;
 	private JPanel progressPanel;
-	private JTextArea textArea1;
 
 
 	public FastCopyMainForm() {
@@ -93,6 +93,7 @@ public class FastCopyMainForm {
 				if (fastCopy.isRunning()) {
 					fastCopy.setStopThreads(true);
 					progressPanel.setVisible(false);
+					fastCopy.setRunning(false);
 					btnCancel.setText("Close");
 				}
 				else
@@ -136,8 +137,8 @@ public class FastCopyMainForm {
 		overrideOnlyIfNewerCheckBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-				chkOverrideAlways.setSelected(!overrideOnlyIfNewerCheckBox.isSelected());
+				if (overrideOnlyIfNewerCheckBox.isSelected())
+					chkOverrideAlways.setSelected(false);
 			}
 
 
@@ -183,6 +184,7 @@ public class FastCopyMainForm {
 		progressBar1.setMinimum(0);
 
 		progressPanel.setVisible(false);
+		frame.setPreferredSize(new Dimension(600, 580));
 
 		frame.pack();
 
@@ -258,11 +260,13 @@ public class FastCopyMainForm {
 			progressPanel.setVisible(true);
 
 			fastCopy.run(props);
+
+			labelStatus.setText(fastCopy.getStatistics().printOverallProgress());
 			progressPanel.setVisible(false);
 
 			btnOk.setEnabled(true);
 			btnCancel.setText("Close");
-			labelStatus.setText("Dir copied:" + fastCopy.getStatistics().getDirCount() + ", Files copied:" + fastCopy.getStatistics().getFilesCount());
+			//labelStatus.setText("Dir copied:" + fastCopy.getStatistics().getDirCount() + ", Files copied:" + fastCopy.getStatistics().getFilesCount());
 		}
 	}
 

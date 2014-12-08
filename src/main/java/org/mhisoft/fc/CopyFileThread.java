@@ -31,7 +31,7 @@ import org.mhisoft.fc.ui.RdProUI;
  */
 public class CopyFileThread implements Runnable {
 
-	static final int TRIGGER_MULTI_THREAD_THRESHHOLD=20;
+	static final int TRIGGER_MULTI_THREAD_THRESHHOLD = 20;
 
 	private String dir;
 	private boolean verbose;
@@ -42,7 +42,7 @@ public class CopyFileThread implements Runnable {
 	File targetFile;
 
 
-	public CopyFileThread(RdProUI rdProUI, File sourceFile, File targetFile,  boolean verbose, FileCopyStatistics frs) {
+	public CopyFileThread(RdProUI rdProUI, File sourceFile, File targetFile, boolean verbose, FileCopyStatistics frs) {
 		this.sourceFile = sourceFile;
 		this.targetFile = targetFile;
 		this.verbose = verbose;
@@ -52,14 +52,18 @@ public class CopyFileThread implements Runnable {
 
 	@Override
 	public void run() {
-		if (FastCopy.debug)
-			rdProUI.println(Thread.currentThread().getName() + " Starts");
-		long t1 = System.currentTimeMillis();
 
-		FileUtils.nioBufferCopy(sourceFile, targetFile, statistics, rdProUI);
+		if (!FastCopy.isStopThreads()) {
 
-		if (FastCopy.debug)
-			rdProUI.println("\t" + Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
+			if (FastCopy.debug)
+				rdProUI.println(Thread.currentThread().getName() + " Starts");
+			long t1 = System.currentTimeMillis();
+
+			FileUtils.nioBufferCopy(sourceFile, targetFile, statistics, rdProUI);
+
+			if (FastCopy.debug)
+				rdProUI.println("\t" + Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
+		}
 
 	}
 

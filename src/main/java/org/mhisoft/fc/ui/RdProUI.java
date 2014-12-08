@@ -20,6 +20,7 @@
 package org.mhisoft.fc.ui;
 
 import org.mhisoft.fc.FastCopy;
+import org.mhisoft.fc.FileCopyStatistics;
 
 /**
  * Description: The RdPro User Interface
@@ -84,5 +85,5 @@ public interface RdProUI {
 	 * show progress
 	 * @param value
 	 */
-	public void showProgress(int value);
+	public void showProgress(int value, FileCopyStatistics statistics);
 }

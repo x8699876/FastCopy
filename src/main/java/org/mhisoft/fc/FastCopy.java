@@ -153,6 +153,8 @@ public class FastCopy {
 
 	public void run(RunTimeProperties props) {
 		workerPool = new Workers(props.getNumOfThreads(), rdProUI);
+
+		frs.reset();
 		FileWalker fw = new FileWalker(rdProUI, workerPool, props, frs);
 		long t1 = System.currentTimeMillis();
 

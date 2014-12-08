@@ -32,6 +32,20 @@ import java.text.DecimalFormat;
 public class FileCopyStatistics {
 	long filesCount;
 	long dirCount;
+	long totalFileSize =0;
+
+	public void reset() {
+		filesCount =0;
+		dirCount =0;
+		totalFileSize =0;
+		this.bucketBySizeList = new ArrayList<BucketBySize>();
+		//4k, 1M, 100M, 500M
+		bucketBySizeList.add(new BucketBySize(4L, "<4K"));
+		bucketBySizeList.add(new BucketBySize(1000L, "4K-1M"));
+		bucketBySizeList.add(new BucketBySize(100000L, "1M-100M"));
+		bucketBySizeList.add(new BucketBySize(500000L, "100M-500M"));
+		bucketBySizeList.add(new BucketBySize(-1L, "500M+"));
+	}
 
 	public static class BucketBySize {
 		String name ;
@@ -49,18 +63,16 @@ public class FileCopyStatistics {
 	List<BucketBySize> bucketBySizeList;
 
 	public FileCopyStatistics() {
-		this.bucketBySizeList = new ArrayList<BucketBySize>();
-		//4k, 1M, 100M, 500M
-		bucketBySizeList.add(new BucketBySize(4L, "<4K"));
-		bucketBySizeList.add(new BucketBySize(1000L, "4K-1M"));
-		bucketBySizeList.add(new BucketBySize(100000L, "1M-100M"));
-		bucketBySizeList.add(new BucketBySize(500000L, "100M-500M"));
-		bucketBySizeList.add(new BucketBySize(-1L, "500M+"));
-
+		reset();
 	}
 
 	public long getFilesCount() {
 		return filesCount;
+	}
+
+
+	public long getTotalFileSize() {
+		return totalFileSize;
 	}
 
 	public void setFilesCount(long filesCount) {
@@ -98,8 +110,10 @@ public class FileCopyStatistics {
 		}
 	}
 
+	DecimalFormat df = new DecimalFormat("#,###.##");
+
 	public String  printSpeed() {
-		DecimalFormat df = new DecimalFormat("#,###.##");
+
 		StringBuilder sb = new StringBuilder();
 
 		for (BucketBySize entry : bucketBySizeList) {
@@ -111,6 +125,18 @@ public class FileCopyStatistics {
 
 		return sb.toString();
 
+	}
+
+	String s12=  "Total Files: %s, Total size: %s MB";
+	public String printOverallProgress() {
+		double fsize = getTotalFileSize()/1024;
+		return  String.format(s12, df.format(getFilesCount()),  df.format(fsize));
+	}
+
+
+	//in KB
+	public void addFileSize(final long fsize) {
+		totalFileSize = totalFileSize + fsize;
 	}
 
 

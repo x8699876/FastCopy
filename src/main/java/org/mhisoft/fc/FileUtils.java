@@ -105,14 +105,14 @@ public class FileUtils {
 		FileChannel out = null;
 		long t1 = System.currentTimeMillis();
 		double size = 0;
-		rdProUI.showProgress(0);
+		rdProUI.showProgress(0, statistics);
 
 		try {
 			in = new FileInputStream(source).getChannel();
 			out = new FileOutputStream(target).getChannel();
 			size = in.size();
 			double size2InKB = size / 1024 ;
-			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getName(), df.format(size2InKB)));
+			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getAbsolutePath(), df.format(size2InKB)));
 
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
@@ -124,12 +124,13 @@ public class FileUtils {
 
 				if (FastCopy.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.");
-					break;
+					return;
 				}
 
 				totalSize = totalSize + readSize;
+				statistics.addFileSize(readSize/1024);
 				progress = (int) (totalSize * 100 / size);
-				rdProUI.showProgress(progress);
+				rdProUI.showProgress(progress, statistics);
 
 				buffer.flip();
 

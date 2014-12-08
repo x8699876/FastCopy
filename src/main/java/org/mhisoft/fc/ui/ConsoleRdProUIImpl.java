@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.mhisoft.fc.FastCopy;
+import org.mhisoft.fc.FileCopyStatistics;
 
 /**
  * Description: Console UI
@@ -200,7 +201,7 @@ public class ConsoleRdProUIImpl extends AbstractRdProUIImpl{
 	}
 
 	@Override
-	public void showProgress(int value) {
-		//none.
+	public void showProgress(int value, FileCopyStatistics statistics) {
+		//none
 	}
 }

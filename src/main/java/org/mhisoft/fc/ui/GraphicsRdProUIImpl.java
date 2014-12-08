@@ -26,6 +26,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.mhisoft.fc.FastCopy;
+import org.mhisoft.fc.FileCopyStatistics;
 
 /**
  * Description:  Swing UI implementation.
@@ -139,10 +140,14 @@ public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
 		return props;
 	}
 
+	long lastProgressTime = -1;
+
 	//0..100
-	public void showProgress(int value) {
-		progressBar.setValue(value);
-
-
+	public void showProgress(int value, FileCopyStatistics statistics) {
+		if (lastProgressTime==-1 || (System.currentTimeMillis()-lastProgressTime)>1000) {
+			progressBar.setValue(value);
+			labelStatus.setText( statistics.printOverallProgress());
+			lastProgressTime = System.currentTimeMillis();
+		}
 	}
 }
