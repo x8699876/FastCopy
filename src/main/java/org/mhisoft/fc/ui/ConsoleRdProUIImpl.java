@@ -34,7 +34,7 @@ import org.mhisoft.fc.FileCopyStatistics;
  * @author Tony Xue
  * @since Nov, 2014
  */
-public class ConsoleRdProUIImpl extends AbstractRdProUIImpl{
+public class ConsoleRdProUIImpl extends AbstractUIImpl {
 
 	@Override
 	public void print(final String msg) {
@@ -107,16 +107,16 @@ public class ConsoleRdProUIImpl extends AbstractRdProUIImpl{
 	public  void help() {
 		printBuildAndDisclaimer();
 		println("Usages:");
-		println("\t fastcopy [option] source target-dir ");
-		println("\t  source: The source files and directories delimited with semicolon");
-		println("\t target-dir: The target directory");
+		println("\t fastcopy [option] source-dir target-dir ");
+		println("\t source-dir: The source files and directories delimited with semicolon.");
+		println("\t target-dir: The target directory.");
 		println("\t Options: ");
 		println("\t\t -v verbose mode");
 		println("\t\t -dest alternative way to specify the target directory.");
 		/*println("\t -w number of worker threads, default 5");*/
 		println("Examples:");
 		println("\t\t fastcopy t:\\backup");
-		println("\t\t fastcopy s:\\projects\\dir1;s:\\projects\\dir2 t:\backup");
+		println("\t\t fastcopy s:\\projects\\dir1;s:\\projects\\dir2 t:\\backup");
 	}
 
 

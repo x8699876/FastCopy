@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.mhisoft.fc.ui.RdProUI;
+import org.mhisoft.fc.ui.UI;
 
 /**
  * Description: a pool of workers
@@ -39,10 +39,10 @@ public class Workers {
 
 	private  ThreadPoolExecutor executor;
 	static int QUESIZE = 5000;
-	private RdProUI rdProUI;
+	private UI rdProUI;
 
 	//creating the ThreadPoolExecutor
-	public Workers(final int corePoolSize, final RdProUI _rdProUI) {
+	public Workers(final int corePoolSize, final UI _rdProUI) {
 		//executor = Executors.newFixedThreadPool(corePoolSize);
 		this.rdProUI = _rdProUI;
 

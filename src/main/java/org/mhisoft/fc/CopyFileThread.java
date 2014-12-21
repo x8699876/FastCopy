@@ -21,7 +21,7 @@ package org.mhisoft.fc;
 
 import java.io.File;
 
-import org.mhisoft.fc.ui.RdProUI;
+import org.mhisoft.fc.ui.UI;
 
 /**
  * Description: CopyFileThread
@@ -36,13 +36,13 @@ public class CopyFileThread implements Runnable {
 	private String dir;
 	private boolean verbose;
 	private FileCopyStatistics statistics;
-	private RdProUI rdProUI;
+	private UI rdProUI;
 
 	File sourceFile;
 	File targetFile;
 
 
-	public CopyFileThread(RdProUI rdProUI, File sourceFile, File targetFile, boolean verbose, FileCopyStatistics frs) {
+	public CopyFileThread(UI rdProUI, File sourceFile, File targetFile, boolean verbose, FileCopyStatistics frs) {
 		this.sourceFile = sourceFile;
 		this.targetFile = targetFile;
 		this.verbose = verbose;

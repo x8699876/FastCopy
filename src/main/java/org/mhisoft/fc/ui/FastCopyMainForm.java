@@ -176,7 +176,7 @@ public class FastCopyMainForm {
 
 
 	public void init() {
-		frame = new JFrame("Fast Copy"+RdProUI.version);
+		frame = new JFrame("Fast Copy "+ UI.version);
 		frame.setContentPane(layoutPanel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//progressBar1.setVisible(false);
@@ -273,7 +273,7 @@ public class FastCopyMainForm {
 	public static void main(String[] args) {
 		FastCopyMainForm rdProMain = new FastCopyMainForm();
 		rdProMain.init();
-		GraphicsRdProUIImpl rdProUI = new GraphicsRdProUIImpl();
+		GraphicsUIImpl rdProUI = new GraphicsUIImpl();
 		rdProUI.setOutputTextArea(rdProMain.outputTextArea);
 		rdProUI.setLabelStatus(rdProMain.labelStatus);
 		rdProUI.setProgressBar(rdProMain.progressBar1);

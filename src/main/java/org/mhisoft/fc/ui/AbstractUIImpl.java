@@ -28,7 +28,7 @@ package org.mhisoft.fc.ui;
  * @author Tony Xue
  * @since Nov, 2014
  */
-public abstract class AbstractRdProUIImpl implements RdProUI {
+public abstract class AbstractUIImpl implements UI {
 
 	public void printBuildAndDisclaimer() {
 		println("Fast Copy (" +

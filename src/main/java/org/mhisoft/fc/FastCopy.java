@@ -22,7 +22,7 @@ package org.mhisoft.fc;
 import java.text.DecimalFormat;
 
 import org.mhisoft.fc.ui.ConsoleRdProUIImpl;
-import org.mhisoft.fc.ui.RdProUI;
+import org.mhisoft.fc.ui.UI;
 
 /**
  * Description: Recursive Delete Pro
@@ -37,13 +37,13 @@ public class FastCopy {
 	FileCopyStatistics frs = new FileCopyStatistics();
 	Workers workerPool;
 
-	public  RdProUI rdProUI;
+	public UI rdProUI;
 
-	public FastCopy(RdProUI rdProUI) {
+	public FastCopy(UI rdProUI) {
 		this.rdProUI = rdProUI;
 	}
 
-	public RdProUI getRdProUI() {
+	public UI getRdProUI() {
 		return rdProUI;
 	}
 

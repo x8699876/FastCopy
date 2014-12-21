@@ -28,7 +28,7 @@ import org.mhisoft.fc.FileCopyStatistics;
  * @author Tony Xue
  * @since Nov, 2014
  */
-public interface RdProUI {
+public interface UI {
 
 	public static final String version = "v0.9 ";
 	public static final String build = "build 001";

@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
 
-import org.mhisoft.fc.ui.RdProUI;
+import org.mhisoft.fc.ui.UI;
 
 /**
  * Description:
@@ -41,7 +41,7 @@ import org.mhisoft.fc.ui.RdProUI;
  */
 public class FileUtils {
 
-	public static void removeDir(File dir, RdProUI ui, FileCopyStatistics frs) {
+	public static void removeDir(File dir, UI ui, FileCopyStatistics frs) {
 		try {
 			if (!dir.delete()) {
 				ui.println("\t[warn]Can't remove:" + dir.getAbsolutePath() + ". May be locked. ");
@@ -55,7 +55,7 @@ public class FileUtils {
 	}
 
 
-	public static void createDir(final File theDir, final RdProUI ui, final FileCopyStatistics frs) {
+	public static void createDir(final File theDir, final UI ui, final FileCopyStatistics frs) {
 		// if the directory does not exist, create it
 		if (!theDir.exists()) {
 			//ui.println("creating directory: " + theDir.getName());
@@ -91,7 +91,7 @@ public class FileUtils {
 	private static final int BUFFER = 8192;
 	static final DecimalFormat df = new DecimalFormat("#,###.##");
 
-	public static void showPercent(final RdProUI rdProUI, double digital) {
+	public static void showPercent(final UI rdProUI, double digital) {
 		long p = (long) digital * 100;
 		DecimalFormat df = new DecimalFormat("000");
 		String s = df.format(p);
@@ -100,7 +100,7 @@ public class FileUtils {
 	}
 
 
-	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final RdProUI rdProUI) {
+	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
 		FileChannel in = null;
 		FileChannel out = null;
 		long t1 = System.currentTimeMillis();

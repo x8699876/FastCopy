@@ -147,7 +147,7 @@
 
     <profiles>
         <profile>
-            <id>rdproui</id>
+            <id>fcui</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -155,7 +155,7 @@
                 <manifest-file>src/main/resources/META-INF/MANIFEST.MF</manifest-file>
             </properties>
             <build>
-                <finalName>rdpro-ui</finalName>
+                <finalName>fastcopy-ui</finalName>
 
 
                 <resources>
@@ -208,12 +208,12 @@
  ============================================ -->
 
         <profile>
-            <id>rdpro-console</id>
+            <id>fastcopy-console</id>
             <properties>
                 <manifest-file>src/main/resources/META-INF/MANIFEST.MF-console</manifest-file>
             </properties>
             <build>
-                <finalName>rdpro-console</finalName>
+                <finalName>fastcopy-console</finalName>
                 <plugins>
 
                     <plugin>

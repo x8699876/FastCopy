@@ -34,17 +34,17 @@ import org.mhisoft.fc.FileCopyStatistics;
  * @author Tony Xue
  * @since Nov, 2014
  */
-public class GraphicsRdProUIImpl extends AbstractRdProUIImpl {
+public class GraphicsUIImpl extends AbstractUIImpl {
 
 	JTextArea outputTextArea;
 	JLabel labelStatus;
 	JProgressBar progressBar;
 
-	public GraphicsRdProUIImpl(JTextArea outputTextArea) {
+	public GraphicsUIImpl(JTextArea outputTextArea) {
 		this.outputTextArea = outputTextArea;
 	}
 
-	public GraphicsRdProUIImpl() {
+	public GraphicsUIImpl() {
 	}
 
 	public JTextArea getOutputTextArea() {

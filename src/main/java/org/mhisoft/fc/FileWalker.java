@@ -22,7 +22,7 @@ package org.mhisoft.fc;
 import java.io.File;
 import java.io.FilenameFilter;
 
-import org.mhisoft.fc.ui.RdProUI;
+import org.mhisoft.fc.ui.UI;
 
 /**
  * Description: walk the directory and schedule works to remove the target files and directories.
@@ -37,10 +37,10 @@ public class FileWalker {
 	boolean lastAnsweredDeleteAll = false;
 	boolean initialConfirmation = false;
 	Workers workerPool;
-	RdProUI rdProUI;
+	UI rdProUI;
 	FileCopyStatistics statistics;
 
-	public FileWalker(RdProUI rdProUI,
+	public FileWalker(UI rdProUI,
 			Workers workerPool,
 			FastCopy.RunTimeProperties props
 			, FileCopyStatistics frs
