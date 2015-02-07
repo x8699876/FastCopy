@@ -129,6 +129,8 @@ public class FileCopyStatistics {
 	 * @param fileTime milli sec
 	 */
 	public void setSpeedForBucket(double fsize, double speed, long fileTime) {
+		if (fileTime<=0)
+			return;
 
         BucketBySize bucketBySize = getBucket(fsize);
 		bucketBySize.addToTotal(fsize, fileTime);
@@ -157,7 +159,7 @@ public class FileCopyStatistics {
 
 			sb.append("Files ").append(entry.name).append(": ")
 //					.append(String.format("Max Speed: %s KB/s, Avg Speed:%s MB/s, ", df.format(entry.maxSpeed),avgSpeed ))
-					.append(String.format("Avg Speed:%s MB/s",  avgSpeed ))
+					.append(String.format("Avg Speed:%s MB/s", avgSpeed ))
 					.append("\n");
 
 		}

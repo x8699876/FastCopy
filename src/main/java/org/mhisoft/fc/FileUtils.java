@@ -140,7 +140,7 @@ public class FileUtils {
 
 			statistics.setFilesCount(statistics.getFilesCount()+1);
 			long overallT2 =  System.currentTimeMillis();
-			statistics.setSpeedForBucket(readSize/1024, 0,  (overallT2 - overallT1));
+			statistics.setSpeedForBucket(size2InKB, 0,  (overallT2 - overallT1));
 
 
 			//long t2 = System.currentTimeMillis();
