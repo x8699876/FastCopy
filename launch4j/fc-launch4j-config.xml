@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
-  <headerType>gui</headerType>
-  <jar>S:\projects\mhisoft\RdPro\dist\rdpro-ui.jar</jar>
-  <outfile>S:\projects\mhisoft\RdPro\dist\rdproui.exe</outfile>
+  <headerType>console</headerType>
+  <jar>S:\projects\mhisoft\fastcopy\dist\fastcopy-console.jar</jar>
+  <outfile>S:\projects\mhisoft\fastcopy\dist\fc.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>
@@ -22,15 +22,15 @@
     <runtimeBits>64/32</runtimeBits>
   </jre>
   <versionInfo>
-    <fileVersion>1.0.0.0</fileVersion>
-    <txtFileVersion>1.0</txtFileVersion>
-    <fileDescription>Recursive Delete Pro</fileDescription>
-    <copyright>Copyright(c) 2014Tony Xue</copyright>
-    <productVersion>1.0.0.0</productVersion>
-    <txtProductVersion>1.0</txtProductVersion>
-    <productName>Recursive Delete Pro</productName>
+    <fileVersion>0.9.0.0</fileVersion>
+    <txtFileVersion>0.9.0.0</txtFileVersion>
+    <fileDescription>Fast copy</fileDescription>
+    <copyright>Copyright(c) 2015 Tony Xue</copyright>
+    <productVersion>0.9.0.0</productVersion>
+    <txtProductVersion>0.9</txtProductVersion>
+    <productName>Fast Copy</productName>
     <companyName>MHISoft</companyName>
-    <internalName>RdPro</internalName>
-    <originalFilename>rdproui.exe</originalFilename>
+    <internalName>fastcopy</internalName>
+    <originalFilename>fastcopy.exe</originalFilename>
   </versionInfo>
 </launch4jConfig>

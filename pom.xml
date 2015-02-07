@@ -60,10 +60,10 @@
                                 <resource>
                                     <directory>${project.basedir}</directory>
                                     <includes>
-                                        <include>dist\rdpro.bat</include>
-                                        <include>dist\rdproui.bat</include>
-                                        <include>dist\rdpro.sh</include>
-                                        <include>dist\rdproui.sh</include>
+                                        <include>dist\fc.bat</include>
+                                        <include>dist\fcui.bat</include>
+                                        <include>dist\fc.sh</include>
+                                        <include>dist\fcui.sh</include>
                                     </includes>
                                     <filtering>false</filtering>
                                 </resource>
@@ -257,6 +257,13 @@
             <groupId>jgoodies</groupId>
             <artifactId>forms</artifactId>
             <version>1.0.5</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>4.1.0</version>
         </dependency>
 
     </dependencies>

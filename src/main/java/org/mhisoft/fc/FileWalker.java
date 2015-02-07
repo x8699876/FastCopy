@@ -49,6 +49,7 @@ public class FileWalker {
 		this.props = props;
 		this.rdProUI = rdProUI;
 		this.statistics = frs;
+		rdProUI.reset();
 	}
 
 

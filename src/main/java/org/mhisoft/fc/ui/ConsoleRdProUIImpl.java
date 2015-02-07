@@ -123,8 +123,14 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	public FastCopy.RunTimeProperties parseCommandLineArguments(String[] args) {
 
 		FastCopy.RunTimeProperties props = new FastCopy.RunTimeProperties();
-
 		List<String> noneHyfenArgs = new ArrayList<String>();
+
+		if (args==null || args.length==0) {
+			help();
+			props.setSuccess(false);
+			return props;
+		}
+
 
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
@@ -165,7 +171,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 			props.setSourceDir(System.getProperty("user.dir"));
 		}
 		else if (noneHyfenArgs.size() == 1) {
-			//rdpro d:\temp -dest classes
+			//fc d:\temp -dest classes
 			if (props.getDestDir() != null)
 				props.setSourceDir(noneHyfenArgs.get(0));
 
@@ -189,7 +195,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 
 
 		if (props.getDestDir() == null) {
-			if (!isAnswerY("Specify a destination directory."))
+			if (!isAnswerY("Specify a destination directory:"))
 				props.setSuccess(false);
 			return props;
 
@@ -203,5 +209,10 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	@Override
 	public void showProgress(int value, FileCopyStatistics statistics) {
 		//none
+	}
+
+	@Override
+	public void reset() {
+		//
 	}
 }

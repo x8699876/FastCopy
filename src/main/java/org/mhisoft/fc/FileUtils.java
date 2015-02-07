@@ -41,18 +41,6 @@ import org.mhisoft.fc.ui.UI;
  */
 public class FileUtils {
 
-	public static void removeDir(File dir, UI ui, FileCopyStatistics frs) {
-		try {
-			if (!dir.delete()) {
-				ui.println("\t[warn]Can't remove:" + dir.getAbsolutePath() + ". May be locked. ");
-			} else {
-				ui.println("\tRemoved dir:" + dir.getAbsolutePath());
-				frs.dirCount++;
-			}
-		} catch (Exception e) {
-			ui.println("\t[error]:" + e.getMessage());
-		}
-	}
 
 
 	public static void createDir(final File theDir, final UI ui, final FileCopyStatistics frs) {
@@ -88,7 +76,7 @@ public class FileUtils {
 		}
 	}
 
-	private static final int BUFFER = 8192;
+	private static final int BUFFER = 4096*16;
 	static final DecimalFormat df = new DecimalFormat("#,###.##");
 
 	public static void showPercent(final UI rdProUI, double digital) {
@@ -114,11 +102,13 @@ public class FileUtils {
 			double size2InKB = size / 1024 ;
 			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getAbsolutePath(), df.format(size2InKB)));
 
-
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 			int readSize = in.read(buffer);
 			long totalSize = 0;
 			int progress = 0;
+
+			long startTime, endTime  ;
+			long overallT1 =  System.currentTimeMillis();
 
 			while (readSize != -1) {
 
@@ -128,7 +118,7 @@ public class FileUtils {
 				}
 
 				totalSize = totalSize + readSize;
-				statistics.addFileSize(readSize/1024);
+				startTime = System.currentTimeMillis();
 				progress = (int) (totalSize * 100 / size);
 				rdProUI.showProgress(progress, statistics);
 
@@ -144,18 +134,24 @@ public class FileUtils {
 				readSize = in.read(buffer);
 
 
+				endTime = System.currentTimeMillis();
+				statistics.addToTotalFileSizeAndTime(readSize / 1024, (endTime - startTime));
 			}
 
-			statistics.filesCount++;
-			long t2 = System.currentTimeMillis();
+			statistics.setFilesCount(statistics.getFilesCount()+1);
+			long overallT2 =  System.currentTimeMillis();
+			statistics.setSpeedForBucket(readSize/1024, 0,  (overallT2 - overallT1));
 
-			double speed = 0;
-			if (size > 0 && t2 - t1 > 0) {
-				speed = size2InKB * (10 ^ 6) / (t2 - t1);  //KB/s
-				statistics.setSpeed(size2InKB, speed);
-			}
 
-			rdProUI.println(String.format(", speed:%s KByte/Second.", df.format(speed)));
+			//long t2 = System.currentTimeMillis();
+
+//			double speed = 0;
+//			if (size > 0 && t2 - t1 > 0) {
+//				speed = size2InKB * (10 ^ 6) / (t2 - t1);  //KB/s
+//				statistics.setSpeedForBucket(size2InKB, speed, t2 - t1);
+//			}
+
+			//rdProUI.println(String.format(", speed:%s KByte/Second.", df.format(speed)));
 
 		} catch (IOException e) {
 			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));

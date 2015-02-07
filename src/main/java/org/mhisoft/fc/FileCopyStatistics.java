@@ -21,43 +21,63 @@ package org.mhisoft.fc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.WString;
+
 /**
-* Description: Statistics on files and directories copied.
-*
-* @author Tony Xue
-* @since Nov, 2014
-*/
+ * Description: Statistics on files and directories copied.
+ *
+ * @author Tony Xue
+ * @since Nov, 2014
+ */
 public class FileCopyStatistics {
-	long filesCount;
-	long dirCount;
-	long totalFileSize =0;
+	private long filesCount;
+	private long dirCount;
+	private long totalFileSize = 0;
+	private long totalTime=0;
+
 
 	public void reset() {
-		filesCount =0;
-		dirCount =0;
-		totalFileSize =0;
+		filesCount = 0;
+		dirCount = 0;
+		totalFileSize = 0;
+		totalTime =0;
 		this.bucketBySizeList = new ArrayList<BucketBySize>();
 		//4k, 1M, 100M, 500M
-		bucketBySizeList.add(new BucketBySize(4L, "<4K"));
-		bucketBySizeList.add(new BucketBySize(1000L, "4K-1M"));
-		bucketBySizeList.add(new BucketBySize(100000L, "1M-100M"));
-		bucketBySizeList.add(new BucketBySize(500000L, "100M-500M"));
-		bucketBySizeList.add(new BucketBySize(-1L, "500M+"));
+		bucketBySizeList.add(new BucketBySize(4L		, "<4K       "));
+		bucketBySizeList.add(new BucketBySize(1000L		, "4K-1M     "));
+		bucketBySizeList.add(new BucketBySize(100000L	, "1M-100M   "));
+		bucketBySizeList.add(new BucketBySize(500000L	, "100M-500M "));
+		bucketBySizeList.add(new BucketBySize(-1L		, "500M+     "));
 	}
 
 	public static class BucketBySize {
-		String name ;
-		long size ;
-		double  speed ; //Byte Per Seconds
-		double  minSpeed=0 ; //Byte Per Seconds
-		double  maxSpeed=0; //Byte Per Seconds
+		String name;
+		long size;
+		double totalSize = 0; //KB
+		long totalTime = 0;   // milli seconds
+		double speed; //Byte Per Seconds
+		double minSpeed = 0; //Byte Per Seconds
+		double maxSpeed = 0; //Byte Per Seconds
 
 		public BucketBySize(long size, String name) {
 			this.size = size;
 			this.name = name;
 		}
+
+		public void addToTotal(double size, long time) {
+			totalSize += size;
+			totalTime += time;
+		}
+
 	}
 
 	List<BucketBySize> bucketBySizeList;
@@ -87,38 +107,57 @@ public class FileCopyStatistics {
 		this.dirCount = dirCount;
 	}
 
-	//fsize is in KB.
-	public void setSpeed(double fsize, double speed) {
+	public BucketBySize getBucket(double fsize) {
 
 		BucketBySize bucketBySize = null;
 		for (BucketBySize entry : bucketBySizeList) {
-			if (fsize<entry.size) {
+			if (fsize < entry.size) {
 				bucketBySize = entry;
 				break;
 			}
 		}
-		if (bucketBySize==null) {
-			bucketBySize =  bucketBySizeList.get(4);
+		if (bucketBySize == null) {
+			bucketBySize = bucketBySizeList.get(4);
 		}
+		return bucketBySize;
+	}
 
-		if (speed>0) {
+
+	/**
+	 * @param fsize    in KB
+	 * @param speed    KB/s
+	 * @param fileTime milli sec
+	 */
+	public void setSpeedForBucket(double fsize, double speed, long fileTime) {
+
+        BucketBySize bucketBySize = getBucket(fsize);
+		bucketBySize.addToTotal(fsize, fileTime);
+
+		if (speed > 0) {
 			bucketBySize.speed = speed;
-			if (bucketBySize.minSpeed==0 || speed < bucketBySize.minSpeed)
+			if (bucketBySize.minSpeed == 0 || speed < bucketBySize.minSpeed)
 				bucketBySize.minSpeed = speed;
-			if (bucketBySize.maxSpeed==0 || speed > bucketBySize.maxSpeed)
+			if (bucketBySize.maxSpeed == 0 || speed > bucketBySize.maxSpeed)
 				bucketBySize.maxSpeed = speed;
 		}
 	}
 
-	DecimalFormat df = new DecimalFormat("#,###.##");
+	DecimalFormat df = new DecimalFormat("###.##");
 
-	public String  printSpeed() {
+	public String printSpeed() {
 
 		StringBuilder sb = new StringBuilder();
+		String avgSpeed; //MB/s
 
 		for (BucketBySize entry : bucketBySizeList) {
+			if (entry.totalTime > 0)
+				avgSpeed = df.format(entry.totalSize * (10 ^ 3) / entry.totalTime);
+			else
+				avgSpeed = "NA";
+
 			sb.append("Files ").append(entry.name).append(": ")
-					.append(String.format("Min Speed:%s KB/s, Max Speed: %s KB/s", df.format(entry.minSpeed), df.format(entry.maxSpeed)))
+//					.append(String.format("Max Speed: %s KB/s, Avg Speed:%s MB/s, ", df.format(entry.maxSpeed),avgSpeed ))
+					.append(String.format("Avg Speed:%s MB/s",  avgSpeed ))
 					.append("\n");
 
 		}
@@ -127,17 +166,59 @@ public class FileCopyStatistics {
 
 	}
 
-	String s12=  "Total Files: %s, Total size: %s MB";
+	String s12 = "Total Files: %s, Total size: %s MB, Took: %s sec, Overall Ave Speed=%s MB/s";
+
 	public String printOverallProgress() {
-		double fsize = getTotalFileSize()/1024;
-		return  String.format(s12, df.format(getFilesCount()),  df.format(fsize));
+		double fsize = getTotalFileSize() / 1024;
+		return String.format(s12, df.format(getFilesCount()), df.format(fsize)
+				, df.format(totalTime/1000), df.format(fsize*1000/totalTime));
 	}
 
 
-	//in KB
-	public void addFileSize(final long fsize) {
+	//in KB, milli seconds.
+	public void addToTotalFileSizeAndTime(final long fsize, final long ftime) {
 		totalFileSize = totalFileSize + fsize;
+		totalTime= totalTime+ ftime;
 	}
+
+
+	interface Kernel32 extends Library {
+		public int GetFileAttributesW(WString fileName);
+	}
+
+	static Kernel32 lib = null;
+	public static int getWin32FileAttributes(File f) throws IOException {
+		if (lib == null) {
+			synchronized (Kernel32.class) {
+				lib = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class);
+			}
+		}
+		return lib.GetFileAttributesW(new WString(f.getCanonicalPath()));
+	}
+
+	public static boolean isJunctionOrSymlink(File f) throws IOException {
+		if (!f.exists()) { return false; }
+		int attributes = getWin32FileAttributes(f);
+		if (-1 == attributes) { return false; }
+		return ((0x400 & attributes) != 0);
+	}
+
+	public static void main(String[] args) {
+		try {
+			String link = "D:\\plateau-talent-management-b1408\\webapps\\learning";
+			boolean b = isJunctionOrSymlink( new File (link));
+			System.out.println("isJunctionOrSymlink=" + b);
+			Path p =  Paths.get(link);
+			boolean isSymbolicLink = Files.isSymbolicLink(p);
+			System.out.println("isSymbolicLink=" + isSymbolicLink);
+
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 
 }

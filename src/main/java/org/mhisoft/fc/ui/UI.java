@@ -86,4 +86,6 @@ public interface UI {
 	 * @param value
 	 */
 	public void showProgress(int value, FileCopyStatistics statistics);
+
+	public void reset() ;
 }

@@ -142,6 +142,13 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 	long lastProgressTime = -1;
 
+	@Override
+	public void reset() {
+		lastProgressTime=-1;
+		labelStatus.setText("");
+		progressBar.setValue(0);
+	}
+
 	//0..100
 	public void showProgress(int value, FileCopyStatistics statistics) {
 		if (lastProgressTime==-1 || (System.currentTimeMillis()-lastProgressTime)>1000) {

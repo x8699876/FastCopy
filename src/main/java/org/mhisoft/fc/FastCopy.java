@@ -169,9 +169,11 @@ public class FastCopy {
 		running= false;
 		stopThreads = false;
 
-		rdProUI.println("\nDone in " + (System.currentTimeMillis() - t1) / 1000 + " seconds.");
+		rdProUI.println("");
+		rdProUI.println("Done.");
 		rdProUI.println(frs.printSpeed());
-		rdProUI.println("Dir copied:" + frs.dirCount + ", Files copied:" + frs.filesCount);
+		rdProUI.println("Dir copied:" + frs.getDirCount() + ", Files copied:" + frs.getFilesCount());
+		rdProUI.println(frs.printOverallProgress());
 	}
 
 
