@@ -14,7 +14,8 @@
 * Unix/linux : run the fastcopy.sh, fastcopyui.sh
 
 
-![screen shot](doc/11-21-2014%2010-10-21%20PM.png "rdproui.exe screenshot")
+![Screenshot](doc/screenshot1.png "screenshot")
+
 
 
 ## Hook to the Windows Explorer Context menu
