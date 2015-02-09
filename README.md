@@ -10,8 +10,8 @@
 
 * If not already, down load and install the latest JRE/JDK 1.7 from Oracle.
 * Exploded the downloaded zip into a directory and add the directory to the system path. 
-* Windows: run the fastcopy.exe or fastcopyui.exe
-* Unix/linux : run the fastcopy.sh, fastcopyui.sh
+* Windows: run the fastcopy.exe or fastcopy-console.exe
+* Unix/linux : run the fc.sh, fc.sh script.
 
 
 ![Screenshot](doc/screenshot1.png "screenshot")
