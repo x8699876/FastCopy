@@ -123,6 +123,19 @@ public class FileCopyStatistics {
 	}
 
 
+
+	//in KB, milli seconds.
+	public void addToTotalFileSizeAndTime(final long totalFsize, final long fsize, final long ftime) {
+		this.totalFileSize = this.totalFileSize + fsize;
+		this.totalTime= this.totalTime+ ftime;
+
+		BucketBySize bucketBySize = getBucket(totalFsize/1024);
+		bucketBySize.addToTotal(fsize, ftime);
+
+	}
+
+
+
 	/**
 	 * @param fsize    in KB
 	 * @param speed    KB/s
@@ -152,9 +165,12 @@ public class FileCopyStatistics {
 		String avgSpeed; //MB/s
 
 		for (BucketBySize entry : bucketBySizeList) {
-			if (entry.totalTime > 0)
-				avgSpeed = df.format(entry.totalSize * (10 ^ 3) / entry.totalTime);
-			else
+
+			if (entry.totalTime > 0) {
+				double d= entry.totalSize/1024*1000/entry.totalTime;
+				avgSpeed = df.format(d);
+			}
+				else
 				avgSpeed = "NA";
 
 			sb.append("Files ").append(entry.name).append(": ")
@@ -174,13 +190,6 @@ public class FileCopyStatistics {
 		double fsize = getTotalFileSize() / 1024;
 		return String.format(s12, df.format(getFilesCount()), df.format(fsize)
 				, df.format(totalTime/1000), df.format(fsize*1000/totalTime));
-	}
-
-
-	//in KB, milli seconds.
-	public void addToTotalFileSizeAndTime(final long fsize, final long ftime) {
-		totalFileSize = totalFileSize + fsize;
-		totalTime= totalTime+ ftime;
 	}
 
 

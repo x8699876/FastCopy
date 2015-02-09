@@ -91,24 +91,22 @@ public class FileUtils {
 	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
 		FileChannel in = null;
 		FileChannel out = null;
-		long t1 = System.currentTimeMillis();
-		double size = 0;
+		long totalFileSize = 0;
 		rdProUI.showProgress(0, statistics);
 
 		try {
 			in = new FileInputStream(source).getChannel();
 			out = new FileOutputStream(target).getChannel();
-			size = in.size();
-			double size2InKB = size / 1024 ;
-			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getAbsolutePath(), df.format(size2InKB)));
+			totalFileSize = in.size();
+			//double size2InKB = size / 1024 ;
+			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getAbsolutePath(), df.format(totalFileSize/1024)));
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 			int readSize = in.read(buffer);
-			long totalSize = 0;
+			long totalRead = 0;
 			int progress = 0;
 
 			long startTime, endTime  ;
-			long overallT1 =  System.currentTimeMillis();
 
 			while (readSize != -1) {
 
@@ -116,10 +114,10 @@ public class FileUtils {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.");
 					return;
 				}
-
-				totalSize = totalSize + readSize;
 				startTime = System.currentTimeMillis();
-				progress = (int) (totalSize * 100 / size);
+				totalRead = totalRead + readSize;
+
+				progress = (int) (totalRead * 100 / totalFileSize);
 				rdProUI.showProgress(progress, statistics);
 
 				buffer.flip();
@@ -128,30 +126,17 @@ public class FileUtils {
 					out.write(buffer);
 					//System.out.printf(".");
 					//showPercent(rdProUI, totalSize/size );
-
 				}
 				buffer.clear();
 				readSize = in.read(buffer);
 
 
 				endTime = System.currentTimeMillis();
-				statistics.addToTotalFileSizeAndTime(readSize / 1024, (endTime - startTime));
+				statistics.addToTotalFileSizeAndTime(totalFileSize, readSize / 1024, (endTime - startTime));
 			}
 
 			statistics.setFilesCount(statistics.getFilesCount()+1);
-			long overallT2 =  System.currentTimeMillis();
-			statistics.setSpeedForBucket(size2InKB, 0,  (overallT2 - overallT1));
 
-
-			//long t2 = System.currentTimeMillis();
-
-//			double speed = 0;
-//			if (size > 0 && t2 - t1 > 0) {
-//				speed = size2InKB * (10 ^ 6) / (t2 - t1);  //KB/s
-//				statistics.setSpeedForBucket(size2InKB, speed, t2 - t1);
-//			}
-
-			//rdProUI.println(String.format(", speed:%s KByte/Second.", df.format(speed)));
 
 		} catch (IOException e) {
 			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
