@@ -80,12 +80,18 @@
           <component id="74ff2" class="javax.swing.JTextField" binding="fldSourceDir">
             <constraints/>
             <properties>
-              <columns value="30"/>
+              <columns value="35"/>
               <editable value="true"/>
               <font name="MS Reference Sans Serif" size="10"/>
               <foreground color="-15785217"/>
               <horizontalAlignment value="2"/>
               <text value="fldSource"/>
+            </properties>
+          </component>
+          <component id="27e42" class="javax.swing.JButton" binding="btnSourceBrowse">
+            <constraints/>
+            <properties>
+              <text value="Browse"/>
             </properties>
           </component>
         </children>
@@ -113,12 +119,18 @@
           <component id="d3f20" class="javax.swing.JTextField" binding="fldTargetDir">
             <constraints/>
             <properties>
-              <columns value="30"/>
+              <columns value="35"/>
               <editable value="true"/>
               <font name="MS Reference Sans Serif" size="10"/>
               <foreground color="-15785217"/>
               <horizontalAlignment value="2"/>
               <text value="fldTarget"/>
+            </properties>
+          </component>
+          <component id="eef59" class="javax.swing.JButton" binding="btnTargetBrowse">
+            <constraints/>
+            <properties>
+              <text value="Browse"/>
             </properties>
           </component>
         </children>
@@ -181,6 +193,7 @@
           <component id="ea30" class="javax.swing.JButton" binding="btnOk">
             <constraints/>
             <properties>
+              <hideActionText value="true"/>
               <icon value="images/btn-purge.png"/>
               <text value="&amp;Start Copy"/>
             </properties>

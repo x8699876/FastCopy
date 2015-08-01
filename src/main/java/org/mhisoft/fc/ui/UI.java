@@ -19,8 +19,8 @@
  */
 package org.mhisoft.fc.ui;
 
-import org.mhisoft.fc.FastCopy;
 import org.mhisoft.fc.FileCopyStatistics;
+import org.mhisoft.fc.RunTimeProperties;
 
 /**
  * Description: The RdPro User Interface
@@ -31,7 +31,7 @@ import org.mhisoft.fc.FileCopyStatistics;
 public interface UI {
 
 	public static final String version = "v0.9 ";
-	public static final String build = "build 001";
+	public static final String build = "build 102";
 
 	public  enum Confirmation {
 		YES, NO, YES_TO_ALL, HELP
@@ -52,6 +52,8 @@ public interface UI {
 
 	public  void printf(final String msg, Object args);
 
+	public void printError(final String msg) ;
+
 	/**
 	 * Present a confirmation and return true if confirmed.
 	 * @param question
@@ -70,7 +72,7 @@ public interface UI {
 	 * @param args
 	 * @return
 	 */
-	public FastCopy.RunTimeProperties parseCommandLineArguments(String[] args);
+	public RunTimeProperties parseCommandLineArguments(String[] args);
 
 
 	/**
@@ -88,4 +90,6 @@ public interface UI {
 	public void showProgress(int value, FileCopyStatistics statistics);
 
 	public void reset() ;
+
+	public void dumpArguments(String[] args, RunTimeProperties props) ;
 }

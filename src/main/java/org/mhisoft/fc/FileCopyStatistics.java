@@ -21,16 +21,11 @@ package org.mhisoft.fc;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-import com.sun.jna.WString;
+//import com.sun.jna.Library;
+//import com.sun.jna.Native;
+//import com.sun.jna.WString;
 
 /**
  * Description: Statistics on files and directories copied.
@@ -193,42 +188,42 @@ public class FileCopyStatistics {
 	}
 
 
-	interface Kernel32 extends Library {
-		public int GetFileAttributesW(WString fileName);
-	}
+//	interface Kernel32 extends Library {
+//		public int GetFileAttributesW(WString fileName);
+//	}
+//
+//	static Kernel32 lib = null;
+//	public static int getWin32FileAttributes(File f) throws IOException {
+//		if (lib == null) {
+//			synchronized (Kernel32.class) {
+//				lib = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class);
+//			}
+//		}
+//		return lib.GetFileAttributesW(new WString(f.getCanonicalPath()));
+//	}
 
-	static Kernel32 lib = null;
-	public static int getWin32FileAttributes(File f) throws IOException {
-		if (lib == null) {
-			synchronized (Kernel32.class) {
-				lib = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class);
-			}
-		}
-		return lib.GetFileAttributesW(new WString(f.getCanonicalPath()));
-	}
-
-	public static boolean isJunctionOrSymlink(File f) throws IOException {
-		if (!f.exists()) { return false; }
-		int attributes = getWin32FileAttributes(f);
-		if (-1 == attributes) { return false; }
-		return ((0x400 & attributes) != 0);
-	}
-
-	public static void main(String[] args) {
-		try {
-			String link = "D:\\plateau-talent-management-b1408\\webapps\\learning";
-			boolean b = isJunctionOrSymlink( new File (link));
-			System.out.println("isJunctionOrSymlink=" + b);
-			Path p =  Paths.get(link);
-			boolean isSymbolicLink = Files.isSymbolicLink(p);
-			System.out.println("isSymbolicLink=" + isSymbolicLink);
-
-
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	public static boolean isJunctionOrSymlink(File f) throws IOException {
+//		if (!f.exists()) { return false; }
+//		int attributes = getWin32FileAttributes(f);
+//		if (-1 == attributes) { return false; }
+//		return ((0x400 & attributes) != 0);
+//	}
+//
+//	public static void main(String[] args) {
+//		try {
+//			String link = "D:\\plateau-talent-management-b1408\\webapps\\learning";
+//			boolean b = isJunctionOrSymlink( new File (link));
+//			System.out.println("isJunctionOrSymlink=" + b);
+//			Path p =  Paths.get(link);
+//			boolean isSymbolicLink = Files.isSymbolicLink(p);
+//			System.out.println("isSymbolicLink=" + isSymbolicLink);
+//
+//
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 
 

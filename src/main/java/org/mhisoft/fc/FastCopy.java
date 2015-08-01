@@ -19,6 +19,9 @@
  */
 package org.mhisoft.fc;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
 import org.mhisoft.fc.ui.ConsoleRdProUIImpl;
@@ -70,85 +73,6 @@ public class FastCopy {
 		this.running = running;
 	}
 
-	/**
-	 * Run time properties
-	 */
-	public static class RunTimeProperties {
-		String sourceDir = null;
-		String destDir = null;
-		boolean success;
-		boolean verbose;
-		int numOfThreads=1;
-		boolean overwrite;
-		boolean overwriteIfNewerOrDifferent;
-		boolean flatCopy;
-
-
-		public String getSourceDir() {
-			return sourceDir;
-		}
-
-		public void setSourceDir(String sourceDir) {
-			this.sourceDir = sourceDir;
-		}
-
-		public String getDestDir() {
-			return destDir;
-		}
-
-		public void setDestDir(String destDir) {
-			this.destDir = destDir;
-		}
-
-		public boolean isSuccess() {
-			return success;
-		}
-
-		public void setSuccess(boolean success) {
-			this.success = success;
-		}
-
-		public boolean isVerbose() {
-			return verbose;
-		}
-
-		public void setVerbose(boolean verbose) {
-			this.verbose = verbose;
-		}
-
-		public int getNumOfThreads() {
-			return numOfThreads;
-		}
-
-		public void setNumOfThreads(int numOfThreads) {
-			this.numOfThreads = numOfThreads;
-		}
-
-		public boolean isOverwrite() {
-			return overwrite;
-		}
-
-		public void setOverwrite(boolean overwrite) {
-			this.overwrite = overwrite;
-		}
-
-		public boolean isFlatCopy() {
-			return flatCopy;
-		}
-
-		public void setFlatCopy(boolean flatCopy) {
-			this.flatCopy = flatCopy;
-		}
-
-		public boolean isOverwriteIfNewerOrDifferent() {
-			return overwriteIfNewerOrDifferent;
-		}
-
-		public void setOverwriteIfNewerOrDifferent(boolean overwriteIfNewerOrDifferent) {
-			this.overwriteIfNewerOrDifferent = overwriteIfNewerOrDifferent;
-		}
-	}
-
 	static DecimalFormat df = new DecimalFormat("#,###.##");
 
 	public void run(RunTimeProperties props) {
@@ -180,6 +104,27 @@ public class FastCopy {
 	public static void main(String[] args) {
 		FastCopy fastCopy = new FastCopy(new ConsoleRdProUIImpl());
 		RunTimeProperties props = fastCopy.getRdProUI().parseCommandLineArguments(args);
+
+		if (props.isDebug())
+			fastCopy.getRdProUI().dumpArguments(args, props);
+
+		Path path = Paths.get(props.getSourceDir()) ;
+		if (Files.notExists(path)) {
+			fastCopy.getRdProUI().printError("The source dir does not exist:" +  props.getSourceDir()) ;
+			System.exit(-2);
+		}
+
+
+		boolean b =fastCopy.getRdProUI().isAnswerY(
+				"Start to copy everything under \"" + props.getSourceDir() + "\"" +
+						"to \"" +props.getDestDir()+"\""  +
+						" (y/n/q or h for help)?");
+
+
+		if (!b)
+			System.exit(-2);
+
+
 		if (props.isSuccess()) {
 			fastCopy.getRdProUI().print("working.");
 			fastCopy.run(props);

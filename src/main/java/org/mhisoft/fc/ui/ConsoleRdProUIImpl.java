@@ -25,8 +25,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.mhisoft.fc.FastCopy;
 import org.mhisoft.fc.FileCopyStatistics;
+import org.mhisoft.fc.RunTimeProperties;
 
 /**
  * Description: Console UI
@@ -39,7 +39,11 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	@Override
 	public void print(final String msg) {
 		System.out.print(msg);
+	}
 
+	@Override
+	public void printError(String msg) {
+		System.err.print("[error]" + msg);
 	}
 
 	@Override
@@ -120,9 +124,9 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	}
 
 
-	public FastCopy.RunTimeProperties parseCommandLineArguments(String[] args) {
+	public RunTimeProperties parseCommandLineArguments(String[] args) {
 
-		FastCopy.RunTimeProperties props = new FastCopy.RunTimeProperties();
+		RunTimeProperties props = new RunTimeProperties();
 		List<String> noneHyfenArgs = new ArrayList<String>();
 
 		if (args==null || args.length==0) {
@@ -140,6 +144,9 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				return props;
 			} else if (arg.equalsIgnoreCase("-v")) {
 				props.setVerbose(true);
+			}
+			else if (arg.equalsIgnoreCase("-debug")) {
+				props.setDebug(true);
 			}
 			else if (arg.equalsIgnoreCase("-w")) {
 

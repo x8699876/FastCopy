@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -39,6 +40,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.mhisoft.fc.FastCopy;
+import org.mhisoft.fc.RunTimeProperties;
 
 /**
  * Description:
@@ -50,7 +52,7 @@ public class FastCopyMainForm {
 
 	JFrame frame;
 	FastCopy fastCopy;
-	FastCopy.RunTimeProperties props;
+	RunTimeProperties props;
 
 
 	JCheckBox chkMultiThread;
@@ -71,15 +73,24 @@ public class FastCopyMainForm {
 	private JCheckBox chkFlat;
 	private JCheckBox overrideOnlyIfNewerCheckBox;
 	private JPanel progressPanel;
+	private JButton btnSourceBrowse;
+	private JButton btnTargetBrowse;
 
+	GraphicsUIImpl uiImpl;
+
+	public void setRdProUI(GraphicsUIImpl rdProUI) {
+		this.uiImpl = rdProUI;
+	}
 
 	public FastCopyMainForm() {
+
 		chkMultiThread.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				//outputTextArea.append("Value of the checkbox:" + chkForceDelete.isSelected());
 			}
 		});
+
 		chkShowInfo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -96,8 +107,10 @@ public class FastCopyMainForm {
 					fastCopy.setRunning(false);
 					btnCancel.setText("Close");
 				}
-				else
+				else {
 					frame.dispose();
+					System.exit(0);
+				}
 			}
 		});
 
@@ -124,6 +137,7 @@ public class FastCopyMainForm {
 
 			}
 		});
+
 		btnHelp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -143,6 +157,42 @@ public class FastCopyMainForm {
 
 
 		});
+
+
+		btnSourceBrowse.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser chooser = new JFileChooser();
+				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+				chooser.setAcceptAllFileFilterUsed(false);
+				int returnValue = chooser.showOpenDialog(null);
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+//						uiImpl.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
+//						uiImpl.println("getSelectedFile() : " + chooser.getSelectedFile());
+					props.setSourceDir(chooser.getSelectedFile().getAbsolutePath())  ;
+					fldSourceDir.setText(props.getSourceDir());
+
+				}
+
+			}
+		});
+
+
+		btnTargetBrowse.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser chooser = new JFileChooser();
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				chooser.setAcceptAllFileFilterUsed(false);
+				int returnValue = chooser.showOpenDialog(null);
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					props.setDestDir(chooser.getSelectedFile().getAbsolutePath());  ;
+					fldTargetDir.setText(props.getDestDir());
+				}
+			}
+		});
+
+
 	}
 
 
@@ -274,11 +324,19 @@ public class FastCopyMainForm {
 		FastCopyMainForm rdProMain = new FastCopyMainForm();
 		rdProMain.init();
 		GraphicsUIImpl rdProUI = new GraphicsUIImpl();
+		rdProMain.setRdProUI(rdProUI);
 		rdProUI.setOutputTextArea(rdProMain.outputTextArea);
 		rdProUI.setLabelStatus(rdProMain.labelStatus);
 		rdProUI.setProgressBar(rdProMain.progressBar1);
 
-		if (FastCopy.debug) {
+
+		//default it to current dir
+		rdProMain.fastCopy = new FastCopy(rdProUI);
+
+		rdProMain.props = rdProUI.parseCommandLineArguments(args);
+
+
+		if (FastCopy.debug  ||  rdProMain.props.isDebug()) {
 			int i = 0;
 			for (String arg : args) {
 				rdProUI.println("arg[" + i + "]=" + arg);
@@ -286,10 +344,6 @@ public class FastCopyMainForm {
 			}
 		}
 
-		//default it to current dir
-		rdProMain.fastCopy = new FastCopy(rdProUI);
-
-		rdProMain.props = rdProUI.parseCommandLineArguments(args);
 		rdProMain.fldSourceDir.setText(rdProMain.props.getSourceDir());
 		rdProMain.fldTargetDir.setText(rdProMain.props.getDestDir());
 

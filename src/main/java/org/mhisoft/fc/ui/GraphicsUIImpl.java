@@ -19,14 +19,17 @@
  */
 package org.mhisoft.fc.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.mhisoft.fc.FastCopy;
 import org.mhisoft.fc.FileCopyStatistics;
+import org.mhisoft.fc.RunTimeProperties;
 
 /**
  * Description:  Swing UI implementation.
@@ -87,6 +90,11 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 	}
 
 	@Override
+	public void printError(String msg) {
+		print("[Error] " + msg)   ;
+	}
+
+	@Override
 	public  void println(final String msg) {
 		print(msg+"\n");
 	}
@@ -121,9 +129,11 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 	}
 
 	@Override
-	public FastCopy.RunTimeProperties parseCommandLineArguments(String[] args) {
+	public RunTimeProperties parseCommandLineArguments(String[] args) {
+		List<String> noneHyfenArgs = new ArrayList<String>();
 
-		FastCopy.RunTimeProperties props= new FastCopy.RunTimeProperties();
+
+		RunTimeProperties props= new RunTimeProperties();
 
 		if (args.length<1 || args[0]==null || args[0].trim().length()==0) {
 			//JOptionPane.showMessageDialog(null, "The root dir to start with can't be determined from args[].", "Error"
@@ -132,11 +142,77 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 			props.setSourceDir(null);
 		}
 		else {
-			if (args.length>=1)
-				props.setSourceDir(args[0]);
-			if (args.length>=2)
-				props.setDestDir(args[1]);
+//			if (args.length>=1)
+//				props.setSourceDir(args[0]);
+//			if (args.length>=2)
+//				props.setDestDir(args[1]);
+			for (int i = 0; i < args.length; i++) {
+				String arg = args[i];
+				if (arg.equalsIgnoreCase("-h") || arg.equalsIgnoreCase("-help")) {
+					help();
+				} else if (arg.equalsIgnoreCase("-v")) {
+					props.setVerbose(true);
+				}
+				else if (arg.equalsIgnoreCase("-debug")) {
+					props.setDebug(true);
+				}
+				else if (arg.equalsIgnoreCase("-w")) {
+					try {
+						props.setNumOfThreads(Integer.parseInt(args[i + 1]));
+						i++; //skip the next arg, it is the target.
+					} catch (NumberFormatException e) {
+						props.setNumOfThreads( 1 );
+					}
+
+				} else if (arg.equalsIgnoreCase("-d") || arg.equalsIgnoreCase("-dest")) {
+					props.setDestDir(args[i + 1]);
+					i++; //skip the next arg, it is the target.
+
+				} else {
+					if (arg.startsWith("-")) {
+						System.err.println("The argument is not recognized:" + arg);
+						props.setSuccess(false);
+						return props;
+					} else
+						//not start with "-"
+						if (arg!=null && arg.trim().length()>0)
+							noneHyfenArgs.add(arg);
+				}
+			}
+
+
+
 		}
+
+
+		if (noneHyfenArgs.size() == 0) {
+			props.setSourceDir(System.getProperty("user.dir"));
+		}
+		else if (noneHyfenArgs.size() == 1) {
+			//fc d:\temp -dest classes
+			if (props.getDestDir() != null)
+				props.setSourceDir(noneHyfenArgs.get(0));
+
+			else {
+				//rdpro classes
+				props.setSourceDir(System.getProperty("user.dir"));
+				props.setDestDir(noneHyfenArgs.get(0));
+			}
+
+		}
+		else {
+			props.setSourceDir(noneHyfenArgs.get(0));
+			props.setDestDir(noneHyfenArgs.get(1));
+		}
+
+		if (props.getSourceDir() == null)
+			props.setSourceDir(System.getProperty("user.dir"));
+
+
+
+		if (props.getSourceDir() == null)
+			props.setSourceDir(System.getProperty("user.dir"));
+
 		return props;
 	}
 

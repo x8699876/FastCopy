@@ -32,7 +32,7 @@ import org.mhisoft.fc.ui.UI;
  */
 public class FileWalker {
 
-	FastCopy.RunTimeProperties props;
+	RunTimeProperties props;
 	//Integer threads;
 	boolean lastAnsweredDeleteAll = false;
 	boolean initialConfirmation = false;
@@ -42,7 +42,7 @@ public class FileWalker {
 
 	public FileWalker(UI rdProUI,
 			Workers workerPool,
-			FastCopy.RunTimeProperties props
+			RunTimeProperties props
 			, FileCopyStatistics frs
 	) {
 		this.workerPool = workerPool;

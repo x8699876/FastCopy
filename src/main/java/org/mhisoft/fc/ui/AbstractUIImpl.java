@@ -22,6 +22,8 @@
 
 package org.mhisoft.fc.ui;
 
+import org.mhisoft.fc.RunTimeProperties;
+
 /**
  * Description:
  *
@@ -34,5 +36,17 @@ public abstract class AbstractUIImpl implements UI {
 		println("Fast Copy (" +
 				version + build + " by Tony Xue, MHISoft)");
 	}
+
+	public void dumpArguments(String[] args, RunTimeProperties props) {
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			println("arg["+i+"]:" + arg);
+		}
+
+		println("parsed properties:") ;
+		println(props.toString());
+
+	}
+
 
 }
