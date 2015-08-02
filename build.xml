@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<project name="Bundle the Java into Mac App" default="bundle" >
+
+    <taskdef name="bundleapp"
+             classname="com.oracle.appbundler.AppBundlerTask"
+             classpath="lib/ant/appbundler-1.0.jar" />
+
+    <target name="bundle">
+        <bundleapp outputdirectory="./dist"
+                   name="FastCopy 1.0"
+                   displayname="FastCopy"
+                   identifier="org.mhisoft.fc.ui.FastCopyMainForm"
+                   mainclassname="org.mhisoft.fc.ui.FastCopyMainForm">
+            <classpath file="dist/fastcopy-ui.jar" />
+        </bundleapp>
+    </target>
+
+</project>

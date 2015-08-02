@@ -59,7 +59,10 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 
 	@Override
 	public  boolean isAnswerY(String question) {
-		Confirmation a = getConfirmation(question, "y", "n", "h");
+		Confirmation a = getConfirmation(question, "y", "n", "h", "q");
+		if (a==Confirmation.QUIT)
+			System.exit(-2);
+
 		if (a==Confirmation.HELP) {
 			help();
 			return false;
@@ -104,6 +107,9 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		}
 		else if (!a.equalsIgnoreCase("y")) {
 			return Confirmation.NO;
+		}
+		else if (!a.equalsIgnoreCase("q")) {
+			return Confirmation.QUIT;
 		}
 		return Confirmation.YES;
 	}
