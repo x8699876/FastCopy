@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
-  <headerType>console</headerType>
-  <jar>S:\projects\mhisoft\fastcopy\dist\fastcopy-console.jar</jar>
-  <outfile>S:\projects\mhisoft\fastcopy\dist\fc.exe</outfile>
+  <headerType>gui</headerType>
+  <jar>S:\projects\mhisoft\fastcopy\dist/tmp_make_exe/fastcopy-ui-combined.jar</jar>
+  <outfile>S:\projects\mhisoft\fastcopy\dist\fastcopy-ui.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>
@@ -22,15 +22,15 @@
     <runtimeBits>64/32</runtimeBits>
   </jre>
   <versionInfo>
-    <fileVersion>0.9.0.0</fileVersion>
-    <txtFileVersion>0.9.0.0</txtFileVersion>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>1.0.0.0</txtFileVersion>
     <fileDescription>Fast copy</fileDescription>
-    <copyright>Copyright(c) 2015 Tony Xue</copyright>
-    <productVersion>0.9.0.0</productVersion>
-    <txtProductVersion>0.9</txtProductVersion>
+    <copyright>Copyright(c) 2014Tony Xue</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>1.0</txtProductVersion>
     <productName>Fast Copy</productName>
     <companyName>MHISoft</companyName>
-    <internalName>fastcopy</internalName>
-    <originalFilename>fastcopy.exe</originalFilename>
+    <internalName>fastcopy-ui</internalName>
+    <originalFilename>fastcopy-ui.exe</originalFilename>
   </versionInfo>
 </launch4jConfig>

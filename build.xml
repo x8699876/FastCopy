@@ -1,20 +1,181 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 
-<project name="Bundle the Java into Mac App" default="bundle" >
+<project name="Bundle the Java into Mac App" default="build" >
 
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
+    <!-- set the operating system test properties -->
+    <condition property="isMac">
+        <os family="mac" />
+    </condition>
+
+    <condition property="isWindows">
+        <os family="windows" />
+    </condition>
+
+    <condition property="isUnix">
+        <os family="unix" />
+    </condition>
+
+    <property environment="env"/>
+    <macrodef name="maven">
+        <attribute name="argline"/>
+        <attribute name="dir"/>
+        <sequential>
+            <echo message="******************************************************************************************  @{dir} @{argline}"/>
+            <echo message="MAVEN_HOME=${env.MAVEN_HOME}"/>
+            <exec executable="${env.MAVEN_HOME}/bin/mvn.cmd" osfamily="windows" dir="@{dir}" failonerror="true">
+                <arg line="@{argline} -T 1C -P dev -Ddev=true -ff"/>
+            </exec>
+            <!--<exec executable="/Users/i831964/bin/maven/bin/mvn" dir="@{dir}" failonerror="true">-->
+            <exec executable="${env.MAVEN_HOME}/bin/mvn" osfamily="mac" dir="@{dir}" failonerror="true">
+                <arg line="@{argline} -o -T 1C -P dev -Ddev=true -ff"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target name="build" description="make the full build ">
+        <maven dir="." argline="clean" />
+        <maven dir="." argline="-P fastcopy-ui package"/>
+        <maven dir="." argline="-P fastcopy-console package"/>
+
+        <!--copy the jar to the dist folder -->
+        <!--copy the jar to the dist folder -->
+        <copy file="target/fastcopy-ui.jar" todir="dist" overwrite="true"/>
+        <copy file="target/fastcopy-console.jar" todir="dist" overwrite="true"/>
+
+        <antcall target="package"/>
+
+    </target>
+
+    <target name="package">
+        <if>
+            <equals arg1="${isWindows}" arg2="true"/>
+            <then>
+                <antcall target="package-fastcopy-console"/>
+                <antcall target="package-fastcopy-ui"/>
+            </then>
+        </if>
+
+        <antcall target="bundle-mac-app"/>
+
+    </target>
+
+
+
+    <target name="bundle-mac-app">
+
+        <delete file="dist/Fastcopy(v1.0).app"/>
+
+        <property name="sourceJar" value="fastcopy-ui.jar"/>
+        <property name="launch4jFinalJar" value="fastcopy-ui-combined.jar"/>
+        <property name="AppMainClass" value="org.mhisoft.fc.ui.FastCopyMainForm"/>
+        <antcall target="_make-one-jar"/>
+        <bundleapp outputdirectory="./dist"
+                   name="Fastcopy(v1.0)"
+                   displayname="Fastcopy UI"
+                   identifier="${AppMainClass}"
+                   mainclassname="${AppMainClass}">
+            <classpath file="${launch4j.dir}/fastcopy-ui-combined.jar" />
+        </bundleapp>
+    </target>
+
+
+    <!-- =======================================
+        launch 4j package the exe
+    ======================================= -->
+
+    <property name="application.title" value="FastCopy"/>
+    <property name="launch4j.dir" value="dist/tmp_make_exe"/>
+    <property name="launch4jexe.dir" location="s:\bin\Launch4j" />
+
+    <if>
+        <equals arg1="${isWindows}" arg2="true"/>
+        <then>
+            <taskdef name="launch4j"
+                     classname="net.sf.launch4j.ant.Launch4jTask"
+                     classpath="${launch4jexe.dir}/launch4j.jar:${launch4jexe.dir}/lib/xstream.jar" />
+
+        </then>
+
+    </if>
+
+
+    <!--https://java.net/downloads/appbundler/appbundler.html-->
     <taskdef name="bundleapp"
              classname="com.oracle.appbundler.AppBundlerTask"
              classpath="lib/ant/appbundler-1.0.jar" />
 
-    <target name="bundle">
-        <bundleapp outputdirectory="./dist"
-                   name="FastCopy 1.0"
-                   displayname="FastCopy"
-                   identifier="org.mhisoft.fc.ui.FastCopyMainForm"
-                   mainclassname="org.mhisoft.fc.ui.FastCopyMainForm">
-            <classpath file="dist/fastcopy-ui.jar" />
-        </bundleapp>
+
+
+    <target name="package-fastcopy-ui">
+        <property name="sourceJar" value="fastcopy-ui.jar"/>
+        <property name="launch4jFinalJar" value="fastcopy-ui-combined.jar"/>
+        <property name="AppMainClass" value="org.mhisoft.fc.ui.FastCopyMainForm"/>
+
+        <antcall target="_make-one-jar"/>
+
+        <launch4j configFile="launch4j/fastcopy-ui-launch4j-config.xml"  />
+        <!--clean up-->
+        <!--<delete dir="${launch4j.dir}" failonerror="false"/>-->
+
     </target>
+
+    <target name="package-fastcopy-console">
+        <property name="sourceJar" value="fastcopy-console.jar"/>
+        <property name="launch4jFinalJar" value="fastcopy-console-combined.jar"/>
+        <property name="AppMainClass" value="org.mhisoft.fc.FastCopy"/>
+        <antcall target="_make-one-jar"/>
+        <launch4j configFile="launch4j/fastcopy-console-launch4j-config.xml"  />
+        <!--clean up-->
+        <!--<delete dir="${launch4j.dir}" failonerror="false"/>-->
+
+    </target>
+
+
+    <target name="_make-one-jar" description="make the Win Exe Bundle" >
+        <property name="launch4j.jar" value="${launch4j.dir}/${launch4jFinalJar}"/>
+
+
+
+        <echo message="  --> Packaging ${application.title} into a single JAR at ${launch4j.jar}"/>
+        <delete dir="${launch4j.dir}" failonerror="false"/>
+        <mkdir dir="${launch4j.dir}"/>
+
+        <!--make the temp_final.jar-->
+
+        <if>
+            <equals arg1="${sourceJar}" arg2="fastcopy-ui.jar"/>
+            <then>
+                <jar destfile="${launch4j.dir}/temp_final.jar" filesetmanifest="skip">
+                    <zipgroupfileset dir="dist" includes="${sourceJar}"/>
+                    <zipgroupfileset dir="dist/lib" includes="*.jar"/>
+                    <manifest>
+                        <attribute name="Main-Class" value="${AppMainClass}"/>
+                    </manifest>
+                </jar>
+            </then>
+            <else>
+                <echo message="  -->use source jar: ${sourceJar}"/>
+                <jar destfile="${launch4j.dir}/temp_final.jar" filesetmanifest="skip">
+                    <zipgroupfileset dir="dist" includes="${sourceJar}"/>
+                    <manifest>
+                        <attribute name="Main-Class" value="${AppMainClass}"/>
+                    </manifest>
+                </jar>
+            </else>
+        </if>
+
+
+        <!--make the combined jar-->
+        <echo message="  --> make the ${launch4j.jar}}"/>
+        <zip destfile="${launch4j.jar}">
+            <zipfileset src="${launch4j.dir}/temp_final.jar"
+                        excludes="META-INF/*.SF, META-INF/*.DSA, META-INF/*.RSA, META-INF/maven/*, META-INF/jb/*"/>
+        </zip>
+
+    </target>
+
 
 </project>
