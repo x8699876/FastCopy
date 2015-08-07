@@ -99,7 +99,8 @@ public class FileUtils {
 			out = new FileOutputStream(target).getChannel();
 			totalFileSize = in.size();
 			//double size2InKB = size / 1024 ;
-			rdProUI.print(String.format("\nCopying file %s, size:%s KBytes", target.getAbsolutePath(), df.format(totalFileSize/1024)));
+			rdProUI.print(String.format("\nCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
+					target.getAbsolutePath(), df.format(totalFileSize/1024)));
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 			int readSize = in.read(buffer);

@@ -117,12 +117,11 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	public  void help() {
 		printBuildAndDisclaimer();
 		println("Usages:");
-		println("\t fastcopy [option] source-dir target-dir ");
+		println("\t fastcopy [option] -from source-dir -to target-dir ");
 		println("\t source-dir: The source files and directories delimited with semicolon.");
 		println("\t target-dir: The target directory.");
 		println("\t Options: ");
 		println("\t\t -v verbose mode");
-		println("\t\t -dest alternative way to specify the target directory.");
 		/*println("\t -w number of worker threads, default 5");*/
 		println("Examples:");
 		println("\t\t fastcopy t:\\backup");
@@ -163,11 +162,13 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 					props.setNumOfThreads( 1 );
 				}
 
-			} else if (arg.equalsIgnoreCase("-d") || arg.equalsIgnoreCase("-dest")) {
-				props.setDestDir(args[i + 1]);
-				i++; //skip the next arg, it is the target.
+			} else if (arg.equalsIgnoreCase("-from") ) {
+				props.setSourceDir(args[i + 1]);
+				i++; //skip the next arg
 
-			} else {
+			} else if (arg.equalsIgnoreCase("-to") ) {
+				props.setDestDir(args[i + 1]);
+				i++; //skip the next arg else {
 				if (arg.startsWith("-")) {
 					System.err.println("The argument is not recognized:" + arg);
 					props.setSuccess(false);

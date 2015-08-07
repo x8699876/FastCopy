@@ -25,6 +25,7 @@ import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -165,11 +166,21 @@ public class FastCopyMainForm {
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				chooser.setAcceptAllFileFilterUsed(false);
+				chooser.setFileHidingEnabled(false);
+				chooser.setMultiSelectionEnabled(true);
 				int returnValue = chooser.showOpenDialog(null);
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 //						uiImpl.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
 //						uiImpl.println("getSelectedFile() : " + chooser.getSelectedFile());
-					props.setSourceDir(chooser.getSelectedFile().getAbsolutePath())  ;
+					File[] files = chooser.getSelectedFiles();
+					StringBuilder builder = new StringBuilder();
+					for (File file : files) {
+						if (builder.length()>0)
+							builder.append(";") ;
+						builder.append(file.getAbsolutePath()) ;
+
+					}
+					props.setSourceDir(builder.toString())  ;
 					fldSourceDir.setText(props.getSourceDir());
 
 				}
@@ -184,6 +195,7 @@ public class FastCopyMainForm {
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
+				chooser.setFileHidingEnabled(false);
 				int returnValue = chooser.showOpenDialog(null);
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 					props.setDestDir(chooser.getSelectedFile().getAbsolutePath());  ;
@@ -342,6 +354,8 @@ public class FastCopyMainForm {
 				rdProUI.println("arg[" + i + "]=" + arg);
 				i++;
 			}
+			rdProUI.println(rdProMain.props.toString());
+
 		}
 
 		rdProMain.fldSourceDir.setText(rdProMain.props.getSourceDir());

@@ -164,9 +164,13 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 						props.setNumOfThreads( 1 );
 					}
 
-				} else if (arg.equalsIgnoreCase("-d") || arg.equalsIgnoreCase("-dest")) {
+				} else if (arg.equalsIgnoreCase("-from") ) {
+					props.setSourceDir(args[i + 1]);
+					i++; //skip the next arg
+
+				} else if (arg.equalsIgnoreCase("-to") ) {
 					props.setDestDir(args[i + 1]);
-					i++; //skip the next arg, it is the target.
+					i++; //skip the next arg
 
 				} else {
 					if (arg.startsWith("-")) {
@@ -186,7 +190,8 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 
 		if (noneHyfenArgs.size() == 0) {
-			props.setSourceDir(System.getProperty("user.dir"));
+			if (props.getSourceDir()==null || props.getSourceDir().length()==0)
+				props.setSourceDir(System.getProperty("user.dir"));
 		}
 		else if (noneHyfenArgs.size() == 1) {
 			//fc d:\temp -dest classes

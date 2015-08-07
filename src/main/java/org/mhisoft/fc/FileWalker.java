@@ -53,28 +53,31 @@ public class FileWalker {
 	}
 
 
-	public void walk(final String[] dirs, final String destDir) {
+	public void walk(final String[] sourceFileDirs, final String destDir) {
 
 		FileUtils.createDir(new File(destDir), rdProUI, statistics);
 
-		for (String dir : dirs) {
+		for (String source : sourceFileDirs) {
 
 			if (FastCopy.isStopThreads()) {
 				rdProUI.println("[warn]Cancelled by user. stop walk. ");
 				return;
 			}
 
-			File f = new File(dir);
-			if (f.isFile()) {
-				String sTarget = destDir + File.separator + f.getName();
+			File fSource = new File(source);
+			if (fSource.isFile()) {
+				String sTarget = destDir + File.separator + fSource.getName();
 				File targetFile = new File(sTarget);
-				if (overrideTargetFile(f, targetFile)) {
-					CopyFileThread t = new CopyFileThread(rdProUI, f, targetFile, props.verbose, statistics);
+				if (overrideTargetFile(fSource, targetFile)) {
+					CopyFileThread t = new CopyFileThread(rdProUI, fSource, targetFile, props.verbose, statistics);
 					workerPool.addTask(t);
 				} else
 					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", sTarget));
-			} else if (f.isDirectory()) {
-				walkSubDir(f, destDir);
+			} else if (fSource.isDirectory()) {
+				//   get the last dir of the source and make it under dest
+				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
+				FileUtils.createDir(new File(destDir+File.separator+fSource.getName()), rdProUI, statistics);
+				walkSubDir(fSource, destDir+File.separator+fSource.getName());
 			}
 		}
 
