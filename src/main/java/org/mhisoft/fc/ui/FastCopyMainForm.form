@@ -85,7 +85,7 @@
               <font name="MS Reference Sans Serif" size="10"/>
               <foreground color="-15785217"/>
               <horizontalAlignment value="2"/>
-              <text value="fldSource"/>
+              <text value=""/>
             </properties>
           </component>
           <component id="27e42" class="javax.swing.JButton" binding="btnSourceBrowse">
@@ -124,7 +124,7 @@
               <font name="MS Reference Sans Serif" size="10"/>
               <foreground color="-15785217"/>
               <horizontalAlignment value="2"/>
-              <text value="fldTarget"/>
+              <text value=""/>
             </properties>
           </component>
           <component id="eef59" class="javax.swing.JButton" binding="btnTargetBrowse">

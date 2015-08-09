@@ -107,14 +107,12 @@ public class FastCopyMainForm {
 					progressPanel.setVisible(false);
 					fastCopy.setRunning(false);
 					btnCancel.setText("Close");
-				}
-				else {
+				} else {
 					frame.dispose();
 					System.exit(0);
 				}
 			}
 		});
-
 
 
 		btnOk.addActionListener(new ActionListener() {
@@ -129,7 +127,7 @@ public class FastCopyMainForm {
 //				SwingUtilities.invokeLater(new Runnable() {
 //					@Override
 //					public void run() {
-						//doit();
+				//doit();
 //					}
 //				});
 
@@ -168,6 +166,15 @@ public class FastCopyMainForm {
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileHidingEnabled(false);
 				chooser.setMultiSelectionEnabled(true);
+
+
+				String dir = fldSourceDir.getText().trim();
+				int k = dir.indexOf(";");
+				if (k > 0)
+					dir = dir.substring(0, k);
+
+				chooser.setCurrentDirectory(new File(dir));
+
 				int returnValue = chooser.showOpenDialog(null);
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 //						uiImpl.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
@@ -175,12 +182,12 @@ public class FastCopyMainForm {
 					File[] files = chooser.getSelectedFiles();
 					StringBuilder builder = new StringBuilder();
 					for (File file : files) {
-						if (builder.length()>0)
-							builder.append(";") ;
-						builder.append(file.getAbsolutePath()) ;
+						if (builder.length() > 0)
+							builder.append(";");
+						builder.append(file.getAbsolutePath());
 
 					}
-					props.setSourceDir(builder.toString())  ;
+					props.setSourceDir(builder.toString());
 					fldSourceDir.setText(props.getSourceDir());
 
 				}
@@ -196,9 +203,19 @@ public class FastCopyMainForm {
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileHidingEnabled(false);
+
+				String dir = fldTargetDir.getText().trim();
+				int k = dir.indexOf(";");
+				if (k > 0)
+					dir = dir.substring(0, k);
+
+				chooser.setCurrentDirectory(new File(dir));
+
+
 				int returnValue = chooser.showOpenDialog(null);
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
-					props.setDestDir(chooser.getSelectedFile().getAbsolutePath());  ;
+					props.setDestDir(chooser.getSelectedFile().getAbsolutePath());
+					;
 					fldTargetDir.setText(props.getDestDir());
 				}
 			}
@@ -235,10 +252,8 @@ public class FastCopyMainForm {
 	}
 
 
-
-
 	public void init() {
-		frame = new JFrame("Fast Copy "+ UI.version);
+		frame = new JFrame("Fast Copy " + UI.version);
 		frame.setContentPane(layoutPanel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//progressBar1.setVisible(false);
@@ -277,27 +292,22 @@ public class FastCopyMainForm {
 	}
 
 
-
-
 	public boolean refreshDataModel() {
-		if (fldSourceDir.getText()==null || fldSourceDir.getText().trim().length()==0 ) {
+		if (fldSourceDir.getText() == null || fldSourceDir.getText().trim().length() == 0) {
 			JOptionPane.showMessageDialog(null, "Specify the source directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
-		}
-		else
+		} else
 			props.setSourceDir(fldSourceDir.getText());
 
-		if (fldTargetDir.getText()==null || fldTargetDir.getText().trim().length()==0 ) {
+		if (fldTargetDir.getText() == null || fldTargetDir.getText().trim().length() == 0) {
 			JOptionPane.showMessageDialog(null, "Specify the target directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
-		}
-		else
+		} else
 			props.setDestDir(fldTargetDir.getText());
 
-		if (chkMultiThread.isSelected())   {
+		if (chkMultiThread.isSelected()) {
 			props.setNumOfThreads(FastCopy.DEFAULT_THREAD_NUM);
-		}
-		else {
+		} else {
 			props.setNumOfThreads(1);
 		}
 
@@ -305,10 +315,9 @@ public class FastCopyMainForm {
 		props.setOverwriteIfNewerOrDifferent(overrideOnlyIfNewerCheckBox.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
-		return  true;
+		return true;
 
 	}
-
 
 
 	public void doit() {
@@ -348,7 +357,7 @@ public class FastCopyMainForm {
 		rdProMain.props = rdProUI.parseCommandLineArguments(args);
 
 
-		if (FastCopy.debug  ||  rdProMain.props.isDebug()) {
+		if (FastCopy.debug || rdProMain.props.isDebug()) {
 			int i = 0;
 			for (String arg : args) {
 				rdProUI.println("arg[" + i + "]=" + arg);
