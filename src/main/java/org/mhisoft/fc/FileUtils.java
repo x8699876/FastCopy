@@ -113,6 +113,7 @@ public class FileUtils {
 
 				if (FastCopy.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.");
+					rdProUI.println("\t" + Thread.currentThread().getName() +   "is stopped.");
 					return;
 				}
 				startTime = System.currentTimeMillis();

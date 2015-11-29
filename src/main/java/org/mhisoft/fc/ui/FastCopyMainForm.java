@@ -78,10 +78,28 @@ public class FastCopyMainForm {
 	private JButton btnTargetBrowse;
 
 	GraphicsUIImpl uiImpl;
+	DoItJobThread doItJobThread;
 
 	public void setRdProUI(GraphicsUIImpl rdProUI) {
 		this.uiImpl = rdProUI;
 	}
+
+	public void stopIt() {
+		fastCopy.setStopThreads(true);
+		progressPanel.setVisible(false);
+
+		fastCopy.stopWorkers();
+
+		//main thread
+		doItJobThread.interrupt();
+
+
+		//set running false only afer all threads are shutdown.
+		fastCopy.setRunning(false);
+		btnCancel.setText("Close");
+
+	}
+
 
 	public FastCopyMainForm() {
 
@@ -103,10 +121,8 @@ public class FastCopyMainForm {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (fastCopy.isRunning()) {
-					fastCopy.setStopThreads(true);
-					progressPanel.setVisible(false);
-					fastCopy.setRunning(false);
-					btnCancel.setText("Close");
+					stopIt();
+
 				} else {
 					frame.dispose();
 					System.exit(0);
@@ -131,8 +147,8 @@ public class FastCopyMainForm {
 //					}
 //				});
 
-				DoItJobThread t = new DoItJobThread();
-				t.start();
+				doItJobThread = new DoItJobThread();
+				doItJobThread.start();
 
 			}
 		});

@@ -19,6 +19,7 @@
  */
 package org.mhisoft.fc;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,6 +41,7 @@ public class Workers {
 	private  ThreadPoolExecutor executor;
 	static int QUESIZE = 5000;
 	private UI rdProUI;
+
 
 	//creating the ThreadPoolExecutor
 	public Workers(final int corePoolSize, final UI _rdProUI) {
@@ -86,6 +88,10 @@ public class Workers {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void shutDown() {
+		List<Runnable> pendingWorkers =  executor.shutdownNow();
 	}
 
 }

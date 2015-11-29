@@ -61,8 +61,13 @@ public class FastCopy {
 		return stopThreads;
 	}
 
+
 	public static void setStopThreads(boolean stopThreads) {
 		FastCopy.stopThreads = stopThreads;
+	}
+
+	public void stopWorkers() {
+		workerPool.shutDown();
 	}
 
 	public boolean isRunning() {
