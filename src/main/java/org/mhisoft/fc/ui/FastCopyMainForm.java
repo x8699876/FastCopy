@@ -40,8 +40,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import org.apache.commons.vfs2.FileObject;
 import org.mhisoft.fc.FastCopy;
 import org.mhisoft.fc.RunTimeProperties;
+
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+import com.googlecode.vfsjfilechooser2.accessories.DefaultAccessoriesPanel;
+import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
 /**
  * Description:
@@ -175,27 +180,16 @@ public class FastCopyMainForm {
 
 
 		btnSourceBrowse.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser chooser = new JFileChooser();
-				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-				chooser.setAcceptAllFileFilterUsed(false);
-				chooser.setFileHidingEnabled(false);
-				chooser.setMultiSelectionEnabled(true);
 
+			public void actionPerformed(ActionEvent e) {
 
 				String dir = fldSourceDir.getText().trim();
 				int k = dir.indexOf(";");
 				if (k > 0)
 					dir = dir.substring(0, k);
 
-				chooser.setCurrentDirectory(new File(dir));
-
-				int returnValue = chooser.showOpenDialog(null);
-				if (returnValue == JFileChooser.APPROVE_OPTION) {
-//						uiImpl.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-//						uiImpl.println("getSelectedFile() : " + chooser.getSelectedFile());
-					File[] files = chooser.getSelectedFiles();
+				File[] files = chooseFiles(new File(dir), VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES )  ;
+				if (files!=null && files.length>0)   {
 					StringBuilder builder = new StringBuilder();
 					for (File file : files) {
 						if (builder.length() > 0)
@@ -205,41 +199,62 @@ public class FastCopyMainForm {
 					}
 					props.setSourceDir(builder.toString());
 					fldSourceDir.setText(props.getSourceDir());
-
 				}
+
 
 			}
 		});
 
 
 		btnTargetBrowse.addActionListener(new ActionListener() {
-			@Override
+
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser chooser = new JFileChooser();
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				chooser.setAcceptAllFileFilterUsed(false);
-				chooser.setFileHidingEnabled(false);
 
 				String dir = fldTargetDir.getText().trim();
 				int k = dir.indexOf(";");
 				if (k > 0)
 					dir = dir.substring(0, k);
 
-				chooser.setCurrentDirectory(new File(dir));
-
-
-				int returnValue = chooser.showOpenDialog(null);
-				if (returnValue == JFileChooser.APPROVE_OPTION) {
-					props.setDestDir(chooser.getSelectedFile().getAbsolutePath());
-					;
+				File[] files = chooseFiles(new File(dir), VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY )  ;
+				if (files!=null && files.length>0)   {
+					props.setDestDir(files[0].getAbsolutePath().toString());
 					fldTargetDir.setText(props.getDestDir());
 				}
+
+
 			}
 		});
 
 
 	}
 
+
+	File[] chooseFiles(final File currentDir, VFSJFileChooser.SELECTION_MODE selectionMode) {
+		// create a file chooser
+		final VFSJFileChooser fileChooser = new VFSJFileChooser();
+
+		// configure the file dialog
+		fileChooser.setAccessory(new DefaultAccessoriesPanel(fileChooser));
+		fileChooser.setFileHidingEnabled(false);
+		fileChooser.setMultiSelectionEnabled(true);
+		fileChooser.setFileSelectionMode(selectionMode);
+		fileChooser.setCurrentDirectory(currentDir);
+
+		// show the file dialog
+		VFSJFileChooser.RETURN_TYPE answer = fileChooser.showOpenDialog(null);
+
+		// check if a file was selected
+		if (answer == VFSJFileChooser.RETURN_TYPE.APPROVE) {
+			final File[] files = fileChooser.getSelectedFiles();
+
+//			// remove authentication credentials from the file path
+//			final String safeName = VFSUtils.getFriendlyName(aFileObject.toString());
+//
+//			System.out.printf("%s %s", "You selected:", safeName);
+			return files;
+		}
+		return null;
+	}
 
 	public void showHideInfo(boolean visible) {
 		outputTextArea.setVisible(visible);

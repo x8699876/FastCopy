@@ -20,6 +20,31 @@
        </repository>
     </repositories>
 
+
+    <dependencies>
+
+        <!--https://github.com/fracpete/vfsjfilechooser2/releases-->
+        <dependency>
+            <groupId>com.github.fracpete</groupId>
+            <artifactId>vfsjfilechooser2</artifactId>
+            <version>0.2.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.1</version>
+        </dependency>
+
+
+    </dependencies>
+
     <build>
         <!--<finalName>rdpro</finalName>-->
 
@@ -121,6 +146,7 @@
         </plugins>
 
 
+
     </build>
 
 
@@ -150,6 +176,9 @@
                      <artifactId>forms</artifactId>
                      <version>1.0.5</version>
                  </dependency>-->
+
+
+
             </dependencies>
 
 

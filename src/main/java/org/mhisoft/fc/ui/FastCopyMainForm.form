@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.mhisoft.fc.ui.FastCopyMainForm">
   <grid id="27dc6" binding="layoutPanel1" layout-manager="GridLayoutManager" row-count="12" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-    <margin top="10" left="10" bottom="10" right="10"/>
+    <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
       <xy x="20" y="20" width="741" height="619"/>
     </constraints>
@@ -59,15 +59,18 @@
           <text value="Status:"/>
         </properties>
       </component>
-      <grid id="6941" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+      <grid id="6941" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
           <component id="a5a6c" class="javax.swing.JLabel" binding="labelDirName">
-            <constraints/>
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
             <properties>
               <enabled value="true"/>
               <font name="Ebrima" size="11" style="1"/>
@@ -77,10 +80,20 @@
               <toolTipText value="Source directories, delimited by semicolon"/>
             </properties>
           </component>
-          <component id="74ff2" class="javax.swing.JTextField" binding="fldSourceDir">
-            <constraints/>
+          <component id="27e42" class="javax.swing.JButton" binding="btnSourceBrowse">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
             <properties>
-              <columns value="35"/>
+              <text value="Browse"/>
+            </properties>
+          </component>
+          <component id="74ff2" class="javax.swing.JTextField" binding="fldSourceDir">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <columns value="0"/>
               <editable value="true"/>
               <font name="MS Reference Sans Serif" size="10"/>
               <foreground color="-15785217"/>
@@ -88,15 +101,10 @@
               <text value=""/>
             </properties>
           </component>
-          <component id="27e42" class="javax.swing.JButton" binding="btnSourceBrowse">
-            <constraints/>
-            <properties>
-              <text value="Browse"/>
-            </properties>
-          </component>
         </children>
       </grid>
-      <grid id="5da4b" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+      <grid id="5da4b" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -104,7 +112,9 @@
         <border type="none"/>
         <children>
           <component id="64ca3" class="javax.swing.JLabel">
-            <constraints/>
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
             <properties>
               <enabled value="true"/>
               <font name="Ebrima" size="11" style="1"/>
@@ -113,13 +123,12 @@
               <text value="Target"/>
             </properties>
           </component>
-          <hspacer id="9285d">
-            <constraints/>
-          </hspacer>
           <component id="d3f20" class="javax.swing.JTextField" binding="fldTargetDir">
-            <constraints/>
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
             <properties>
-              <columns value="35"/>
+              <columns value="0"/>
               <editable value="true"/>
               <font name="MS Reference Sans Serif" size="10"/>
               <foreground color="-15785217"/>
@@ -128,7 +137,9 @@
             </properties>
           </component>
           <component id="eef59" class="javax.swing.JButton" binding="btnTargetBrowse">
-            <constraints/>
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
             <properties>
               <text value="Browse"/>
             </properties>
@@ -185,7 +196,7 @@
       </grid>
       <grid id="f98a3" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
         <constraints>
-          <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="2" fill="0" indent="2" use-parent-layout="false"/>
+          <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="2" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>

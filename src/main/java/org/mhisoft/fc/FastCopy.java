@@ -113,21 +113,23 @@ public class FastCopy {
 		if (props.isDebug())
 			fastCopy.getRdProUI().dumpArguments(args, props);
 
-		Path path = Paths.get(props.getSourceDir()) ;
-		if (Files.notExists(path)) {
-			fastCopy.getRdProUI().printError("The source dir does not exist:" +  props.getSourceDir()) ;
-			System.exit(-2);
+		if (props.getSourceDir()!=null) {
+			Path path = Paths.get(props.getSourceDir());
+			if (Files.notExists(path)) {
+				fastCopy.getRdProUI().printError("The source dir does not exist:" + props.getSourceDir());
+				System.exit(-2);
+			}
+
+
+			boolean b = fastCopy.getRdProUI().isAnswerY(
+					"Start to copy everything under \"" + props.getSourceDir() + "\"" +
+							"to \"" + props.getDestDir() + "\"" +
+							" (y/n/q or h for help)?");
+
+
+			if (!b)
+				System.exit(-2);
 		}
-
-
-		boolean b =fastCopy.getRdProUI().isAnswerY(
-				"Start to copy everything under \"" + props.getSourceDir() + "\"" +
-						"to \"" +props.getDestDir()+"\""  +
-						" (y/n/q or h for help)?");
-
-
-		if (!b)
-			System.exit(-2);
 
 
 		if (props.isSuccess()) {

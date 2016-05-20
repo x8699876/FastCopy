@@ -25,5 +25,8 @@
         <module name="FastCopy" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="FastCopy" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>

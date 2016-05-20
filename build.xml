@@ -5,6 +5,8 @@
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 
+    <property name="repository.dir" value="~/repository"/>
+
     <!-- set the operating system test properties -->
     <condition property="isMac">
         <os family="mac" />
@@ -50,6 +52,9 @@
     </target>
 
     <target name="package">
+
+
+
         <if>
             <equals arg1="${isWindows}" arg2="true"/>
             <then>
@@ -73,11 +78,12 @@
         <property name="AppMainClass" value="org.mhisoft.fc.ui.FastCopyMainForm"/>
         <antcall target="_make-one-jar"/>
         <bundleapp outputdirectory="./dist"
-                   name="Fastcopy(v1.0)"
+                   name="Fastcopy(v1.0.2)"
                    displayname="Fastcopy UI"
                    identifier="${AppMainClass}"
                    mainclassname="${AppMainClass}">
-            <classpath file="${launch4j.dir}/fastcopy-ui-combined.jar" />
+            <classpath dir="dist" includes="fastcopy-ui.jar,lib/*.jar"/>
+
         </bundleapp>
     </target>
 

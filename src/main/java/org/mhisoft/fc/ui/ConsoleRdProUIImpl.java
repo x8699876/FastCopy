@@ -122,6 +122,10 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		println("\t target-dir: The target directory.");
 		println("\t Options: ");
 		println("\t\t -v verbose mode");
+		println("\t\t -m use multi thread for SSD");
+		println("\t\t -o override");
+		println("\t\t -f flat copy, copy everything to one flat target directory");
+		println("\t\t -n override if new or different");
 		/*println("\t -w number of worker threads, default 5");*/
 		println("Examples:");
 		println("\t\t fastcopy t:\\backup");
@@ -140,6 +144,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 			return props;
 		}
 
+		props.setNumOfThreads( 1 );
 
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
@@ -152,6 +157,14 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 			}
 			else if (arg.equalsIgnoreCase("-debug")) {
 				props.setDebug(true);
+			}else if (arg.equalsIgnoreCase("-m")) {
+				props.setNumOfThreads(4);
+			}else if (arg.equalsIgnoreCase("-o")) {
+				props.setOverwrite(true);
+			}else if (arg.equalsIgnoreCase("-n")) {
+				props.setOverwriteIfNewerOrDifferent(true);
+			}else if (arg.equalsIgnoreCase("-f")) {
+				props.setFlatCopy(true);
 			}
 			else if (arg.equalsIgnoreCase("-w")) {
 
