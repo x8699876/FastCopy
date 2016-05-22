@@ -24,7 +24,10 @@
 double click to import into windows registry
 
 
-![screen shot](doc/11-22-2014 1-14-12 PM(2).png "Windows exploer context menu")
+## Add to the Mac Finder's Context menu 
+* Follow the below Automator screeshot to add the Automator, Service. Edit the path to where you installed the jar if needed. 
+
+ ![screen shot](doc/fastcopy-automator-setup.png "Windows exploer context menu")
 
 
 ## Disclaimer
