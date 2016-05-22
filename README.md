@@ -1,6 +1,7 @@
 ## Fast File and Directory Copy
 
-* Copies files and directories fast
+* Copies files and directories fast.
+* Speed tester for copying files of vairous sizes and locations. 
 
 ## Download
 
