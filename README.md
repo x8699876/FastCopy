@@ -2,6 +2,8 @@
 
 * Copies files and directories fast.
 * Speed tester for copying files of vairous sizes and locations. 
+* Use multiple workers when copying from/to SSDs. 
+
 
 ## Download
 
