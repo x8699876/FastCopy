@@ -78,7 +78,7 @@
         <property name="AppMainClass" value="org.mhisoft.fc.ui.FastCopyMainForm"/>
         <antcall target="_make-one-jar"/>
         <bundleapp outputdirectory="./dist"
-                   name="Fastcopy(v1.0.2)"
+                   name="Fastcopy(v1.0.3)"
                    displayname="Fastcopy UI"
                    identifier="${AppMainClass}"
                    mainclassname="${AppMainClass}">
