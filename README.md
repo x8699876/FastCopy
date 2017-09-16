@@ -28,9 +28,11 @@ double click to import into windows registry
 
 
 ## Add to the Mac Finder's Context menu 
-* Follow the below Automator screeshot to add the Automator, Service. Edit the path to where you installed the jar if needed. 
+* Follow the below Automator screeshot to add the Automator
+* Choose the type of Document, say "Add Service". Select Folders, "In Finder". on the left selt "Run Shell Scripts".Edit the path to where you installed the jar if needed. 
 
  ![screen shot](doc/fastcopy-automator-setup.png "Add to the Mac Finder's Context menu")
+ ![screen shot](doc/fastcopy%20context%20menu.png "Context Men->Services")
 
 
 ## Disclaimer
