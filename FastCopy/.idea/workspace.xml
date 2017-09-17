@@ -2,21 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e0e9f11-f851-41b4-8cd2-87b0b93cc905" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../dist/lib/forms_rt.jar" />
-      <change type="DELETED" beforePath="S:\projects\mhisoft\fastcopy\lib\forms_rt-5.0.jar" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../dist/fastcopy-console.jar" afterPath="$PROJECT_DIR$/../dist/fastcopy-console.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../dist/fastcopy-ui.exe" afterPath="$PROJECT_DIR$/../dist/fastcopy-ui.exe" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../dist/fastcopy-ui.jar" afterPath="$PROJECT_DIR$/../dist/fastcopy-ui.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../dist/fc.exe" afterPath="$PROJECT_DIR$/../dist/fc.exe" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../src/main/resources/META-INF/MANIFEST.MF" afterPath="$PROJECT_DIR$/../src/main/resources/META-INF/MANIFEST.MF" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../.projfiles/RdPro.iml" afterPath="$PROJECT_DIR$/../.projfiles/RdPro.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../build.xml" afterPath="$PROJECT_DIR$/../build.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../dist/fc.bat" afterPath="$PROJECT_DIR$/../dist/fc.bat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../dist/fcui.bat" afterPath="$PROJECT_DIR$/../dist/fcui.bat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../pom.xml" afterPath="$PROJECT_DIR$/../pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MOVED" beforePath="S:\projects\mhisoft\fastcopy\launch4j\fc-launch4j-config.xml" afterPath="$PROJECT_DIR$/../launch4j/fastcopy-console-launch4j-config.xml" />
-      <change type="MOVED" beforePath="S:\projects\mhisoft\fastcopy\launch4j\fcui-launch4j-config.xml" afterPath="$PROJECT_DIR$/../launch4j/fastcopy-ui-launch4j-config.xml" />
     </list>
     <list id="aaccda16-8108-4e10-a04e-394ac4727ccf" name="Local changes" comment="" />
     <ignored path="FastCopy.iws" />
@@ -183,11 +169,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="build.xml" pinned="false" current-in-tab="true">
+      <file leaf-file-name="build.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../build.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7403315" vertical-offset="872" max-vertical-offset="3720">
+            <state vertical-scroll-proportion="-10.72" vertical-offset="872" max-vertical-offset="3720">
               <caret line="57" column="95" selection-start-line="57" selection-start-column="19" selection-end-line="57" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="workspace.xml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-1.9213973" vertical-offset="1500" max-vertical-offset="33180">
+              <caret line="9" column="110" selection-start-line="9" selection-start-column="47" selection-end-line="9" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -378,6 +374,7 @@
         <option value="$PROJECT_DIR$/../launch4j/fastcopy-console-launch4j-config.xml" />
         <option value="$PROJECT_DIR$/../pom.xml" />
         <option value="$PROJECT_DIR$/../build.xml" />
+        <option value="$PROJECT_DIR$/.idea/workspace.xml" />
       </list>
     </option>
   </component>
@@ -1082,7 +1079,7 @@
       <workItem from="1422157342936" duration="1129000" />
       <workItem from="1422403419213" duration="45000" />
       <workItem from="1423331950134" duration="9943000" />
-      <workItem from="1438728550541" duration="2428000" />
+      <workItem from="1438728550541" duration="3145000" />
     </task>
     <task id="LOCAL-00001" summary="GUI working in progress">
       <created>1417755250187</created>
@@ -1126,11 +1123,17 @@
       <option name="project" value="LOCAL" />
       <updated>1419126491403</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="refine the build. add build.xml. packaging">
+      <created>1438735180326</created>
+      <option name="number" value="00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1438735180326</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="68088000" />
+    <option name="totallyTimeSpent" value="68805000" />
   </component>
   <component name="TodoView" selected-index="0">
     <todo-panel id="selected-file">
@@ -1154,9 +1157,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.55345213" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21937639" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32925472" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="simpleUML" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1172,10 +1175,10 @@
       <window_info id="IvyIDEA" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17518637" sideWeight="0.8453865" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17518637" sideWeight="0.8459344" order="0" side_tool="false" content_ui="combo" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17518637" sideWeight="0.15461347" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17518637" sideWeight="0.15406562" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.104898825" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
@@ -1238,7 +1241,8 @@
     <MESSAGE value="fix statistics; fix speed." />
     <MESSAGE value="add spinner" />
     <MESSAGE value="bug fix: was creating extra target dir; reset statics when resstarted another copy; log the full file path." />
-    <option name="LAST_COMMIT_MESSAGE" value="bug fix: was creating extra target dir; reset statics when resstarted another copy; log the full file path." />
+    <MESSAGE value="refine the build. add build.xml. packaging" />
+    <option name="LAST_COMMIT_MESSAGE" value="refine the build. add build.xml. packaging" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1276,13 +1280,6 @@
     </buildFile>
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://S:/bin/jdk1.7.0_55/src.zip!/java/nio/channels/FileChannel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.2857143" vertical-offset="6080" max-vertical-offset="22540">
-          <caret line="346" column="24" selection-start-line="346" selection-start-column="24" selection-end-line="346" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://S:/bin/jdk1.7.0_55/src.zip!/java/awt/Window.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="14403" max-vertical-offset="79040">
@@ -1589,8 +1586,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../build.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7403315" vertical-offset="872" max-vertical-offset="3720">
+        <state vertical-scroll-proportion="-10.72" vertical-offset="872" max-vertical-offset="3720">
           <caret line="57" column="95" selection-start-line="57" selection-start-column="19" selection-end-line="57" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.9213973" vertical-offset="1500" max-vertical-offset="33180">
+          <caret line="9" column="110" selection-start-line="9" selection-start-column="47" selection-end-line="9" selection-end-column="47" />
           <folding />
         </state>
       </provider>

@@ -145,6 +145,12 @@ public class FileUtils {
 		} finally {
 			close(in);
 			close(out);
+			try {
+				boolean b = target.setLastModified( source.lastModified());
+				//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 		}
 	}

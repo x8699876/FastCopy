@@ -1,6 +1,9 @@
-## Fast File and Directory Copy
+## MHISoft Fast Copy
 
-* Copies files and directories fast
+* Copies files and directories fast.
+* Speed tester for copying files of vairous sizes and locations. 
+* Use multiple workers when copying from/to SSDs. 
+
 
 ## Download
 
@@ -24,7 +27,12 @@
 double click to import into windows registry
 
 
-![screen shot](doc/11-22-2014 1-14-12 PM(2).png "Windows exploer context menu")
+## Add to the Mac Finder's Context menu 
+* Follow the below Automator screeshot to add the Automator
+* Choose the type of Document, say "Add Service". Select Folders, "In Finder". on the left selt "Run Shell Scripts".Edit the path to where you installed the jar if needed. 
+
+ ![screen shot](doc/fastcopy-automator-setup2.png "Add to the Mac Finder's Context menu")
+ ![screen shot](doc/fastcopy%20context%20menu.png "Context Men->Services")
 
 
 ## Disclaimer
