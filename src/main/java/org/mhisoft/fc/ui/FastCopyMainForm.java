@@ -29,7 +29,6 @@ import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -40,13 +39,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import org.apache.commons.vfs2.FileObject;
 import org.mhisoft.fc.FastCopy;
 import org.mhisoft.fc.RunTimeProperties;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.accessories.DefaultAccessoriesPanel;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
 /**
  * Description:
@@ -81,6 +78,7 @@ public class FastCopyMainForm {
 	private JPanel progressPanel;
 	private JButton btnSourceBrowse;
 	private JButton btnTargetBrowse;
+	private JCheckBox chkCreateTheSameSourceCheckBox;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -346,6 +344,7 @@ public class FastCopyMainForm {
 		props.setOverwriteIfNewerOrDifferent(overrideOnlyIfNewerCheckBox.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
+		props.setCreateTheSameSourceFolderUnderTarget(chkCreateTheSameSourceCheckBox.isSelected());
 		return true;
 
 	}

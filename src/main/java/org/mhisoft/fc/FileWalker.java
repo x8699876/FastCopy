@@ -76,8 +76,12 @@ public class FileWalker {
 			} else if (fSource.isDirectory()) {
 				//   get the last dir of the source and make it under dest
 				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
-				FileUtils.createDir(new File(destDir+File.separator+fSource.getName()), rdProUI, statistics);
-				walkSubDir(fSource, destDir+File.separator+fSource.getName());
+				String _targetDir =destDir;
+				if (props.isCreateTheSameSourceFolderUnderTarget())   {
+					_targetDir=destDir+File.separator+fSource.getName() ;
+					FileUtils.createDir(new File(_targetDir), rdProUI, statistics);
+				}
+				walkSubDir(fSource, destDir);
 			}
 		}
 

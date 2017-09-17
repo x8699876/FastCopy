@@ -13,6 +13,7 @@ public class RunTimeProperties {
 	boolean overwriteIfNewerOrDifferent;
 	boolean flatCopy;
 	boolean debug;
+	boolean createTheSameSourceFolderUnderTarget;
 
 
 	public String getSourceDir() {
@@ -87,6 +88,14 @@ public class RunTimeProperties {
 		this.debug = debug;
 	}
 
+	public boolean isCreateTheSameSourceFolderUnderTarget() {
+		return createTheSameSourceFolderUnderTarget;
+	}
+
+	public void setCreateTheSameSourceFolderUnderTarget(boolean createTheSameSourceFolderUnderTarget) {
+		this.createTheSameSourceFolderUnderTarget = createTheSameSourceFolderUnderTarget;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RunTimeProperties{");
@@ -97,6 +106,7 @@ public class RunTimeProperties {
 		sb.append(", numOfThreads=").append(numOfThreads);
 		sb.append(", overwrite=").append(overwrite);
 		sb.append(", overwriteIfNewerOrDifferent=").append(overwriteIfNewerOrDifferent);
+		sb.append(", createTheSameSourceFolderUnderTarget=").append(createTheSameSourceFolderUnderTarget);
 		sb.append(", flatCopy=").append(flatCopy);
 		sb.append(", debug=").append(debug);
 		sb.append('}');
