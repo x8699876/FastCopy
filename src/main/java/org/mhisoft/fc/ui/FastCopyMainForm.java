@@ -19,6 +19,8 @@
  */
 package org.mhisoft.fc.ui;
 
+import java.util.List;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -36,11 +38,18 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.mhisoft.fc.FastCopy;
 import org.mhisoft.fc.RunTimeProperties;
+import org.mhisoft.fc.ViewHelper;
+import org.mhisoft.fc.preference.UserPreference;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.accessories.DefaultAccessoriesPanel;
@@ -79,6 +88,8 @@ public class FastCopyMainForm {
 	private JButton btnSourceBrowse;
 	private JButton btnTargetBrowse;
 	private JCheckBox chkCreateTheSameSourceCheckBox;
+	private JSpinner fldFontSize;
+	private JLabel labelFontSize;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -127,6 +138,7 @@ public class FastCopyMainForm {
 					stopIt();
 
 				} else {
+					updateAndSavePreferences();
 					frame.dispose();
 					System.exit(0);
 				}
@@ -290,7 +302,8 @@ public class FastCopyMainForm {
 		progressBar1.setMinimum(0);
 
 		progressPanel.setVisible(false);
-		frame.setPreferredSize(new Dimension(600, 580));
+		//frame.setPreferredSize(new Dimension(1200, 800));
+		frame.setPreferredSize(new Dimension(UserPreference.getInstance().getDimensionX(), UserPreference.getInstance().getDimensionY()));
 
 		frame.pack();
 
@@ -306,7 +319,13 @@ public class FastCopyMainForm {
 
 		frame.setVisible(true);
 
+
+		componentsList = ViewHelper.getAllComponents(frame);
+		setupFontSpinner();
+		ViewHelper.setFontSize(componentsList, UserPreference.getInstance().getFontSize());
+
 	}
+
 
 	private void createUIComponents() {
 		// TODO: place custom component creation code here
@@ -371,35 +390,82 @@ public class FastCopyMainForm {
 		}
 	}
 
-	public static void main(String[] args) {
-		FastCopyMainForm rdProMain = new FastCopyMainForm();
-		rdProMain.init();
-		GraphicsUIImpl rdProUI = new GraphicsUIImpl();
-		rdProMain.setRdProUI(rdProUI);
-		rdProUI.setOutputTextArea(rdProMain.outputTextArea);
-		rdProUI.setLabelStatus(rdProMain.labelStatus);
-		rdProUI.setProgressBar(rdProMain.progressBar1);
+
+	List<Component> componentsList;
+
+	/**
+	 * Use the font spinner to increase and decrease the font size.
+	 */
+	public void setupFontSpinner() {
+
+		int fontSize = UserPreference.getInstance().getFontSize();
+
+		SpinnerModel spinnerModel = new SpinnerNumberModel(fontSize, //initial value
+				10, //min
+				fontSize + 20, //max
+				2); //step
+		fldFontSize.setModel(spinnerModel);
+		fldFontSize.addChangeListener(new ChangeListener() {
+										  @Override
+										  public void stateChanged(ChangeEvent e) {
+											  SpinnerModel spinnerModel = fldFontSize.getModel();
+											  int newFontSize = (Integer) spinnerModel.getValue();
+											  ViewHelper.setFontSize(componentsList, newFontSize);
+										  }
+									  }
+		);
 
 
-		//default it to current dir
-		rdProMain.fastCopy = new FastCopy(rdProUI);
 
-		rdProMain.props = rdProUI.parseCommandLineArguments(args);
-
-
-		if (FastCopy.debug || rdProMain.props.isDebug()) {
-			int i = 0;
-			for (String arg : args) {
-				rdProUI.println("arg[" + i + "]=" + arg);
-				i++;
-			}
-			rdProUI.println(rdProMain.props.toString());
-
-		}
-
-		rdProMain.fldSourceDir.setText(rdProMain.props.getSourceDir());
-		rdProMain.fldTargetDir.setText(rdProMain.props.getDestDir());
 
 
 	}
+
+	public static void main(String[] args) {
+		UserPreference.getInstance().readSettingsFromFile();
+		FastCopyMainForm main = new FastCopyMainForm();
+		main.init();
+		GraphicsUIImpl gra = new GraphicsUIImpl();
+		main.setRdProUI(gra);
+		gra.setOutputTextArea(main.outputTextArea);
+		gra.setLabelStatus(main.labelStatus);
+		gra.setProgressBar(main.progressBar1);
+
+
+		//default it to current dir
+		main.fastCopy = new FastCopy(gra);
+
+		main.props = gra.parseCommandLineArguments(args);
+
+
+		if (FastCopy.debug || main.props.isDebug()) {
+			int i = 0;
+			for (String arg : args) {
+				gra.println("arg[" + i + "]=" + arg);
+				i++;
+			}
+			gra.println(main.props.toString());
+
+		}
+
+		main.fldSourceDir.setText(main.props.getSourceDir());
+		main.fldTargetDir.setText(main.props.getDestDir());
+
+
+	}
+
+
+
+	public void updateAndSavePreferences() {
+		//save the settings
+		Dimension d = frame.getSize();
+        UserPreference.getInstance().setDimensionX(d.width);
+		UserPreference.getInstance().setDimensionY(d.height);
+		SpinnerModel spinnerModel = fldFontSize.getModel();
+		int newFontSize = (Integer) spinnerModel.getValue();
+		UserPreference.getInstance().setFontSize(newFontSize);
+		UserPreference.getInstance().saveSettingsToFile();
+	}
+
+
 }
