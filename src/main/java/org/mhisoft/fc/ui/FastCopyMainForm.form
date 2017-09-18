@@ -293,7 +293,7 @@
               </grid>
             </constraints>
             <properties>
-              <font size="20"/>
+              <font size="11" style="0"/>
             </properties>
           </component>
           <hspacer id="7d127">

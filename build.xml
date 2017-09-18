@@ -5,6 +5,7 @@
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 
+    <property name="AppVersion" value="1.0.4"/>
     <property name="repository.dir" value="~/repository"/>
 
     <!-- set the operating system test properties -->
@@ -78,7 +79,7 @@
         <property name="AppMainClass" value="org.mhisoft.fc.ui.FastCopyMainForm"/>
         <antcall target="_make-one-jar"/>
         <bundleapp outputdirectory="./dist"
-                   name="Fastcopy(v1.0.3)"
+                   name="Fastcopy(${AppVersion})"
                    displayname="Fastcopy UI"
                    identifier="${AppMainClass}"
                    mainclassname="${AppMainClass}">
