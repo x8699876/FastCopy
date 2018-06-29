@@ -32,7 +32,6 @@ import org.mhisoft.fc.ui.UI;
  */
 public class FileWalker {
 
-	RunTimeProperties props;
 	//Integer threads;
 	boolean lastAnsweredDeleteAll = false;
 	boolean initialConfirmation = false;
@@ -46,16 +45,16 @@ public class FileWalker {
 			, FileCopyStatistics frs
 	) {
 		this.workerPool = workerPool;
-		this.props = props;
 		this.rdProUI = rdProUI;
 		this.statistics = frs;
 		rdProUI.reset();
 	}
 
 
-	public void walk(final String[] sourceFileDirs, final String destDir) {
+	public void walk(final String[] sourceFileDirs,  String destDir) {
 
 		FileUtils.createDir(new File(destDir), rdProUI, statistics);
+		rdProUI.println("Copying files under directory " + destDir);
 
 		for (String source : sourceFileDirs) {
 
@@ -69,17 +68,24 @@ public class FileWalker {
 				String sTarget = destDir + File.separator + fSource.getName();
 				File targetFile = new File(sTarget);
 				if (overrideTargetFile(fSource, targetFile)) {
-					CopyFileThread t = new CopyFileThread(rdProUI, fSource, targetFile, props.verbose, statistics);
+					CopyFileThread t = new CopyFileThread(rdProUI, fSource, targetFile,   statistics);
 					workerPool.addTask(t);
-				} else
+				} else {
+					if (RunTimeProperties.instance.isVerbose())
 					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip. ", sTarget));
+				}
 			} else if (fSource.isDirectory()) {
 				//   get the last dir of the source and make it under dest
 				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
 				String _targetDir =destDir;
-				if (props.isCreateTheSameSourceFolderUnderTarget())   {
-					_targetDir=destDir+File.separator+fSource.getName() ;
-					FileUtils.createDir(new File(_targetDir), rdProUI, statistics);
+				if (RunTimeProperties.instance.isCreateTheSameSourceFolderUnderTarget())   {
+					//String sourceDirName =
+
+					_targetDir=destDir+File.separator + fSource.getName() ;
+					if (!new File(_targetDir).exists())
+						FileUtils.createDir(new File(_targetDir), rdProUI, statistics);
+					destDir = _targetDir;
+					RunTimeProperties.instance.setDestDir(destDir);
 				}
 				walkSubDir(fSource, destDir);
 			}
@@ -90,9 +96,9 @@ public class FileWalker {
 
 	private boolean overrideTargetFile(final File srcFile, final File targetFile) {
 		if (targetFile.exists()) { //target file exists
-			if (props.overwrite) {
+			if (RunTimeProperties.instance.overwrite) {
 				return true;
-			} else if (props.isOverwriteIfNewerOrDifferent()) {
+			} else if (RunTimeProperties.instance.isOverwriteIfNewerOrDifferent()) {
 				if (srcFile.lastModified() > targetFile.lastModified()
 						|| (srcFile.length() != targetFile.length())
 						)
@@ -113,8 +119,10 @@ public class FileWalker {
 
 	public void walkSubDir(final File rootDir, final String destRootDir) {
 
+
+
 		if (FastCopy.isStopThreads()) {
-			rdProUI.println("[warn]Cancelled by user. stop walk. ");
+			rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
 			return;
 		}
 
@@ -140,22 +148,24 @@ public class FileWalker {
 			return;
 
 
+		rdProUI.println("Copying files under directory " + destRootDir);
+
 		for (File childFile : list) {
 
 			if (FastCopy.isStopThreads()) {
-				rdProUI.println("[warn]Cancelled by user. stop walk. ");
+				rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
 				return;
 			}
 
 			if (childFile.isDirectory()) {
 				//keep walking down
 
-				if (!props.flatCopy) {
+				if (!RunTimeProperties.instance.flatCopy) {
 					//create the mirror child dir
 					targetDir = destRootDir + File.separator + childFile.getName();
 					FileUtils.createDir(new File(targetDir), rdProUI, statistics);
 				} else {
-					targetDir = props.getDestDir();
+					targetDir = RunTimeProperties.instance.getDestDir();
 				}
 
 				walkSubDir(childFile, targetDir);
@@ -164,19 +174,20 @@ public class FileWalker {
 			else {
 
 
-				if (!props.flatCopy) {
+				if (!RunTimeProperties.instance.flatCopy) {
 					targetDir = destRootDir ;
 				} else {
-					targetDir = props.getDestDir();
+					targetDir = RunTimeProperties.instance.getDestDir();
 				}
 
 
 				String newDestFile = targetDir + File.separator + childFile.getName();
 				File targetFile = new File(newDestFile);
 				if (overrideTargetFile(childFile, targetFile)) {
-					CopyFileThread t = new CopyFileThread(rdProUI, childFile, targetFile, props.verbose, statistics);
+					CopyFileThread t = new CopyFileThread(rdProUI, childFile, targetFile,  statistics);
 					workerPool.addTask(t);
 				} else {
+					if (RunTimeProperties.instance.isVerbose())
 					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip based on the input. ", newDestFile));
 				}
 

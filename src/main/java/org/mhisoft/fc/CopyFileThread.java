@@ -34,7 +34,6 @@ public class CopyFileThread implements Runnable {
 	static final int TRIGGER_MULTI_THREAD_THRESHHOLD = 20;
 
 	private String dir;
-	private boolean verbose;
 	private FileCopyStatistics statistics;
 	private UI rdProUI;
 
@@ -42,10 +41,9 @@ public class CopyFileThread implements Runnable {
 	File targetFile;
 
 
-	public CopyFileThread(UI rdProUI, File sourceFile, File targetFile, boolean verbose, FileCopyStatistics frs) {
+	public CopyFileThread(UI rdProUI, File sourceFile, File targetFile,  FileCopyStatistics frs) {
 		this.sourceFile = sourceFile;
 		this.targetFile = targetFile;
-		this.verbose = verbose;
 		this.statistics = frs;
 		this.rdProUI = rdProUI;
 	}

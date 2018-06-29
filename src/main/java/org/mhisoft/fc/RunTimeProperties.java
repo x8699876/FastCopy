@@ -4,6 +4,13 @@ package org.mhisoft.fc;
  * Run time properties
  */
 public class RunTimeProperties {
+
+	public static RunTimeProperties instance = new RunTimeProperties();
+
+	private RunTimeProperties() {
+		//
+	}
+
 	String sourceDir = null;
 	String destDir = null;
 	boolean success;

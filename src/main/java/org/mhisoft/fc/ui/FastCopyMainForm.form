@@ -14,6 +14,7 @@
         </constraints>
         <properties>
           <font size="11" style="0"/>
+          <selected value="true"/>
           <text value="SSD drive, use multi simutaneous workers (don't check for regular hard drive)"/>
         </properties>
       </component>
@@ -249,6 +250,7 @@
             <constraints border-constraint="Center"/>
             <properties>
               <font size="11" style="0"/>
+              <selected value="true"/>
               <text value="Override only if newer or different in size"/>
             </properties>
           </component>
@@ -256,14 +258,14 @@
       </grid>
       <component id="4a0a5" class="javax.swing.JCheckBox" binding="chkCreateTheSameSourceCheckBox">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="true"/>
           <font size="11" style="0"/>
           <hideActionText value="true"/>
-          <selected value="true"/>
-          <text value="Create the same source folder under the target Dir or Drive"/>
+          <selected value="false"/>
+          <text value="Create the same source folder under the target Dir or Drive and copy under it"/>
         </properties>
       </component>
       <component id="33884" class="javax.swing.JLabel" binding="labelFontSize">

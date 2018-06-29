@@ -41,8 +41,6 @@ import org.mhisoft.fc.ui.UI;
  */
 public class FileUtils {
 
-
-
 	public static void createDir(final File theDir, final UI ui, final FileCopyStatistics frs) {
 		// if the directory does not exist, create it
 		if (!theDir.exists()) {
@@ -55,7 +53,8 @@ public class FileUtils {
 				ui.println(String.format("[error] Failed to create directory: %s", theDir.getName()));
 			}
 			if (result) {
-				ui.println(String.format("Directory created: %s", theDir.getName()));
+				if (RunTimeProperties.instance.isVerbose())
+					ui.println(String.format("Directory created: %s", theDir.getName()));
 				frs.setDirCount(frs.getDirCount() + 1);
 			}
 		}
@@ -76,7 +75,7 @@ public class FileUtils {
 		}
 	}
 
-	private static final int BUFFER = 4096*16;
+	private static final int BUFFER = 4096 * 16;
 	static final DecimalFormat df = new DecimalFormat("#,###.##");
 
 	public static void showPercent(final UI rdProUI, double digital) {
@@ -99,21 +98,22 @@ public class FileUtils {
 			out = new FileOutputStream(target).getChannel();
 			totalFileSize = in.size();
 			//double size2InKB = size / 1024 ;
-			rdProUI.print(String.format("\nCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
-					target.getAbsolutePath(), df.format(totalFileSize/1024)));
+			if (RunTimeProperties.instance.isVerbose())
+				rdProUI.print(String.format("\n\tCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
+						target.getAbsolutePath(), df.format(totalFileSize / 1024)));
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 			int readSize = in.read(buffer);
 			long totalRead = 0;
 			int progress = 0;
 
-			long startTime, endTime  ;
+			long startTime, endTime;
 
 			while (readSize != -1) {
 
 				if (FastCopy.isStopThreads()) {
-					rdProUI.println("[warn]Cancelled by user. Stoping copying.");
-					rdProUI.println("\t" + Thread.currentThread().getName() +   "is stopped.");
+					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
+					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
 					return;
 				}
 				startTime = System.currentTimeMillis();
@@ -137,7 +137,7 @@ public class FileUtils {
 				statistics.addToTotalFileSizeAndTime(totalFileSize, readSize / 1024, (endTime - startTime));
 			}
 
-			statistics.setFilesCount(statistics.getFilesCount()+1);
+			statistics.setFilesCount(statistics.getFilesCount() + 1);
 
 
 		} catch (IOException e) {
@@ -146,7 +146,7 @@ public class FileUtils {
 			close(in);
 			close(out);
 			try {
-				boolean b = target.setLastModified( source.lastModified());
+				boolean b = target.setLastModified(source.lastModified());
 				//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -35,7 +35,7 @@ import org.mhisoft.fc.ui.UI;
  */
 public class FastCopy {
 	public static boolean debug = Boolean.getBoolean("debug");
-	public static final int DEFAULT_THREAD_NUM =5;
+	public static final int DEFAULT_THREAD_NUM = 5;
 
 	FileCopyStatistics frs = new FileCopyStatistics();
 	Workers workerPool;
@@ -54,7 +54,7 @@ public class FastCopy {
 		return frs;
 	}
 
-	public static boolean stopThreads=false;
+	public static boolean stopThreads = false;
 	private boolean running;
 
 	public static boolean isStopThreads() {
@@ -87,15 +87,15 @@ public class FastCopy {
 		FileWalker fw = new FileWalker(rdProUI, workerPool, props, frs);
 		long t1 = System.currentTimeMillis();
 
-		running= true;
+		running = true;
 
 		String[] files = props.sourceDir.split(";");
-		fw.walk( files, props.getDestDir());
+		fw.walk(files, props.getDestDir());
 
 		workerPool.shutDownandWaitForAllThreadsToComplete();
 
 		//reset the flags
-		running= false;
+		running = false;
 		stopThreads = false;
 
 		rdProUI.println("");
@@ -109,11 +109,14 @@ public class FastCopy {
 	public static void main(String[] args) {
 		FastCopy fastCopy = new FastCopy(new ConsoleRdProUIImpl());
 		RunTimeProperties props = fastCopy.getRdProUI().parseCommandLineArguments(args);
+		if (!props.isSuccess()) {
+			System.exit(-1);
+		}
 
 		if (props.isDebug())
 			fastCopy.getRdProUI().dumpArguments(args, props);
 
-		if (props.getSourceDir()!=null) {
+		if (props.getSourceDir() != null) {
 			Path path = Paths.get(props.getSourceDir());
 			if (Files.notExists(path)) {
 				fastCopy.getRdProUI().printError("The source dir does not exist:" + props.getSourceDir());
@@ -123,7 +126,7 @@ public class FastCopy {
 
 			boolean b = fastCopy.getRdProUI().isAnswerY(
 					"Start to copy everything under \"" + props.getSourceDir() + "\"" +
-							"to \"" + props.getDestDir() + "\"" +
+							" to \"" + props.getDestDir() + "\"" +
 							" (y/n/q or h for help)?");
 
 
@@ -131,11 +134,8 @@ public class FastCopy {
 				System.exit(-2);
 		}
 
-
-		if (props.isSuccess()) {
-			fastCopy.getRdProUI().print("working.");
-			fastCopy.run(props);
-		}
+		fastCopy.getRdProUI().print("working.");
+		fastCopy.run(props);
 	}
 
 }

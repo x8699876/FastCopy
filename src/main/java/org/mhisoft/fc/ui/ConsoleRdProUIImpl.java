@@ -42,11 +42,19 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	}
 
 	@Override
+	public void print(String msg, boolean force) {
+		print(msg);
+	}
+
+	@Override
 	public void printError(String msg) {
 		System.err.print("[error]" + msg);
 	}
 
 	@Override
+	public  void println(final String msg, boolean force) {
+		println(msg);
+	}
 	public  void println(final String msg) {
 		System.out.println(msg);
 	}
@@ -105,13 +113,16 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		if (a.equalsIgnoreCase("all")) {
 			return Confirmation.YES_TO_ALL;
 		}
-		else if (!a.equalsIgnoreCase("y")) {
+		else if (a.equalsIgnoreCase("y")) {
+			return Confirmation.YES;
+		}
+		else if (a.equalsIgnoreCase("n")) {
 			return Confirmation.NO;
 		}
-		else if (!a.equalsIgnoreCase("q")) {
+		else if (a.equalsIgnoreCase("q")) {
 			return Confirmation.QUIT;
 		}
-		return Confirmation.YES;
+		return Confirmation.NO;
 	}
 
 	public  void help() {
@@ -126,16 +137,16 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		println("\t\t -o override");
 		println("\t\t -f flat copy, copy everything to one flat target directory");
 		println("\t\t -n override if new or different");
-		/*println("\t -w number of worker threads, default 5");*/
+		println("\t\t -w number of worker threads, default 5");
 		println("Examples:");
-		println("\t\t fastcopy t:\\backup");
-		println("\t\t fastcopy s:\\projects\\dir1;s:\\projects\\dir2 t:\\backup");
+		println("\t\t copy from current dir to the backup directory: fastcopy t:\\backup");
+		println("\t\t fastcopy -from s:\\projects\\dir1;s:\\projects\\dir2 -to t:\\backup");
 	}
 
 
 	public RunTimeProperties parseCommandLineArguments(String[] args) {
 
-		RunTimeProperties props = new RunTimeProperties();
+		RunTimeProperties props = RunTimeProperties.instance;
 		List<String> noneHyfenArgs = new ArrayList<String>();
 
 		if (args==null || args.length==0) {
@@ -174,16 +185,30 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				} catch (NumberFormatException e) {
 					props.setNumOfThreads( 1 );
 				}
-
 			} else if (arg.equalsIgnoreCase("-from") ) {
-				props.setSourceDir(args[i + 1]);
+
+				if (args.length>i+1)
+					props.setSourceDir(args[i + 1]);
+				else  {
+					System.err.println("No value for -from is specified");
+					props.setSuccess(false);
+					return props;
+				}
 				i++; //skip the next arg
 
 			} else if (arg.equalsIgnoreCase("-to") ) {
-				props.setDestDir(args[i + 1]);
-				i++; //skip the next arg else {
+				if (args.length>i+1)
+					props.setDestDir(args[i + 1]);
+				else  {
+					System.err.println("No value for -to is specified");
+					props.setSuccess(false);
+					return props;
+				}
+
+				i++; //skip the next arg
+			} else {
 				if (arg.startsWith("-")) {
-					System.err.println("The argument is not recognized:" + arg);
+					System.err.println("The option argument is not recognized:" + arg);
 					props.setSuccess(false);
 					return props;
 				} else
@@ -194,38 +219,26 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		}
 
 
-		if (noneHyfenArgs.size() == 0) {
-			props.setSourceDir(System.getProperty("user.dir"));
-		}
-		else if (noneHyfenArgs.size() == 1) {
-			//fc d:\temp -dest classes
-			if (props.getDestDir() != null)
-				props.setSourceDir(noneHyfenArgs.get(0));
+		//use the none hyfen args to fill in the source and  dest if needed.
+		//when -from and -to are not specified. 
+		if (props.getSourceDir()==null && noneHyfenArgs.size()>=1)
+			props.setSourceDir(noneHyfenArgs.get(0));
 
-			else {
-				//rdpro classes
-				props.setSourceDir(System.getProperty("user.dir"));
-				props.setDestDir(noneHyfenArgs.get(0));
-			}
-
-		}
-		else {
-				props.setSourceDir(noneHyfenArgs.get(0));
+		if (props.getDestDir()==null && noneHyfenArgs.size()>=2) {
 				props.setDestDir(noneHyfenArgs.get(1));
 		}
 
-		if (props.getSourceDir() == null)
+		//now default to user current directory for source
+		// fc -to target_dir
+		if (props.getSourceDir()==null || props.getSourceDir().length()==0)
 			props.setSourceDir(System.getProperty("user.dir"));
-
 
 		println("");
 
-
-		if (props.getDestDir() == null) {
-			if (!isAnswerY("Specify a destination directory:"))
-				props.setSuccess(false);
+		if (props.getDestDir()==null) {
+			System.err.println("Specify the target directory to copy to by using -to dest_dir");
+			props.setSuccess(false);
 			return props;
-
 		}
 
 		props.setSuccess(true);

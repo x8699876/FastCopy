@@ -30,8 +30,8 @@ import org.mhisoft.fc.RunTimeProperties;
  */
 public interface UI {
 
-	public static final String version = "1.0.4";
-	public static final String build = "09172017";
+	public static final String version = "1.1";
+	public static final String build = "06-29-2018";
 
 	public  enum Confirmation {
 		YES, NO, YES_TO_ALL, HELP, QUIT
@@ -43,12 +43,15 @@ public interface UI {
 	 * @param msg
 	 */
 	void print(String msg);
+	void print(String msg, boolean force);
 
 	/**
 	 * log the msg
 	 * @param msg
 	 */
 	void println(String msg);
+
+	void println(String msg, boolean force);
 
 	public  void printf(final String msg, Object args);
 

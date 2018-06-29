@@ -64,7 +64,7 @@ public class FastCopyMainForm {
 
 	JFrame frame;
 	FastCopy fastCopy;
-	RunTimeProperties props;
+	RunTimeProperties props= RunTimeProperties.instance;
 
 
 	JCheckBox chkMultiThread;
@@ -127,7 +127,8 @@ public class FastCopyMainForm {
 		chkShowInfo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showHideInfo(chkShowInfo.isSelected());
+				//showHideInfo(chkShowInfo.isSelected());
+				RunTimeProperties.instance.setVerbose(chkShowInfo.isSelected());
 			}
 		});
 
