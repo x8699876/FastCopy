@@ -93,10 +93,8 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 					lineNumber = 0;
 				}
 				outputTextArea.append(msg);
-				outputTextArea.setCaretPosition(outputTextArea.getDocument().getLength());
+				//outputTextArea.setCaretPosition(outputTextArea.getDocument().getLength());
 				lineNumber++;
-
-				//labelStatus.setText(msg);
 			}
 		});
 

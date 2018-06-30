@@ -48,7 +48,13 @@ public class Workers {
 		//executor = Executors.newFixedThreadPool(corePoolSize);
 		this.rdProUI = _rdProUI;
 
-		ThreadFactory threadFactory = Executors.defaultThreadFactory();
+		ThreadFactory threadFactory =new ThreadFactory() {
+			public Thread newThread(Runnable r) {
+				Thread t = Executors.defaultThreadFactory().newThread(r);
+				t.setDaemon(true);
+				return t;
+			}
+		};
 
 
 		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize
