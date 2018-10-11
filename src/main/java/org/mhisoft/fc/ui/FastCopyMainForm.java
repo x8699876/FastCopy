@@ -275,6 +275,8 @@ public class FastCopyMainForm {
 		fileChooser.setFileSelectionMode(selectionMode);
 		fileChooser.setCurrentDirectory(currentDir);
 		fileChooser.setFileHidingEnabled(true);  //show hidden files
+		fileChooser.setPreferredSize( new Dimension(800, 500));
+
 
 		// show the file dialog
 		VFSJFileChooser.RETURN_TYPE answer = fileChooser.showOpenDialog(null);
