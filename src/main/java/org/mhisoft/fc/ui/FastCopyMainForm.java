@@ -94,7 +94,8 @@ public class FastCopyMainForm {
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
 
-	File lastFileLocation =null;
+	File lastSrourceFileLocation =null;
+	File lastTargetFileLocation =null;
 
 	public void setRdProUI(GraphicsUIImpl rdProUI) {
 		this.uiImpl = rdProUI;
@@ -203,10 +204,11 @@ public class FastCopyMainForm {
 				if (k > 0)
 					dir = dir.substring(0, k);
 
-				if (lastFileLocation==null)
-					lastFileLocation = new File(dir);
+				if (lastSrourceFileLocation ==null)
+					lastSrourceFileLocation = new File(dir);
 
-				File[] files = chooseFiles(lastFileLocation, VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES);
+				File[] files = chooseFiles(lastSrourceFileLocation
+						, VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES);
 
 				if (files != null && files.length > 0) {
 					StringBuilder builder = new StringBuilder();
@@ -221,7 +223,7 @@ public class FastCopyMainForm {
 						if (builder.length() > 0)
 							builder.append(";");
 						builder.append(file.getAbsolutePath());
-						lastFileLocation =   file;
+						lastSrourceFileLocation =   file;
 
 					}
 
@@ -244,10 +246,14 @@ public class FastCopyMainForm {
 				if (k > 0)
 					dir = dir.substring(0, k);
 
-				File[] files = chooseFiles(new File(dir), VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY);
+				if (lastTargetFileLocation==null)
+					lastTargetFileLocation =new File(dir);
+
+				File[] files = chooseFiles(lastTargetFileLocation, VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY);
 				if (files != null && files.length > 0) {
 					props.setDestDir(files[0].getAbsolutePath().toString());
 					fldTargetDir.setText(props.getDestDir());
+					lastTargetFileLocation = files[0];
 				}
 
 
@@ -268,6 +274,7 @@ public class FastCopyMainForm {
 		fileChooser.setMultiSelectionEnabled(true);
 		fileChooser.setFileSelectionMode(selectionMode);
 		fileChooser.setCurrentDirectory(currentDir);
+		fileChooser.setFileHidingEnabled(true);  //show hidden files
 
 		// show the file dialog
 		VFSJFileChooser.RETURN_TYPE answer = fileChooser.showOpenDialog(null);
