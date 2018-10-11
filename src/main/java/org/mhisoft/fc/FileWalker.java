@@ -51,10 +51,11 @@ public class FileWalker {
 	}
 
 
-	public void walk(final String[] sourceFileDirs,  String destDir) {
+	public void walk(final String[] sourceFileDirs,  final String destDir) {
 
 		FileUtils.createDir(new File(destDir), rdProUI, statistics);
 		rdProUI.println("Copying files under directory " + destDir);
+		String _targetDir =destDir;
 
 		for (String source : sourceFileDirs) {
 
@@ -77,17 +78,15 @@ public class FileWalker {
 			} else if (fSource.isDirectory()) {
 				//   get the last dir of the source and make it under dest
 				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
-				String _targetDir =destDir;
+
 				if (RunTimeProperties.instance.isCreateTheSameSourceFolderUnderTarget())   {
 					//String sourceDirName =
 
 					_targetDir=destDir+File.separator + fSource.getName() ;
 					if (!new File(_targetDir).exists())
 						FileUtils.createDir(new File(_targetDir), rdProUI, statistics);
-					destDir = _targetDir;
-					RunTimeProperties.instance.setDestDir(destDir);
 				}
-				walkSubDir(fSource, destDir);
+				walkSubDir(fSource, _targetDir);
 			}
 		}
 

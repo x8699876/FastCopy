@@ -64,7 +64,7 @@ public class FastCopyMainForm {
 
 	JFrame frame;
 	FastCopy fastCopy;
-	RunTimeProperties props= RunTimeProperties.instance;
+	RunTimeProperties props = RunTimeProperties.instance;
 
 
 	JCheckBox chkMultiThread;
@@ -93,6 +93,8 @@ public class FastCopyMainForm {
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
+
+	File lastFileLocation =null;
 
 	public void setRdProUI(GraphicsUIImpl rdProUI) {
 		this.uiImpl = rdProUI;
@@ -164,6 +166,7 @@ public class FastCopyMainForm {
 //				});
 
 				doItJobThread = new DoItJobThread();
+				doItJobThread.setDaemon(true);
 				doItJobThread.start();
 
 			}
@@ -190,6 +193,7 @@ public class FastCopyMainForm {
 		});
 
 
+
 		btnSourceBrowse.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -199,15 +203,29 @@ public class FastCopyMainForm {
 				if (k > 0)
 					dir = dir.substring(0, k);
 
-				File[] files = chooseFiles(new File(dir), VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES )  ;
-				if (files!=null && files.length>0)   {
+				if (lastFileLocation==null)
+					lastFileLocation = new File(dir);
+
+				File[] files = chooseFiles(lastFileLocation, VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES);
+
+				if (files != null && files.length > 0) {
 					StringBuilder builder = new StringBuilder();
+
+					//append to existing
+					if (fldSourceDir.getText() != null && fldSourceDir.getText().length() > 0) {
+						builder.append(fldSourceDir.getText()) ;
+					}
+
+					//now append the new directories. 
 					for (File file : files) {
 						if (builder.length() > 0)
 							builder.append(";");
 						builder.append(file.getAbsolutePath());
+						lastFileLocation =   file;
 
 					}
+
+
 					props.setSourceDir(builder.toString());
 					fldSourceDir.setText(props.getSourceDir());
 				}
@@ -226,8 +244,8 @@ public class FastCopyMainForm {
 				if (k > 0)
 					dir = dir.substring(0, k);
 
-				File[] files = chooseFiles(new File(dir), VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY )  ;
-				if (files!=null && files.length>0)   {
+				File[] files = chooseFiles(new File(dir), VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY);
+				if (files != null && files.length > 0) {
 					props.setDestDir(files[0].getAbsolutePath().toString());
 					fldTargetDir.setText(props.getDestDir());
 				}
@@ -417,9 +435,6 @@ public class FastCopyMainForm {
 		);
 
 
-
-
-
 	}
 
 	public static void main(String[] args) {
@@ -456,11 +471,10 @@ public class FastCopyMainForm {
 	}
 
 
-
 	public void updateAndSavePreferences() {
 		//save the settings
 		Dimension d = frame.getSize();
-        UserPreference.getInstance().setDimensionX(d.width);
+		UserPreference.getInstance().setDimensionX(d.width);
 		UserPreference.getInstance().setDimensionY(d.height);
 		SpinnerModel spinnerModel = fldFontSize.getModel();
 		int newFontSize = (Integer) spinnerModel.getValue();
