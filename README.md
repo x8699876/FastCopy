@@ -1,6 +1,6 @@
 ## MHISoft Fast Copy
 
-* A very handy tool for copying directories and files, recursively, that is all the sub directories under will be copied over to the target.  
+* A very handy tool for copying directories and files, recursively, that is all the sub directories under will be copied over to the target.  The same directory tree structure will be copied over to be under the target. 
 * fast.
 * Speed tester for copying files of vairous sizes and locations. 
 * Use multiple workers when copying from/to SSDs. 
@@ -63,7 +63,7 @@ Examples:
 * Check the SSD deivers to leverage multiple works for copying files simuteneously.  usually it should speed things up if there no other bottlenecks on such as the network or calbe, ports.
 * The "override only if newer or a size difference is detected" is handy to when you need to stop and resume a copy task. say you stop a copying task in the middle , when you resume it by running again , it will skip the already copied files on the target directory and copies only the not yet copied over files. 
 * "Create the same source folder..." option, for example: 
-source is "/Users/myhome/Respository", target is "/Volumes/externaldrive/backup", with this option checked, a "Respository" diorectory will be created under /Volumes/externaldrive/backup and 
+source is "/Users/myhome/Repository", target is "/Volumes/externaldrive/backup", with this option checked, a "Repository" diorectory will be created under /Volumes/externaldrive/backup and the contents under the source will be copied to /Volumes/externaldrive/backup/Repository
 
 
 
