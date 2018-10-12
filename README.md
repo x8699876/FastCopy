@@ -4,6 +4,7 @@
 * fast.
 * Speed tester for copying files of vairous sizes and locations. 
 * Use multiple workers when copying from/to SSDs. 
+* Supports Windows, MacOS, Unix/Linux where JRE is supported. 
 
 
 ## Download
@@ -13,19 +14,19 @@
 ## Instructions
 
 * If not already, down load and install the latest JRE/JDK 1.7+ from Oracle.
-<br>
-* Windows: 
+
+*Windows: 
   Exploded the downloaded zip into a directory and add the directory to the system path. </br>
   Run the fc.bat, fc.exe or  fastcopy-console.exe for the UI version. </br>
   Also see below on how to integrate with the windows explorer. </br>
 
-* Mac OS: 
+*Mac OS: 
   Exploded the downloaded zip to ~/bin/fastcopy</br>
   The "Fastcopy(1.2).app" is the MacOS app,  copy it to the ~/Applications and run.</br>
   Also see below on how to add as service to the context menu in the Finder.</br> 
 
 
-* Unix/linux, Mac command line : run the ./fc.sh
+*Unix/linux, Mac command line : run the ./fc.sh
 
 ex:
 
