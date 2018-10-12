@@ -13,7 +13,7 @@
 ## Instructions
 
 * If not already, down load and install the latest JRE/JDK 1.7+ from Oracle.
-* 
+<br>
 * Windows: 
   Exploded the downloaded zip into a directory and add the directory to the system path. </br>
   Run the fc.bat, fc.exe or  fastcopy-console.exe for the UI version. </br>
