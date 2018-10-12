@@ -1,6 +1,7 @@
 ## MHISoft Fast Copy
 
-* Copies files and directories fast.
+* A very handy tool for copying directories and files, recursively, that is all the sub directories under will be copied over to the target.  
+* fast.
 * Speed tester for copying files of vairous sizes and locations. 
 * Use multiple workers when copying from/to SSDs. 
 
@@ -12,10 +13,20 @@
 ## Instructions
 
 * If not already, down load and install the latest JRE/JDK 1.7+ from Oracle.
-* Exploded the downloaded zip into a directory and add the directory to the system path. 
-* Windows: run the fc.bat, fc.exe or  fastcopy-console.exe for the UI version. 
-* Mac OS: The "Fastcopy(1.2).app" is the MacOS app,  copy it to the ~/Applications and run.
-* Unix/linux, Mac command line : run the ./fc.sh, ./fcui.sh script. 
+* 
+* Windows: 
+  Exploded the downloaded zip into a directory and add the directory to the system path. </br>
+  Run the fc.bat, fc.exe or  fastcopy-console.exe for the UI version. </br>
+  Also see below on how to integrate with the windows explorer. </br>
+
+* Mac OS: 
+  Exploded the downloaded zip to ~/bin/fastcopy</br>
+  The "Fastcopy(1.2).app" is the MacOS app,  copy it to the ~/Applications and run.</br>
+  Also see below on how to add as service to the context menu in the Finder.</br> 
+
+
+* Unix/linux, Mac command line : run the ./fc.sh
+
 ex:
 
 ```
@@ -48,6 +59,11 @@ Examples:
 
 * The source can be a combination of multiple directories and files delimited by the semicolon ";". You can either use the browse button to choose directories or copy paste directly into the input box. The file choose supports multiple directories selections.
 * The target should always be one directory or drive. 
+* Check the SSD deivers to leverage multiple works for copying files simuteneously.  usually it should speed things up if there no other bottlenecks on such as the network or calbe, ports.
+* The "override only if newer or a size difference is detected" is handy to when you need to stop and resume a copy task. say you stop a copying task in the middle , when you resume it by running again , it will skip the already copied files on the target directory and copies only the not yet copied over files. 
+* "Create the same source folder..." option, for example: 
+source is "/Users/myhome/Respository", target is "/Volumes/externaldrive/backup", with this option checked, a "Respository" diorectory will be created under /Volumes/externaldrive/backup and 
+
 
 
 ## Hook to the Windows Explorer Context menu
