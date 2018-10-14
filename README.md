@@ -10,7 +10,7 @@
 
 ## Download
 
-- [Downlod the latest release] (https://github.com/mhisoft/fastcopy/releases)
+- Downlod the latest release: https://github.com/mhisoft/fastcopy/releases
 
 ## Instructions
 
