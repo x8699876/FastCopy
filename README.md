@@ -1,11 +1,10 @@
 ## FastCopy
 
-* A very handy tool for copying directories and files, recursively, that is all the sub directories under will be copied over to the target.  The same directory tree structure will be copied over to be under the target. 
-* Fast! Use multiple works to copy for SSD drives. 
-* Include all the hidden and system files. So it can also be used as a backup tool. 
-* Speed tester/Benchmark tool for a target drive. 
-* Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
+* A very handy tool for copying or backup a large set of directories and files, recursively, i.e. all the sub directories under will be copied over to the target. Support all the hidden and system files, long file names, file names of other languages. 
+* Fast! Use multiple workers to copy from/to the SSD drives. 
 * Support mounted external drives on Mac.
+* Speed tester/Benchmark.
+* Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
 
 
 ## Download
@@ -14,7 +13,8 @@
 
 ## Instructions
 
-* If not already, down load and install the latest JRE/JDK 1.7+ from Oracle.
+* Requires JRE. If not already, download and install the latest JRE/JDK 1.7+ from Oracle.
+https://java.com/en/download/help/windows_manual_download.xml
 
 * Windows: 
   Exploded the downloaded zip into a c:\bin\fastcopy and add the directory to the system path. </br>
