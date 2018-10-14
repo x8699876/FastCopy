@@ -147,7 +147,6 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 	@Override
 	public RunTimeProperties parseCommandLineArguments(String[] args) {
 		List<String> noneHyfenArgs = new ArrayList<String>();
-		String defaultDir = System.getProperty("user.home") ;
 
 
 		RunTimeProperties props = RunTimeProperties.instance;
@@ -203,16 +202,17 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 
 		if (noneHyfenArgs.size() == 0) {
-			if (props.getSourceDir() == null || props.getSourceDir().length() == 0)
-				props.setSourceDir(defaultDir);
-		} else if (noneHyfenArgs.size() == 1) {
+//			if (props.getSourceDir() == null || props.getSourceDir().length() == 0)
+//				props.setSourceDir(RunTimeProperties.userHome);
+		}
+		else if (noneHyfenArgs.size() == 1) {
 			//fc d:\temp -dest classes
 			if (props.getDestDir() != null)
 				props.setSourceDir(noneHyfenArgs.get(0));
 
 			else {
 				//rdpro classes
-				props.setSourceDir(defaultDir);
+				props.setSourceDir(RunTimeProperties.userHome);
 				props.setDestDir(noneHyfenArgs.get(0));
 			}
 
@@ -221,12 +221,9 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 			props.setDestDir(noneHyfenArgs.get(1));
 		}
 
-		if (props.getSourceDir() == null)
-			props.setSourceDir(defaultDir);
 
-
-		if (props.getSourceDir() == null)
-			props.setSourceDir(defaultDir);
+//		if (props.getSourceDir() == null)
+//			props.setSourceDir(defaultDir);
 
 		return props;
 	}

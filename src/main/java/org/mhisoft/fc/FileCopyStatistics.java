@@ -120,12 +120,12 @@ public class FileCopyStatistics {
 
 
 	//in KB, milli seconds.
-	public void addToTotalFileSizeAndTime(final long totalFsize, final long fsize, final long ftime) {
-		this.totalFileSize = this.totalFileSize + fsize;
+	public void addToTotalFileSizeAndTime(final long totalFsizeInKB, final long ftime) {
+		this.totalFileSize = this.totalFileSize + totalFsizeInKB;
 		this.totalTime= this.totalTime+ ftime;
 
-		BucketBySize bucketBySize = getBucket(totalFsize/1024);
-		bucketBySize.addToTotal(fsize, ftime);
+		BucketBySize bucketBySize = getBucket(totalFsizeInKB);
+		bucketBySize.addToTotal(totalFsizeInKB, ftime);
 
 	}
 
@@ -152,7 +152,7 @@ public class FileCopyStatistics {
 		}
 	}
 
-	DecimalFormat df = new DecimalFormat("###.##");
+	static DecimalFormat df = new DecimalFormat("###.##");
 
 	public String printSpeed() {
 
@@ -179,7 +179,14 @@ public class FileCopyStatistics {
 
 	}
 
-	String s12 = "Total Files: %s, Total size: %s MB, Took: %s sec, Overall Ave Speed=%s MB/s";
+	public static String getAvgSpeedString(double fileSizeInKB, long totalTimeInMillis) {
+		double avgSpeed = fileSizeInKB*1000/totalTimeInMillis;
+		return df.format(avgSpeed);
+	}
+
+
+
+	String s12 = "Total Files: %s, Total size: %s MB, Took: %s sec, Overall Avg Speed=%s MB/s";
 
 	public String printOverallProgress() {
 		double fsize = getTotalFileSize() / 1024;

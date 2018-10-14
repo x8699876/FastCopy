@@ -5,6 +5,9 @@ package org.mhisoft.fc;
  */
 public class RunTimeProperties {
 
+	public static String userHome = System.getProperty("user.home") ;
+
+
 	public static RunTimeProperties instance = new RunTimeProperties();
 
 	private RunTimeProperties() {

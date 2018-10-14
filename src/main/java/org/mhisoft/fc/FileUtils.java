@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
+import java.util.Timer;
 
 import org.mhisoft.fc.ui.UI;
 
@@ -92,6 +93,9 @@ public class FileUtils {
 		FileChannel out = null;
 		long totalFileSize = 0;
 		rdProUI.showProgress(0, statistics);
+		long startTime, endTime;
+
+		startTime = System.currentTimeMillis();
 
 		try {
 			in = new FileInputStream(source).getChannel();
@@ -107,7 +111,6 @@ public class FileUtils {
 			long totalRead = 0;
 			int progress = 0;
 
-			long startTime, endTime;
 
 			while (readSize != -1) {
 
@@ -116,7 +119,7 @@ public class FileUtils {
 					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
 					return;
 				}
-				startTime = System.currentTimeMillis();
+
 				totalRead = totalRead + readSize;
 
 				progress = (int) (totalRead * 100 / totalFileSize);
@@ -132,12 +135,14 @@ public class FileUtils {
 				buffer.clear();
 				readSize = in.read(buffer);
 
-
-				endTime = System.currentTimeMillis();
-				statistics.addToTotalFileSizeAndTime(totalFileSize, readSize / 1024, (endTime - startTime));
 			}
 
+			endTime = System.currentTimeMillis();
+
+			statistics.addToTotalFileSizeAndTime(totalFileSize/1024,  (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
+
+
 
 
 		} catch (IOException e) {

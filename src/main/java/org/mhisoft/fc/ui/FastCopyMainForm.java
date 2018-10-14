@@ -200,6 +200,10 @@ public class FastCopyMainForm {
 			public void actionPerformed(ActionEvent e) {
 
 				String dir = fldSourceDir.getText().trim();
+
+				if (dir.length()==0)
+					dir = RunTimeProperties.userHome;
+
 				int k = dir.indexOf(";");
 				if (k > 0)
 					dir = dir.substring(0, k);
