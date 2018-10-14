@@ -5,6 +5,7 @@
 * Include all the hidden and system files. So it can also be used as a backup tool. 
 * Speed tester for your target drive. 
 * Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
+* Support mounted external drives on Mac.
 
 
 ## Download
