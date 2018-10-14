@@ -1,10 +1,10 @@
 ## MHISoft Fast Copy
 
 * A very handy tool for copying directories and files, recursively, that is all the sub directories under will be copied over to the target.  The same directory tree structure will be copied over to be under the target. 
-* fast.
-* Speed tester for copying files of vairous sizes and locations. 
-* Use multiple workers when copying from/to SSDs. 
-* Supports Windows, MacOS, Unix/Linux where JRE is supported. 
+* Fast! Use multiple works to copy for SSD drives. 
+* Include all the hidden and system files. So it can also be used as a backup tool. 
+* Speed tester for your target drive. 
+* Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
 
 
 ## Download
@@ -56,7 +56,8 @@ Examples:
 
 ## GUI version:
 
-![Screenshot](doc/screenshot1.png "screenshot")
+![Screenshot](/doc/10-14-2018%201-58-04%20PM.png "screenshot")
+
 
 * The source can be a combination of multiple directories and files delimited by the semicolon ";". You can either use the browse button to choose directories or copy paste directly into the input box. The file choose supports multiple directories selections.
 * The target should always be one directory or drive. 
