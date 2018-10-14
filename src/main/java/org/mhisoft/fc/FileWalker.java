@@ -65,6 +65,9 @@ public class FileWalker {
 
 			File fSource = new File(source);
 			if (fSource.isFile()) {
+
+				//todo check the file pattern
+
 				String sTarget = destDir + File.separator + fSource.getName();
 				File targetFile = new File(sTarget);
 				if (overrideTargetFile(fSource, targetFile)) {

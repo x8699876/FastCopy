@@ -21,6 +21,8 @@ public class RunTimeProperties {
 	boolean flatCopy;
 	boolean debug;
 	boolean createTheSameSourceFolderUnderTarget;
+	String[] inludeFilePatterns;
+	String[] exludeFilePatterns;
 
 
 	public String getSourceDir() {
@@ -101,6 +103,37 @@ public class RunTimeProperties {
 
 	public void setCreateTheSameSourceFolderUnderTarget(boolean createTheSameSourceFolderUnderTarget) {
 		this.createTheSameSourceFolderUnderTarget = createTheSameSourceFolderUnderTarget;
+	}
+
+	public String[] getInludeFilePatterns() {
+		return inludeFilePatterns;
+	}
+
+
+	public void setIncludeFilePatterns(String pattern) {
+		if (pattern!=null && pattern.trim().length()>0) {
+			this.inludeFilePatterns = pattern.trim().split("[,;]+");
+			for (int i = 0; i < inludeFilePatterns.length; i++) {
+				this.inludeFilePatterns[i] = this.inludeFilePatterns[i].trim();
+			}
+		}
+		else
+			this.inludeFilePatterns=null;
+	}
+
+	public String[] getExludeFilePatterns() {
+		return exludeFilePatterns;
+	}
+
+	public void setExludeFilePatterns(String pattern) {
+		if (pattern!=null && pattern.trim().length()>0) {
+			this.exludeFilePatterns = pattern.trim().split("[,;]+");
+			for (int i = 0; i < exludeFilePatterns.length; i++) {
+				this.exludeFilePatterns[i] = this.exludeFilePatterns[i].trim();
+			}
+		}
+		else
+			this.exludeFilePatterns=null;
 	}
 
 	@Override

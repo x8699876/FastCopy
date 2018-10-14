@@ -90,6 +90,8 @@ public class FastCopyMainForm {
 	private JCheckBox chkCreateTheSameSourceCheckBox;
 	private JSpinner fldFontSize;
 	private JLabel labelFontSize;
+	private JTextField fldIncludeFilePatterns;
+	private JTextField fldExcludeFilePatterns;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -365,6 +367,8 @@ public class FastCopyMainForm {
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
 		props.setCreateTheSameSourceFolderUnderTarget(chkCreateTheSameSourceCheckBox.isSelected());
+		props.setIncludeFilePatterns(fldIncludeFilePatterns.getText());
+		props.setExludeFilePatterns(fldExcludeFilePatterns.getText());
 		return true;
 
 	}
