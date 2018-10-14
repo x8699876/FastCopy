@@ -239,10 +239,17 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 	//0..100
 	public void showProgress(int value, FileCopyStatistics statistics) {
-		if (lastProgressTime == -1 || (System.currentTimeMillis() - lastProgressTime) > 1000) {
-			progressBar.setValue(value);
-			labelStatus.setText(statistics.printOverallProgress());
-			lastProgressTime = System.currentTimeMillis();
-		}
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+
+				if (lastProgressTime == -1 || (System.currentTimeMillis() - lastProgressTime) > 1000) {
+					progressBar.setValue(value);
+					labelStatus.setText(statistics.printOverallProgress());
+					lastProgressTime = System.currentTimeMillis();
+				}
+			}
+		});
+
 	}
 }

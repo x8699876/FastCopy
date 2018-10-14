@@ -54,7 +54,7 @@ public class FileUtils {
 				ui.println(String.format("[error] Failed to create directory: %s", theDir.getName()));
 			}
 			if (result) {
-				if (RunTimeProperties.instance.isVerbose())
+				if (RunTimeProperties.instance.isVerbose() && RunTimeProperties.instance.isDebug() )
 					ui.println(String.format("Directory created: %s", theDir.getName()));
 				frs.setDirCount(frs.getDirCount() + 1);
 			}
@@ -141,6 +141,7 @@ public class FileUtils {
 
 			statistics.addToTotalFileSizeAndTime(totalFileSize/1024,  (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			rdProUI.showProgress(100, statistics);
 
 
 
