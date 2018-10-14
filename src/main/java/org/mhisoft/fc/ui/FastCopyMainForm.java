@@ -356,6 +356,8 @@ public class FastCopyMainForm {
 		setupFontSpinner();
 		ViewHelper.setFontSize(componentsList, UserPreference.getInstance().getFontSize());
 
+
+
 	}
 
 
@@ -454,31 +456,33 @@ public class FastCopyMainForm {
 		UserPreference.getInstance().readSettingsFromFile();
 		FastCopyMainForm main = new FastCopyMainForm();
 		main.init();
-		GraphicsUIImpl gra = new GraphicsUIImpl();
-		main.setRdProUI(gra);
-		gra.setOutputTextArea(main.outputTextArea);
-		gra.setLabelStatus(main.labelStatus);
-		gra.setProgressBar(main.progressBar1);
+		GraphicsUIImpl uiImpl = new GraphicsUIImpl();
+		main.setRdProUI(uiImpl);
+		uiImpl.setOutputTextArea(main.outputTextArea);
+		uiImpl.setLabelStatus(main.labelStatus);
+		uiImpl.setProgressBar(main.progressBar1);
 
 
 		//default it to current dir
-		main.fastCopy = new FastCopy(gra);
+		main.fastCopy = new FastCopy(uiImpl);
 
-		main.props = gra.parseCommandLineArguments(args);
+		main.props = uiImpl.parseCommandLineArguments(args);
 
 
 		if (FastCopy.debug || main.props.isDebug()) {
 			int i = 0;
 			for (String arg : args) {
-				gra.println("arg[" + i + "]=" + arg);
+				uiImpl.println("arg[" + i + "]=" + arg);
 				i++;
 			}
-			gra.println(main.props.toString());
+			uiImpl.println(main.props.toString());
 
 		}
 
 		main.fldSourceDir.setText(main.props.getSourceDir());
 		main.fldTargetDir.setText(main.props.getDestDir());
+
+		uiImpl.help();
 
 
 	}
