@@ -3,7 +3,7 @@
 * A very handy tool for copying directories and files, recursively, that is all the sub directories under will be copied over to the target.  The same directory tree structure will be copied over to be under the target. 
 * Fast! Use multiple works to copy for SSD drives. 
 * Include all the hidden and system files. So it can also be used as a backup tool. 
-* Speed tester for your target drive. 
+* Speed tester/Benchmark tool for a target drive. 
 * Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
 * Support mounted external drives on Mac.
 
