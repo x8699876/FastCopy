@@ -76,9 +76,11 @@ double click to import into windows registry
 
 ## Add to the Mac Finder's Context menu 
 * Open Automator, Files menu --> "new"
-* On the "Choose a type for your document" prompt, select "Service"
+* On the "Choose a type for your document" prompt, select "Service"; "quick action" for moJave.
 * On the left in the search bar, type in "Run Shell Scripts" and select it. 
 * For "Services receives selected", choose "Folders", in "Finder". Edit the path to where you installed the jar if needed. 
+* for the "Pass input",  select "as arguments"
+* Save as "Fast Copy"
  
  ![screen shot](doc/fastcopy-automator-setup2.png "Add to the Mac Finder's Context menu")
  ![screen shot](doc/fastcopy%20context%20menu.png "Context Men->Services")
