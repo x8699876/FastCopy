@@ -14,7 +14,7 @@
 ## Instructions
 
 * Requires java JDK. If not already availabe on your system, download and install the JDK 1.8+ from Oracle.
-https://java.com/en/download/help/windows_manual_download.xml.  
+https://www.oracle.com/technetwork/java/javase/overview/index.html
 
 * Windows: 
   Exploded the downloaded zip into a c:\bin\fastcopy and add the directory to the system path. </br>
