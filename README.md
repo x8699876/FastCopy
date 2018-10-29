@@ -13,8 +13,8 @@
 
 ## Instructions
 
-* Requires JRE. If not already, download and install the latest JRE/JDK 1.7+ from Oracle.
-https://java.com/en/download/help/windows_manual_download.xml
+* Requires java JDK. If not already availabe on your system, download and install the JDK 1.8+ from Oracle.
+https://java.com/en/download/help/windows_manual_download.xml.  
 
 * Windows: 
   Exploded the downloaded zip into a c:\bin\fastcopy and add the directory to the system path. </br>
@@ -75,8 +75,9 @@ double click to import into windows registry
 
 
 ## Add to the Mac Finder's Context menu 
+* Since this approach launches the java fromt he shell scripts, it will require the full java SDK to be installed on the Mac. 
 * Open Automator, Files menu --> "new"
-* On the "Choose a type for your document" prompt, select "Service"; "quick action" for moJave.
+* On the "Choose a type for your document" prompt, select "Service"; "quick actions" for moJave.
 * On the left in the search bar, type in "Run Shell Scripts" and select it. 
 * For "Services receives selected", choose "Folders", in "Finder". Edit the path to where you installed the jar if needed. 
 * for the "Pass input",  select "as arguments"
