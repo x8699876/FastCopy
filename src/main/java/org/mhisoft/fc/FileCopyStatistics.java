@@ -202,8 +202,11 @@ public class FileCopyStatistics {
 
 	public String printOverallProgress() {
 		double fsize = getTotalFileSize() / 1024 /1024;
-		return String.format(s12, df.format(getFilesCount()), df.format(fsize)
-				, df.format(this.totalTime), df.format(fsize*1000/totalTime));
+		return String.format(s12
+				, df.format(getFilesCount())
+				, df.format(fsize)
+				, df.format(this.totalTime)
+				, df.format(fsize*1000/totalTime));
 	}
 
 

@@ -29,7 +29,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.CopyOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.mhisoft.fc.ui.UI;
 
@@ -40,6 +51,271 @@ import org.mhisoft.fc.ui.UI;
  * @since Nov, 2014
  */
 public class FileUtils {
+
+	private static final int BUFFER = 4096 * 16;
+	private static final int SMALL_FILE_SIZE = 20000;
+	static final DecimalFormat df = new DecimalFormat("#,###.##");
+	static final DecimalFormat dfLong = new DecimalFormat("#,###");
+
+
+	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI)  {
+
+		long timeTook=0;
+		if (source.length() < SMALL_FILE_SIZE) {
+			timeTook =FileUtils.copySmallFiles(source, target, statistics, rdProUI);
+		} else
+			timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
+
+
+
+		if (RunTimeProperties.instance.isVerbose()) {
+			if (source.length()<1024)
+				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
+						, source.getAbsolutePath(),target.getAbsolutePath()
+						, df.format(source.length())
+						, timeTook)
+				);
+			else
+				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
+						, source.getAbsolutePath(),target.getAbsolutePath()
+						, df.format(source.length()/1024)
+						, timeTook)
+				);
+		}
+
+
+		statistics.getBucket(source.length()).incrementFileCount();
+
+		try {
+			boolean b = target.setLastModified(source.lastModified());
+			//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
+		} catch (Exception e) {
+			rdProUI.printError(e.getMessage());
+		}
+
+	}
+
+
+	public static void showPercent(final UI rdProUI, double digital) {
+		long p = (long) digital * 100;
+		DecimalFormat df = new DecimalFormat("000");
+		String s = df.format(p);
+
+		rdProUI.printf("\u0008\u0008\u0008\u0008%s", df.format(p) + "%");
+	}
+
+
+
+
+	private static long copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
+
+		long startTime=0, endTime=0;
+		FileChannel inChannel=null,outChannel=null;
+
+		try {
+			inChannel = new FileInputStream(source).getChannel();
+			outChannel = new FileOutputStream(target).getChannel();
+			long totalFileSize = inChannel.size();
+
+			startTime = System.currentTimeMillis();
+
+			//do the copy
+			inChannel.transferTo(0, inChannel.size(), outChannel);
+
+			//done
+			endTime = System.currentTimeMillis();
+			rdProUI.showProgress(100, statistics);
+
+			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
+			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			rdProUI.showProgress(100, statistics);
+
+		} catch (IOException e) {
+			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
+		} finally {
+			close(inChannel);
+			close(outChannel);
+		}
+		return (endTime - startTime);
+	}
+
+
+	public static long copyDirectory(final File source, final File target
+			, FileCopyStatistics statistics, final UI rdProUI) {
+		long startTime=0, endTime=0;
+		Path sourcePath = Paths.get(source.getAbsolutePath());
+		Path targetPath = Paths.get(target.getAbsolutePath() );
+
+
+
+		startTime = System.currentTimeMillis();
+		try{
+			List<CopyOption> options = new ArrayList<>();
+			options.add(StandardCopyOption.COPY_ATTRIBUTES);
+			if (RunTimeProperties.instance.overwrite)
+				options.add(StandardCopyOption.REPLACE_EXISTING);
+
+			Files.copy(sourcePath, targetPath, options.toArray( new CopyOption[0]));
+
+			endTime = System.currentTimeMillis();
+			long totalFileSize = getFolderSizeNio(source);
+			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
+			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			rdProUI.print(String.format("\n\tCopying direcotry %s-->%s, size:%s (Kb), took %s (ms)"
+					, source.getAbsolutePath(),target.getAbsolutePath()
+					, df.format(totalFileSize/1024)
+					, df.format(source.length()), dfLong.format(endTime-startTime))
+			);
+
+		}catch (IOException e){
+			e.printStackTrace();
+			rdProUI.println(String.format("[error] Copy dir from %s to %s failed: %s"
+					, source.getAbsolutePath(), target.getAbsolutePath(), e.getMessage()));
+		}
+
+		return (endTime - startTime);
+	}
+
+
+	private static long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
+		FileChannel in = null;
+		FileChannel out = null;
+		long totalFileSize = 0;
+		rdProUI.showProgress(0, statistics);
+		long startTime, endTime=0;
+
+		startTime = System.currentTimeMillis();
+
+		try {
+			in = new FileInputStream(source).getChannel();
+			out = new FileOutputStream(target).getChannel();
+			totalFileSize = in.size();
+
+
+			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
+			int readSize = in.read(buffer);
+			long totalRead = 0;
+			int progress = 0;
+
+
+			while (readSize != -1) {
+
+				if (FastCopy.isStopThreads()) {
+					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
+					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
+					return 0;
+				}
+
+				totalRead = totalRead + readSize;
+
+				progress = (int) (totalRead * 100 / totalFileSize);
+				rdProUI.showProgress(progress, statistics);
+
+				buffer.flip();
+
+				while (buffer.hasRemaining()) {
+					out.write(buffer);
+					//System.out.printf(".");
+					//showPercent(rdProUI, totalSize/size );
+				}
+				buffer.clear();
+				readSize = in.read(buffer);
+
+			}
+
+			endTime = System.currentTimeMillis();
+
+			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
+			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			rdProUI.showProgress(100, statistics);
+
+
+		} catch (IOException e) {
+			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
+		} finally {
+			close(in);
+			close(out);
+		}
+		return (endTime - startTime);
+	}
+
+	private static void close(Closeable closable) {
+		if (closable != null) {
+			try {
+				closable.close();
+			} catch (IOException e) {
+				if (FastCopy.debug)
+					e.printStackTrace();
+			}
+		}
+	}
+
+
+	 /*
+	public static long getFolderSize(String dir)  {
+		try {
+			return Files.walk(new File(dir).toPath())
+					.map(f -> f.toFile())
+					.filter(f -> f.isFile())
+					.mapToLong(f -> f.length()).sum();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	*/
+
+	/**
+	 * Get total size of all the files immediately under this rootDir.
+	 * It does not count the sub directories. 
+	 * @param rootDir
+	 * @return
+	 */
+	public static long getFolderSizeNio(final File rootDir) {
+
+		final AtomicLong size = new AtomicLong(0);
+		final AtomicLong fileCount = new AtomicLong(0);
+		Path rootPath = rootDir.toPath();
+		try {
+			Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+					size.addAndGet(attrs.size());
+					fileCount.incrementAndGet();
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (dir.equals(rootPath))
+						return FileVisitResult.CONTINUE;
+					else
+						return FileVisitResult.SKIP_SUBTREE;
+				}
+
+				@Override
+				public FileVisitResult visitFileFailed(Path file, IOException exc) {
+					//todo 
+					System.out.println("skipped: " + file + " (" + exc + ")");
+					// Skip folders that can't be traversed
+					return FileVisitResult.CONTINUE;
+				}
+
+//				@Override
+//				public FileVisitResult postVisitDirectory(Path rootDir, IOException exc) {
+//
+//					if (exc != null)
+//						System.out.println("had trouble traversing: " + rootDir + " (" + exc + ")");
+//					// Ignore errors traversing a folder
+//					return FileVisitResult.CONTINUE;
+//				}
+			});
+		} catch (IOException e) {
+			throw new AssertionError("walkFileTree will not throw IOException if the FileVisitor does not");
+		}
+
+		return size.get();
+	}
+
 
 	public static void createDir(final File theDir, final UI ui, final FileCopyStatistics frs) {
 		// if the directory does not exist, create it
@@ -75,148 +351,6 @@ public class FileUtils {
 		}
 	}
 
-	private static final int BUFFER = 4096 * 16;
-	static final DecimalFormat df = new DecimalFormat("#,###.##");
-
-	public static void showPercent(final UI rdProUI, double digital) {
-		long p = (long) digital * 100;
-		DecimalFormat df = new DecimalFormat("000");
-		String s = df.format(p);
-
-		rdProUI.printf("\u0008\u0008\u0008\u0008%s", df.format(p) + "%");
-	}
-
-
-	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI)  {
-
-
-		if (RunTimeProperties.instance.isVerbose()) {
-			rdProUI.print(String.format("\n\tCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
-					target.getAbsolutePath(), df.format(source.length() / 1024)));
-		}
-
-		if (source.length() < 8000) {
-			FileUtils.copySmallFiles(source, target, statistics, rdProUI);
-		} else
-			FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
-
-		statistics.getBucket(source.length()).incrementFileCount();
-
-		try {
-			boolean b = target.setLastModified(source.lastModified());
-			//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
-		} catch (Exception e) {
-			rdProUI.printError(e.getMessage());
-		}
-
-
-
-	}
-
-
-	private static void copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
-
-		long startTime, endTime;
-		FileChannel inChannel=null,outChannel=null;
-
-		try {
-			inChannel = new FileInputStream(source).getChannel();
-			outChannel = new FileOutputStream(target).getChannel();
-			long totalFileSize = inChannel.size();
-
-			startTime = System.currentTimeMillis();
-
-			//do the copy
-			inChannel.transferTo(0, inChannel.size(), outChannel);
-
-			//done
-			endTime = System.currentTimeMillis();
-			rdProUI.showProgress(100, statistics);
-
-			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
-			statistics.setFilesCount(statistics.getFilesCount() + 1);
-			rdProUI.showProgress(100, statistics);
-
-		} catch (IOException e) {
-			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
-		} finally {
-			close(inChannel);
-			close(outChannel);
-		}
-	}
-
-
-	private static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
-		FileChannel in = null;
-		FileChannel out = null;
-		long totalFileSize = 0;
-		rdProUI.showProgress(0, statistics);
-		long startTime, endTime;
-
-		startTime = System.currentTimeMillis();
-
-		try {
-			in = new FileInputStream(source).getChannel();
-			out = new FileOutputStream(target).getChannel();
-			totalFileSize = in.size();
-
-
-			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
-			int readSize = in.read(buffer);
-			long totalRead = 0;
-			int progress = 0;
-
-
-			while (readSize != -1) {
-
-				if (FastCopy.isStopThreads()) {
-					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
-					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
-					return;
-				}
-
-				totalRead = totalRead + readSize;
-
-				progress = (int) (totalRead * 100 / totalFileSize);
-				rdProUI.showProgress(progress, statistics);
-
-				buffer.flip();
-
-				while (buffer.hasRemaining()) {
-					out.write(buffer);
-					//System.out.printf(".");
-					//showPercent(rdProUI, totalSize/size );
-				}
-				buffer.clear();
-				readSize = in.read(buffer);
-
-			}
-
-			endTime = System.currentTimeMillis();
-
-			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
-			statistics.setFilesCount(statistics.getFilesCount() + 1);
-			rdProUI.showProgress(100, statistics);
-
-
-		} catch (IOException e) {
-			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
-		} finally {
-			close(in);
-			close(out);
-		}
-	}
-
-	private static void close(Closeable closable) {
-		if (closable != null) {
-			try {
-				closable.close();
-			} catch (IOException e) {
-				if (FastCopy.debug)
-					e.printStackTrace();
-			}
-		}
-	}
 
 
 }

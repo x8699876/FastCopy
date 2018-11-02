@@ -56,6 +56,9 @@ public class Workers {
 			}
 		};
 
+		if (FastCopy.debug) {
+			_rdProUI.println("Create the executor, corePoolSize=" + corePoolSize );
+		}
 
 		executor = new ThreadPoolExecutor(corePoolSize, corePoolSize
 				 , 10, TimeUnit.SECONDS

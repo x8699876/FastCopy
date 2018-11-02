@@ -149,11 +149,66 @@ public class FileWalker {
 
 		rdProUI.println("Copying files under directory " + destRootDir);
 
-		for (File childFile : list) {
+		//let's do some analysis on this directory first.
+		//FileUtils.copyDirectory(rootDir, new File(destRootDir), statistics, rdProUI);
+
+		copyFilesOneByOne(destRootDir, list);
+		
+		if (FastCopy.isStopThreads())
+			return;
+
+
+		//let copying files finish before moving on
+		while ( workerPool.getNotCompletedTaskCount()>0) {
+			//wait
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				//s
+			}
+		}
+
+		/* walk down the directory recursively */
+		 for (File childFile : list) {
 
 			if (FastCopy.isStopThreads()) {
 				rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
 				return;
+			}
+
+			if (childFile.isDirectory()) {
+				//keep walking down
+
+				if (!RunTimeProperties.instance.flatCopy) {
+					//create the mirror child dir
+					targetDir = destRootDir + File.separator + childFile.getName();
+					FileUtils.createDir(new File(targetDir), rdProUI, statistics);
+				} else {
+					targetDir = RunTimeProperties.instance.getDestDir();
+				}
+
+				walkSubDir(childFile, targetDir);
+
+			}
+
+
+		}   //loop all the files and dires under root
+
+	}
+
+	/**
+	 *
+	 * @param destRootDir
+	 * @param list
+	 * @return was it interrupted by user.
+	 */
+	private boolean copyFilesOneByOne(String destRootDir, File[] list) {
+		String targetDir;
+		for (File childFile : list) {
+
+			if (FastCopy.isStopThreads()) {
+				rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
+				return true;
 			}
 
 			/* copy all the files under this dir first */
@@ -180,44 +235,7 @@ public class FileWalker {
 
 
 		}   //loop all the files
-
-
-//		let copying files finish before moving on
-
-		while ( workerPool.getNotCompletedTaskCount()>0) {
-			//wait
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				//s
-			}
-		}
-
-		 for (File childFile : list) {
-
-			if (FastCopy.isStopThreads()) {
-				rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
-				return;
-			}
-
-			if (childFile.isDirectory()) {
-				//keep walking down
-
-				if (!RunTimeProperties.instance.flatCopy) {
-					//create the mirror child dir
-					targetDir = destRootDir + File.separator + childFile.getName();
-					FileUtils.createDir(new File(targetDir), rdProUI, statistics);
-				} else {
-					targetDir = RunTimeProperties.instance.getDestDir();
-				}
-
-				walkSubDir(childFile, targetDir);
-
-			}
-
-
-		}   //loop all the files and dires under root
-
+		return false;
 	}
 
 }

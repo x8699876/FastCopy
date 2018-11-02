@@ -60,9 +60,10 @@ public class CopyFileThread implements Runnable {
 			FileUtils.copyFile(sourceFile, targetFile, statistics, rdProUI);
 
 			if (FastCopy.debug)
-				rdProUI.println("\t" + Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
+				rdProUI.println("\n"
+						+ Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
 		} else {
-			rdProUI.println("\t" + Thread.currentThread().getName() +   "is stopped.");
+			rdProUI.println("\n" + Thread.currentThread().getName() +   "is stopped.");
 
 		}
 
