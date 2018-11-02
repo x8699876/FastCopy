@@ -156,22 +156,8 @@ public class FileWalker {
 				return;
 			}
 
-			if (childFile.isDirectory()) {
-				//keep walking down
-
-				if (!RunTimeProperties.instance.flatCopy) {
-					//create the mirror child dir
-					targetDir = destRootDir + File.separator + childFile.getName();
-					FileUtils.createDir(new File(targetDir), rdProUI, statistics);
-				} else {
-					targetDir = RunTimeProperties.instance.getDestDir();
-				}
-
-				walkSubDir(childFile, targetDir);
-
-			}
-			else {
-
+			/* copy all the files under this dir first */
+			if (childFile.isFile()) {
 
 				if (!RunTimeProperties.instance.flatCopy) {
 					targetDir = destRootDir ;
@@ -189,6 +175,43 @@ public class FileWalker {
 					if (RunTimeProperties.instance.isVerbose())
 					rdProUI.println(String.format("\tFile %s exists on the target dir. Skip based on the input. ", newDestFile));
 				}
+
+			}
+
+
+		}   //loop all the files
+
+
+//		let copying files finish before moving on
+
+		while ( workerPool.getNotCompletedTaskCount()>0) {
+			//wait
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				//s
+			}
+		}
+
+		 for (File childFile : list) {
+
+			if (FastCopy.isStopThreads()) {
+				rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
+				return;
+			}
+
+			if (childFile.isDirectory()) {
+				//keep walking down
+
+				if (!RunTimeProperties.instance.flatCopy) {
+					//create the mirror child dir
+					targetDir = destRootDir + File.separator + childFile.getName();
+					FileUtils.createDir(new File(targetDir), rdProUI, statistics);
+				} else {
+					targetDir = RunTimeProperties.instance.getDestDir();
+				}
+
+				walkSubDir(childFile, targetDir);
 
 			}
 

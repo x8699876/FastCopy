@@ -90,7 +90,6 @@ public class FileUtils {
 	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI)  {
 
 
-		//double size2InKB = size / 1024 ;
 		if (RunTimeProperties.instance.isVerbose()) {
 			rdProUI.print(String.format("\n\tCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
 					target.getAbsolutePath(), df.format(source.length() / 1024)));
@@ -100,6 +99,8 @@ public class FileUtils {
 			FileUtils.copySmallFiles(source, target, statistics, rdProUI);
 		} else
 			FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
+
+		statistics.getBucket(source.length()).incrementFileCount();
 
 		try {
 			boolean b = target.setLastModified(source.lastModified());
@@ -132,7 +133,7 @@ public class FileUtils {
 			endTime = System.currentTimeMillis();
 			rdProUI.showProgress(100, statistics);
 
-			statistics.addToTotalFileSizeAndTime(totalFileSize / 1024, (endTime - startTime));
+			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
 			rdProUI.showProgress(100, statistics);
 
@@ -193,7 +194,7 @@ public class FileUtils {
 
 			endTime = System.currentTimeMillis();
 
-			statistics.addToTotalFileSizeAndTime(totalFileSize / 1024, (endTime - startTime));
+			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
 			rdProUI.showProgress(100, statistics);
 

@@ -77,6 +77,13 @@ public class Workers {
 		return this.executor;
 	}
 
+	public int getNotCompletedTaskCount() {
+		int queued = executor.getQueue().size();
+		int active = executor.getActiveCount();
+		int notCompleted = queued + active; // approximate
+		return notCompleted;
+	}
+
 //	public  void shutDown() {
 //		executor.shutdown();
 //	}

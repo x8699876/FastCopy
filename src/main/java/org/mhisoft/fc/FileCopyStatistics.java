@@ -36,8 +36,8 @@ import java.text.DecimalFormat;
 public class FileCopyStatistics {
 	private long filesCount;
 	private long dirCount;
-	private long totalFileSize = 0;
-	private long totalTime=0;
+	private double totalFileSize = 0;
+	private double totalTime=0;
 
 
 	public void reset() {
@@ -47,21 +47,23 @@ public class FileCopyStatistics {
 		totalTime =0;
 		this.bucketBySizeList = new ArrayList<BucketBySize>();
 		//4k, 1M, 100M, 500M
-		bucketBySizeList.add(new BucketBySize(4L		, "<4K       "));
-		bucketBySizeList.add(new BucketBySize(1000L		, "4K-1M     "));
-		bucketBySizeList.add(new BucketBySize(100000L	, "1M-100M   "));
-		bucketBySizeList.add(new BucketBySize(500000L	, "100M-500M "));
+		bucketBySizeList.add(new BucketBySize(4*1024		, "<4K       "));
+		bucketBySizeList.add(new BucketBySize(1000*1024		, "4K-1M     "));
+		bucketBySizeList.add(new BucketBySize(100000*1024	, "1M-100M   "));
+		bucketBySizeList.add(new BucketBySize(500000*1024	, "100M-500M "));
 		bucketBySizeList.add(new BucketBySize(-1L		, "500M+     "));
 	}
 
 	public static class BucketBySize {
 		String name;
 		long size;
-		double totalSize = 0; //KB
+		double totalSize = 0; //bytes
+
 		long totalTime = 0;   // milli seconds
 		double speed; //Byte Per Seconds
 		double minSpeed = 0; //Byte Per Seconds
 		double maxSpeed = 0; //Byte Per Seconds
+		long fileCount=0;
 
 		public BucketBySize(long size, String name) {
 			this.size = size;
@@ -71,6 +73,10 @@ public class FileCopyStatistics {
 		public void addToTotal(double size, long time) {
 			totalSize += size;
 			totalTime += time;
+		}
+
+		public void incrementFileCount(){
+			fileCount++;
 		}
 
 	}
@@ -86,7 +92,7 @@ public class FileCopyStatistics {
 	}
 
 
-	public long getTotalFileSize() {
+	public double getTotalFileSize() {
 		return totalFileSize;
 	}
 
@@ -102,11 +108,11 @@ public class FileCopyStatistics {
 		this.dirCount = dirCount;
 	}
 
-	public BucketBySize getBucket(double fsize) {
+	public BucketBySize getBucket(double fsizeInBytes) {
 
 		BucketBySize bucketBySize = null;
 		for (BucketBySize entry : bucketBySizeList) {
-			if (fsize < entry.size) {
+			if (fsizeInBytes < entry.size) {
 				bucketBySize = entry;
 				break;
 			}
@@ -120,12 +126,12 @@ public class FileCopyStatistics {
 
 
 	//in KB, milli seconds.
-	public void addToTotalFileSizeAndTime(final long totalFsizeInKB, final long ftime) {
-		this.totalFileSize  += totalFsizeInKB;
+	public void addToTotalFileSizeAndTime(final long totalFsizeInBytes, final long ftime) {
+		this.totalFileSize  += totalFsizeInBytes;
 		this.totalTime +=  ftime;
 
-		BucketBySize bucketBySize = getBucket(totalFsizeInKB);
-		bucketBySize.addToTotal(totalFsizeInKB, ftime);
+		BucketBySize bucketBySize = getBucket(totalFsizeInBytes);
+		bucketBySize.addToTotal(totalFsizeInBytes, ftime);
 
 	}
 
@@ -162,15 +168,21 @@ public class FileCopyStatistics {
 		for (BucketBySize entry : bucketBySizeList) {
 
 			if (entry.totalTime > 0) {
-				double d= (entry.totalSize*1000)/(entry.totalTime*1024);
+				// bytes/milliseconds convert to Mb/s
+				double d= (entry.totalSize*1000)/(entry.totalTime*1024*1024);
 				avgSpeed = df.format(d);
+
 			}
 				else
 				avgSpeed = "NA";
 
+			long totalTimeInseconds = entry.totalTime/1000;
+
 			sb.append("Files ").append(entry.name).append(": ")
 //					.append(String.format("Max Speed: %s KB/s, Avg Speed:%s MB/s, ", df.format(entry.maxSpeed),avgSpeed ))
-					.append(String.format("Avg Speed:%s MB/s", avgSpeed ))
+					.append( "Total Time:").append(totalTimeInseconds).append(" (s)")
+					.append( ", count:").append(entry.fileCount)
+					.append(String.format(", Avg Speed:%s (Mb/s)", avgSpeed ))
 					.append("\n");
 
 		}
@@ -189,7 +201,7 @@ public class FileCopyStatistics {
 	String s12 = "Total Files: %s, Total size: %s Mb, Took: %s ms, Overall Avg Speed=%s Mb/s";
 
 	public String printOverallProgress() {
-		double fsize = getTotalFileSize() / 1024;
+		double fsize = getTotalFileSize() / 1024 /1024;
 		return String.format(s12, df.format(getFilesCount()), df.format(fsize)
 				, df.format(this.totalTime), df.format(fsize*1000/totalTime));
 	}
