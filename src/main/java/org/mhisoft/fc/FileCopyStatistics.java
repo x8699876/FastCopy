@@ -162,7 +162,7 @@ public class FileCopyStatistics {
 		for (BucketBySize entry : bucketBySizeList) {
 
 			if (entry.totalTime > 0) {
-				double d= entry.totalSize/1024*1000/entry.totalTime;
+				double d= (entry.totalSize*1000)/(entry.totalTime*1024);
 				avgSpeed = df.format(d);
 			}
 				else

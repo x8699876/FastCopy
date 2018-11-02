@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
-import java.util.Timer;
 
 import org.mhisoft.fc.ui.UI;
 
@@ -54,7 +53,7 @@ public class FileUtils {
 				ui.println(String.format("[error] Failed to create directory: %s", theDir.getName()));
 			}
 			if (result) {
-				if (RunTimeProperties.instance.isVerbose() && RunTimeProperties.instance.isDebug() )
+				if (RunTimeProperties.instance.isVerbose() && RunTimeProperties.instance.isDebug())
 					ui.println(String.format("Directory created: %s", theDir.getName()));
 				frs.setDirCount(frs.getDirCount() + 1);
 			}
@@ -88,7 +87,65 @@ public class FileUtils {
 	}
 
 
-	public static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
+	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI)  {
+
+
+		//double size2InKB = size / 1024 ;
+		if (RunTimeProperties.instance.isVerbose()) {
+			rdProUI.print(String.format("\n\tCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
+					target.getAbsolutePath(), df.format(source.length() / 1024)));
+		}
+
+		if (source.length() < 8000) {
+			FileUtils.copySmallFiles(source, target, statistics, rdProUI);
+		} else
+			FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
+
+		try {
+			boolean b = target.setLastModified(source.lastModified());
+			//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
+		} catch (Exception e) {
+			rdProUI.printError(e.getMessage());
+		}
+
+
+
+	}
+
+
+	private static void copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
+
+		long startTime, endTime;
+		FileChannel inChannel=null,outChannel=null;
+
+		try {
+			inChannel = new FileInputStream(source).getChannel();
+			outChannel = new FileOutputStream(target).getChannel();
+			long totalFileSize = inChannel.size();
+
+			startTime = System.currentTimeMillis();
+
+			//do the copy
+			inChannel.transferTo(0, inChannel.size(), outChannel);
+
+			//done
+			endTime = System.currentTimeMillis();
+			rdProUI.showProgress(100, statistics);
+
+			statistics.addToTotalFileSizeAndTime(totalFileSize / 1024, (endTime - startTime));
+			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			rdProUI.showProgress(100, statistics);
+
+		} catch (IOException e) {
+			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
+		} finally {
+			close(inChannel);
+			close(outChannel);
+		}
+	}
+
+
+	private static void nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
 		FileChannel in = null;
 		FileChannel out = null;
 		long totalFileSize = 0;
@@ -101,10 +158,7 @@ public class FileUtils {
 			in = new FileInputStream(source).getChannel();
 			out = new FileOutputStream(target).getChannel();
 			totalFileSize = in.size();
-			//double size2InKB = size / 1024 ;
-			if (RunTimeProperties.instance.isVerbose())
-				rdProUI.print(String.format("\n\tCopying file %s-->%s, size:%s KBytes", source.getAbsolutePath(),
-						target.getAbsolutePath(), df.format(totalFileSize / 1024)));
+
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 			int readSize = in.read(buffer);
@@ -139,11 +193,9 @@ public class FileUtils {
 
 			endTime = System.currentTimeMillis();
 
-			statistics.addToTotalFileSizeAndTime(totalFileSize/1024,  (endTime - startTime));
+			statistics.addToTotalFileSizeAndTime(totalFileSize / 1024, (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
 			rdProUI.showProgress(100, statistics);
-
-
 
 
 		} catch (IOException e) {
@@ -151,13 +203,6 @@ public class FileUtils {
 		} finally {
 			close(in);
 			close(out);
-			try {
-				boolean b = target.setLastModified(source.lastModified());
-				//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
 		}
 	}
 

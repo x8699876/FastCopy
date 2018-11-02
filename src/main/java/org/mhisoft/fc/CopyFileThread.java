@@ -57,7 +57,7 @@ public class CopyFileThread implements Runnable {
 				rdProUI.println(Thread.currentThread().getName() + " Starts");
 			long t1 = System.currentTimeMillis();
 
-			FileUtils.nioBufferCopy(sourceFile, targetFile, statistics, rdProUI);
+			FileUtils.copyFile(sourceFile, targetFile, statistics, rdProUI);
 
 			if (FastCopy.debug)
 				rdProUI.println("\t" + Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
