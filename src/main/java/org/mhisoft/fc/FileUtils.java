@@ -22,6 +22,11 @@
 
 package org.mhisoft.fc;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,9 +43,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.mhisoft.fc.ui.UI;
 
@@ -58,27 +60,26 @@ public class FileUtils {
 	static final DecimalFormat dfLong = new DecimalFormat("#,###");
 
 
-	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI)  {
+	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
 
-		long timeTook=0;
+		long timeTook = 0;
 		if (source.length() < SMALL_FILE_SIZE) {
-			timeTook =FileUtils.copySmallFiles(source, target, statistics, rdProUI);
+			timeTook = FileUtils.copySmallFiles(source, target, statistics, rdProUI);
 		} else
 			timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
 
 
-
 		if (RunTimeProperties.instance.isVerbose()) {
-			if (source.length()<1024)
+			if (source.length() < 1024)
 				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
-						, source.getAbsolutePath(),target.getAbsolutePath()
+						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
 						, timeTook)
 				);
 			else
 				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
-						, source.getAbsolutePath(),target.getAbsolutePath()
-						, df.format(source.length()/1024)
+						, source.getAbsolutePath(), target.getAbsolutePath()
+						, df.format(source.length() / 1024)
 						, timeTook)
 				);
 		}
@@ -105,12 +106,10 @@ public class FileUtils {
 	}
 
 
-
-
 	private static long copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
 
-		long startTime=0, endTime=0;
-		FileChannel inChannel=null,outChannel=null;
+		long startTime = 0, endTime = 0;
+		FileChannel inChannel = null, outChannel = null;
 
 		try {
 			inChannel = new FileInputStream(source).getChannel();
@@ -142,32 +141,31 @@ public class FileUtils {
 
 	public static long copyDirectory(final File source, final File target
 			, FileCopyStatistics statistics, final UI rdProUI) {
-		long startTime=0, endTime=0;
+		long startTime = 0, endTime = 0;
 		Path sourcePath = Paths.get(source.getAbsolutePath());
-		Path targetPath = Paths.get(target.getAbsolutePath() );
-
+		Path targetPath = Paths.get(target.getAbsolutePath());
 
 
 		startTime = System.currentTimeMillis();
-		try{
+		try {
 			List<CopyOption> options = new ArrayList<>();
 			options.add(StandardCopyOption.COPY_ATTRIBUTES);
 			if (RunTimeProperties.instance.overwrite)
 				options.add(StandardCopyOption.REPLACE_EXISTING);
 
-			Files.copy(sourcePath, targetPath, options.toArray( new CopyOption[0]));
+			Files.copy(sourcePath, targetPath, options.toArray(new CopyOption[0]));
 
 			endTime = System.currentTimeMillis();
 			long totalFileSize = getFolderSizeNio(source);
 			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
 			rdProUI.print(String.format("\n\tCopying direcotry %s-->%s, size:%s (Kb), took %s (ms)"
-					, source.getAbsolutePath(),target.getAbsolutePath()
-					, df.format(totalFileSize/1024)
-					, df.format(source.length()), dfLong.format(endTime-startTime))
+					, source.getAbsolutePath(), target.getAbsolutePath()
+					, df.format(totalFileSize / 1024)
+					, df.format(source.length()), dfLong.format(endTime - startTime))
 			);
 
-		}catch (IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
 			rdProUI.println(String.format("[error] Copy dir from %s to %s failed: %s"
 					, source.getAbsolutePath(), target.getAbsolutePath(), e.getMessage()));
@@ -182,7 +180,7 @@ public class FileUtils {
 		FileChannel out = null;
 		long totalFileSize = 0;
 		rdProUI.showProgress(0, statistics);
-		long startTime, endTime=0;
+		long startTime, endTime = 0;
 
 		startTime = System.currentTimeMillis();
 
@@ -266,7 +264,8 @@ public class FileUtils {
 
 	/**
 	 * Get total size of all the files immediately under this rootDir.
-	 * It does not count the sub directories. 
+	 * It does not count the sub directories.
+	 *
 	 * @param rootDir
 	 * @return
 	 */
@@ -352,5 +351,63 @@ public class FileUtils {
 	}
 
 
+	/**
+	 * Compress the directory contains small files.
+	 * @param dirPath   The directory
+	 * @param recursive recursive or not.
+	 * @param smallFileSizeThreashold if the file size is smaller than this, it is included.    if -1, it does not apply
+	 */
+	public static void compressDirectory(final String dirPath, final boolean recursive, final long smallFileSizeThreashold) {
+		Path sourcePath = Paths.get(dirPath);
 
+		//put the zip under the same sourcePath.
+		String name = "_"+sourcePath.getFileName().toString()+".zip";
+		final String zipFileName = dirPath.concat(File.separator).concat(name);
+		try {
+			ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
+			Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+					try {
+						if (( smallFileSizeThreashold==-1 ||file.toFile().length()<=smallFileSizeThreashold) //
+						    && !file.getFileName().toString().equals(name)) { //exclude the zip file itself. 
+
+							Path targetFile = sourcePath.relativize(file);
+							outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
+							//note read whole file into memory. it is what we wanted for small size files.
+							byte[] bytes = Files.readAllBytes(file);
+							outputStream.write(bytes, 0, bytes.length);
+							outputStream.closeEntry();
+							
+						}
+					} catch (IOException e) {
+						throw new RuntimeException("compressDirectory() failed", e);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (dir.equals(sourcePath))
+						return FileVisitResult.CONTINUE;
+					else
+						return recursive?FileVisitResult.CONTINUE:FileVisitResult.SKIP_SUBTREE;
+				}
+
+			});
+			outputStream.close();
+		} catch (IOException e) {
+			throw new RuntimeException("compressDirectory() failed", e);
+		}
+	}
+
+
+	public static void main(String[] args) {
+		String dir = "S:\\src\\b1611-trunk\\dev-light\\apps\\learning\\sapui5-modules\\browse-catalog\\src\\main\\control";
+		compressDirectory(dir, true, 20000 );
+	}
 }
+
+
+
