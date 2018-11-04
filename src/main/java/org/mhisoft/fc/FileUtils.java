@@ -122,7 +122,7 @@ public class FileUtils {
 			rdProUI.showProgress(100, statistics);
 
 			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
-			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			statistics.incrementFileCount();
 			rdProUI.showProgress(100, statistics);
 
 		} catch (IOException e) {
@@ -220,7 +220,7 @@ public class FileUtils {
 			endTime = System.currentTimeMillis();
 
 			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
-			statistics.setFilesCount(statistics.getFilesCount() + 1);
+			statistics.incrementFileCount();
 			rdProUI.showProgress(100, statistics);
 
 
@@ -333,7 +333,7 @@ public class FileUtils {
 			if (result) {
 				if (RunTimeProperties.instance.isVerbose() && RunTimeProperties.instance.isDebug())
 					ui.println(String.format("Directory created: %s", theDir.getName()));
-				frs.setDirCount(frs.getDirCount() + 1);
+				frs.incrementDirCount();
 			}
 		}
 	}

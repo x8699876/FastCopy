@@ -35,10 +35,10 @@ import java.text.DecimalFormat;
  * @since Nov, 2014
  */
 public class FileCopyStatistics {
-	private AtomicLong filesCount;
-	private AtomicLong dirCount;
-	private AtomicLong totalFileSize;
-	private AtomicLong totalTime;
+	private AtomicLong filesCount= new AtomicLong(0);
+	private AtomicLong dirCount=new AtomicLong(0);
+	private AtomicLong totalFileSize=new AtomicLong(0);
+	private AtomicLong totalTime=new AtomicLong(0);
 
 
 	private List<BucketBySize> bucketBySizeList;
@@ -63,14 +63,14 @@ public class FileCopyStatistics {
 
 	public static class BucketBySize {
 		String name;
-		AtomicLong size;
-		AtomicLong totalSize; //bytes
+		AtomicLong size =new AtomicLong(0);
+		AtomicLong totalSize =new AtomicLong(0); //bytes
+		AtomicLong totalTime =new AtomicLong(0);   // milli seconds
 
-		AtomicLong totalTime;   // milli seconds
-		double speed; //Byte Per Seconds
-		double minSpeed = 0; //Byte Per Seconds
-		double maxSpeed = 0; //Byte Per Seconds
-		AtomicLong fileCount;
+//		double speed; //Byte Per Seconds
+//		double minSpeed = 0; //Byte Per Seconds
+//		double maxSpeed = 0; //Byte Per Seconds
+		AtomicLong fileCount =new AtomicLong(0);
 
 		public BucketBySize(long size, String name) {
 			this.size.set( size );
@@ -143,6 +143,14 @@ public class FileCopyStatistics {
 
 	}
 
+	public void incrementFileCount() {
+		this.filesCount.incrementAndGet();
+	}
+
+    public void incrementDirCount() {
+		this.dirCount.incrementAndGet();
+	}
+
 
 
 	/**
@@ -184,11 +192,11 @@ public class FileCopyStatistics {
 				else
 				avgSpeed = "NA";
 
-			long totalTimeInSeconds = entry.totalTime.get()/1000;
+			//slong totalTimeInSeconds = entry.totalTime.get()/1000;
 
 			sb.append("Files ").append(entry.name).append(": ")
 //					.append(String.format("Max Speed: %s KB/s, Avg Speed:%s MB/s, ", df.format(entry.maxSpeed),avgSpeed ))
-					.append( "Total Time:").append(totalTimeInSeconds).append(" (s)")
+					.append( "Total Time:").append(entry.totalTime.get()).append(" (ms)")
 					.append( ", count:").append(entry.fileCount)
 					.append(String.format(", Avg Speed:%s (Mb/s)", avgSpeed ))
 					.append("\n");
