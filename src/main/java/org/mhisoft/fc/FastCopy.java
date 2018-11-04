@@ -100,7 +100,7 @@ public class FastCopy {
 
 		rdProUI.println("");
 		rdProUI.println("Done.");
-		rdProUI.println(frs.printSpeed());
+		rdProUI.println(frs.printBucketSpeedSummary());
 		rdProUI.println("Dir copied:" + frs.getDirCount() + ", Files copied:" + frs.getFilesCount());
 		rdProUI.println(frs.printOverallProgress());
 	}

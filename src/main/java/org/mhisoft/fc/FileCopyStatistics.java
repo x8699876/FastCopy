@@ -21,6 +21,7 @@ package org.mhisoft.fc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.text.DecimalFormat;
 
 //import com.sun.jna.Library;
@@ -34,17 +35,23 @@ import java.text.DecimalFormat;
  * @since Nov, 2014
  */
 public class FileCopyStatistics {
-	private long filesCount;
-	private long dirCount;
-	private double totalFileSize = 0;
-	private double totalTime=0;
+	private AtomicLong filesCount;
+	private AtomicLong dirCount;
+	private AtomicLong totalFileSize;
+	private AtomicLong totalTime;
 
+
+	private List<BucketBySize> bucketBySizeList;
+
+	public FileCopyStatistics() {
+		reset();
+	}
 
 	public void reset() {
-		filesCount = 0;
-		dirCount = 0;
-		totalFileSize = 0;
-		totalTime =0;
+		filesCount.set(0);
+		dirCount.set(0);
+		totalFileSize.set(0);
+		totalTime.set(0);
 		this.bucketBySizeList = new ArrayList<BucketBySize>();
 		//4k, 1M, 100M, 500M
 		bucketBySizeList.add(new BucketBySize(4*1024		, "<4K       "));
@@ -56,63 +63,61 @@ public class FileCopyStatistics {
 
 	public static class BucketBySize {
 		String name;
-		long size;
-		double totalSize = 0; //bytes
+		AtomicLong size;
+		AtomicLong totalSize; //bytes
 
-		long totalTime = 0;   // milli seconds
+		AtomicLong totalTime;   // milli seconds
 		double speed; //Byte Per Seconds
 		double minSpeed = 0; //Byte Per Seconds
 		double maxSpeed = 0; //Byte Per Seconds
-		long fileCount=0;
+		AtomicLong fileCount;
 
 		public BucketBySize(long size, String name) {
-			this.size = size;
+			this.size.set( size );
 			this.name = name;
 		}
 
-		public void addToTotal(double size, long time) {
-			totalSize += size;
-			totalTime += time;
+		/**
+		 *
+		 * @param size in bytes
+		 * @param time in ms
+		 */
+		public void atomicAdd(long size, long time) {
+			totalSize.addAndGet(size);
+			totalTime.addAndGet(time);
 		}
 
 		public void incrementFileCount(){
-			fileCount++;
+			fileCount.incrementAndGet();
 		}
 
 	}
 
-	List<BucketBySize> bucketBySizeList;
 
-	public FileCopyStatistics() {
-		reset();
-	}
 
 	public long getFilesCount() {
-		return filesCount;
+		return filesCount.get();
 	}
 
 
 	public double getTotalFileSize() {
-		return totalFileSize;
+		return totalFileSize.get();
 	}
 
-	public void setFilesCount(long filesCount) {
-		this.filesCount = filesCount;
-	}
 
 	public long getDirCount() {
-		return dirCount;
+		return dirCount.get();
 	}
 
-	public void setDirCount(long dirCount) {
-		this.dirCount = dirCount;
-	}
 
-	public BucketBySize getBucket(double fsizeInBytes) {
+
+
+
+	public BucketBySize getBucket(long fsizeInBytes) {
 
 		BucketBySize bucketBySize = null;
 		for (BucketBySize entry : bucketBySizeList) {
-			if (fsizeInBytes < entry.size) {
+			if (fsizeInBytes < entry.size.get()) {
 				bucketBySize = entry;
 				break;
 			}
@@ -125,13 +130,16 @@ public class FileCopyStatistics {
 
 
 
-	//in KB, milli seconds.
+	//in bytes and milli seconds, (ms)
 	public void addToTotalFileSizeAndTime(final long totalFsizeInBytes, final long ftime) {
-		this.totalFileSize  += totalFsizeInBytes;
-		this.totalTime +=  ftime;
+
+		this.totalFileSize.addAndGet(totalFsizeInBytes);
+		this.totalTime.addAndGet(ftime);
 
 		BucketBySize bucketBySize = getBucket(totalFsizeInBytes);
-		bucketBySize.addToTotal(totalFsizeInBytes, ftime);
+		//synchronized (bucketBySize) {
+			bucketBySize.atomicAdd(totalFsizeInBytes, ftime);
+		//}
 
 	}
 
@@ -142,12 +150,12 @@ public class FileCopyStatistics {
 	 * @param speed    KB/s
 	 * @param fileTime milli sec
 	 */
-	public void setSpeedForBucket(double fsize, double speed, long fileTime) {
+	/*public void setSpeedForBucket(double fsize, double speed, long fileTime) {
 		if (fileTime<=0)
 			return;
 
         BucketBySize bucketBySize = getBucket(fsize);
-		bucketBySize.addToTotal(fsize, fileTime);
+		bucketBySize.atomicAdd(fsize, fileTime);
 
 		if (speed > 0) {
 			bucketBySize.speed = speed;
@@ -156,31 +164,31 @@ public class FileCopyStatistics {
 			if (bucketBySize.maxSpeed == 0 || speed > bucketBySize.maxSpeed)
 				bucketBySize.maxSpeed = speed;
 		}
-	}
+	}*/
 
 	static DecimalFormat df = new DecimalFormat("###,###.##");
 
-	public String printSpeed() {
+	public String printBucketSpeedSummary() {
 
 		StringBuilder sb = new StringBuilder();
 		String avgSpeed; //MB/s
 
 		for (BucketBySize entry : bucketBySizeList) {
 
-			if (entry.totalTime > 0) {
+			if (entry.totalTime.get() > 0) {
 				// bytes/milliseconds convert to Mb/s
-				double d= (entry.totalSize*1000)/(entry.totalTime*1024*1024);
+				double d= (entry.totalSize.get()*1000);
+				d = d/(entry.totalTime.get()*1024*1024);
 				avgSpeed = df.format(d);
-
 			}
 				else
 				avgSpeed = "NA";
 
-			long totalTimeInseconds = entry.totalTime/1000;
+			long totalTimeInSeconds = entry.totalTime.get()/1000;
 
 			sb.append("Files ").append(entry.name).append(": ")
 //					.append(String.format("Max Speed: %s KB/s, Avg Speed:%s MB/s, ", df.format(entry.maxSpeed),avgSpeed ))
-					.append( "Total Time:").append(totalTimeInseconds).append(" (s)")
+					.append( "Total Time:").append(totalTimeInSeconds).append(" (s)")
 					.append( ", count:").append(entry.fileCount)
 					.append(String.format(", Avg Speed:%s (Mb/s)", avgSpeed ))
 					.append("\n");
@@ -198,15 +206,15 @@ public class FileCopyStatistics {
 
 
 
-	String s12 = "Total Files: %s, Total size: %s Mb, Took: %s ms, Overall Avg Speed=%s Mb/s";
+	String sOverall = "Total Files: %s, Total size: %s Mb, Took: %s ms, Overall Avg Speed=%s Mb/s";
 
 	public String printOverallProgress() {
 		double fsize = getTotalFileSize() / 1024 /1024;
-		return String.format(s12
+		return String.format(sOverall
 				, df.format(getFilesCount())
 				, df.format(fsize)
 				, df.format(this.totalTime)
-				, df.format(fsize*1000/totalTime));
+				, df.format(fsize*1000/totalTime.get()));
 	}
 
 

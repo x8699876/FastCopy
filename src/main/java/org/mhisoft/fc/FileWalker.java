@@ -58,13 +58,22 @@ public class FileWalker {
 		String _targetDir =destDir;
 
 		for (String source : sourceFileDirs) {
+			File fSource = new File(source);
 
 			if (FastCopy.isStopThreads()) {
 				rdProUI.println("[warn]Cancelled by user. stop walk. ");
 				return;
 			}
 
-			File fSource = new File(source);
+
+			if (fSource.isDirectory()) {
+				FileUtils.getDirectoryStats(fSource) ;
+
+			}
+
+
+
+
 			if (fSource.isFile()) {
 				String sTarget = destDir + File.separator + fSource.getName();
 				File targetFile = new File(sTarget);

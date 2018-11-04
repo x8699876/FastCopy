@@ -22,8 +22,6 @@
 
 package org.mhisoft.fc;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -34,13 +32,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 
@@ -139,7 +135,7 @@ public class FileUtils {
 	}
 
 
-	public static long copyDirectory(final File source, final File target
+	/*public static long copyDirectory(final File source, final File target
 			, FileCopyStatistics statistics, final UI rdProUI) {
 		long startTime = 0, endTime = 0;
 		Path sourcePath = Paths.get(source.getAbsolutePath());
@@ -156,7 +152,7 @@ public class FileUtils {
 			Files.copy(sourcePath, targetPath, options.toArray(new CopyOption[0]));
 
 			endTime = System.currentTimeMillis();
-			long totalFileSize = getFolderSizeNio(source);
+			long totalFileSize = getDirectoryStats(source);
 			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
 			statistics.setFilesCount(statistics.getFilesCount() + 1);
 			rdProUI.print(String.format("\n\tCopying direcotry %s-->%s, size:%s (Kb), took %s (ms)"
@@ -172,7 +168,7 @@ public class FileUtils {
 		}
 
 		return (endTime - startTime);
-	}
+	}*/
 
 
 	private static long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
@@ -262,6 +258,9 @@ public class FileUtils {
 	}
 	*/
 
+
+
+
 	/**
 	 * Get total size of all the files immediately under this rootDir.
 	 * It does not count the sub directories.
@@ -269,11 +268,12 @@ public class FileUtils {
 	 * @param rootDir
 	 * @return
 	 */
-	public static long getFolderSizeNio(final File rootDir) {
+	public static DirecotryStat getDirectoryStats(final File rootDir) {
 
 		final AtomicLong size = new AtomicLong(0);
 		final AtomicLong fileCount = new AtomicLong(0);
 		Path rootPath = rootDir.toPath();
+		DirecotryStat ret = new DirecotryStat();
 		try {
 			Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
 				@Override
@@ -312,7 +312,10 @@ public class FileUtils {
 			throw new AssertionError("walkFileTree will not throw IOException if the FileVisitor does not");
 		}
 
-		return size.get();
+		ret.setTotalFileSize(size.get());
+		ret.setNumberOfFiles(fileCount.get());
+
+		return ret;
 	}
 
 
