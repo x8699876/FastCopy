@@ -56,7 +56,7 @@ public class Workers {
 			}
 		};
 
-		if (FastCopy.debug) {
+		if (RunTimeProperties.instance.isDebug()) {
 			_rdProUI.println("Create the executor, corePoolSize=" + corePoolSize );
 		}
 

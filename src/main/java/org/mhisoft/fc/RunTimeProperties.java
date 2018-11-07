@@ -6,7 +6,8 @@ package org.mhisoft.fc;
 public class RunTimeProperties {
 
 	public static String userHome = System.getProperty("user.home") ;
-
+	public static boolean compressSmallFiles = Boolean.getBoolean("compressSmallFiles");
+	public static boolean debug = Boolean.getBoolean("debug");
 
 	public static RunTimeProperties instance = new RunTimeProperties();
 
@@ -22,7 +23,7 @@ public class RunTimeProperties {
 	boolean overwrite;
 	boolean overwriteIfNewerOrDifferent;
 	boolean flatCopy;
-	boolean debug;
+	boolean debugArg;
 	boolean createTheSameSourceFolderUnderTarget;
 
 
@@ -91,11 +92,11 @@ public class RunTimeProperties {
 	}
 
 	public boolean isDebug() {
-		return debug;
+		return debugArg || debug;
 	}
 
-	public void setDebug(boolean debug) {
-		this.debug = debug;
+	public void setDebug(boolean debugArg) {
+		this.debugArg = debugArg;
 	}
 
 	public boolean isCreateTheSameSourceFolderUnderTarget() {
@@ -118,7 +119,7 @@ public class RunTimeProperties {
 		sb.append(", overwriteIfNewerOrDifferent=").append(overwriteIfNewerOrDifferent);
 		sb.append(", createTheSameSourceFolderUnderTarget=").append(createTheSameSourceFolderUnderTarget);
 		sb.append(", flatCopy=").append(flatCopy);
-		sb.append(", debug=").append(debug);
+		sb.append(", debugArg=").append(debugArg);
 		sb.append('}');
 		return sb.toString();
 	}

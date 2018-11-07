@@ -51,7 +51,7 @@ public class FileWalker {
 	}
 
 
-	final static long SMALL_FILE_SIZE = 4096;
+	final static long SMALL_FILE_SIZE = 20000;
 
 	public void walkTree(int level, final String[] rootDirs, final String destDir) {
 
@@ -103,18 +103,18 @@ public class FileWalker {
 			boolean thisRootDirQualifiedToPack=false;
 
 			/* process files under this "source" dir,  package small files */
-			if (rootDir.isDirectory()) {
+			if (RunTimeProperties.compressSmallFiles && rootDir.isDirectory()) {
 				DirecotryStat direcotryStat = FileUtils.getDirectoryStats(rootDir, SMALL_FILE_SIZE);
-				if (direcotryStat.getSmallFileCount()>=1 && direcotryStat.getTotalSmallFileSize()>=4096) {
+				if (
+						direcotryStat.getSmallFileCount()>=3 //number criteria
+					  || (direcotryStat.getSmallFileCount()>=2 && direcotryStat.getTotalSmallFileSize()>=4096/0.7) //size criteria
 
+
+				) {
 					thisRootDirQualifiedToPack = true;
-					FileUtils.CompressedackageVO vo = FileUtils.compressDirectory(sRootDir, false, SMALL_FILE_SIZE);
-
-					String sTarget = _targetDir + File.separator + vo.zipName;
-					vo.setDestDir(_targetDir);
-					File targetFile = new File(sTarget);
-					//copy the zip over.
-					CopyFileThread t = new CopyFileThread(rdProUI, new File( vo.sourceZipFileWithPath ) , targetFile, vo, statistics);
+					CopyFileThread t = new CopyFileThread(rdProUI
+							, sRootDir, _targetDir
+							,null, null, true, statistics);
 					workerPool.addTask(t);
 				}
 				else
@@ -139,7 +139,9 @@ public class FileWalker {
 					String newDestFile = _targetDir + File.separator + childFile.getName();
 					File targetFile = new File(newDestFile);
 					if (overrideTargetFile(childFile, targetFile)) {
-						CopyFileThread t = new CopyFileThread(rdProUI, childFile, targetFile, null, statistics);
+						CopyFileThread t = new CopyFileThread(rdProUI
+								, sRootDir, _targetDir
+								, childFile, targetFile, false, statistics);
 						workerPool.addTask(t);
 					} else {
 						if (RunTimeProperties.instance.isVerbose())

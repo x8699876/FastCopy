@@ -67,29 +67,8 @@ public class FileUtils {
 			timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
 
 
-		try {
-			//exploded it  the target zip file on the dest dir
-			if (compressedackageVO!=null) {
-
-				//delete the source zip
-				source.delete();
-
-				//create destdir
-				File destZipDir = new File (compressedackageVO.getDestDir());
-						//+File.separator + compressedackageVO.originalDirname);
-				FileUtils.createDir( destZipDir, rdProUI, statistics);
-
-				unzipFile(target , destZipDir ) ;
-
-				//delete the target zip
-				target.delete();
-			}
-		} catch (IOException e) {
-			rdProUI.printError(e.getMessage());
-		}
-
 		if (RunTimeProperties.instance.isVerbose()) {
-			if (source.length() < 1024)
+			if (source.length() < 4096)
 				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
@@ -103,8 +82,32 @@ public class FileUtils {
 				);
 		}
 
-
+		             //todo need to adjust for packaged zip
 		statistics.getBucket(source.length()).incrementFileCount();
+
+
+		try {
+			//exploded it  the target zip file on the dest dir
+			if (compressedackageVO!=null) {
+
+				//delete the source zip
+				source.delete();
+
+				//create destdir
+				File destZipDir = new File (compressedackageVO.getDestDir());
+				//+File.separator + compressedackageVO.originalDirname);
+				FileUtils.createDir( destZipDir, rdProUI, statistics);
+
+				unzipFile(target , destZipDir ) ;
+
+				//delete the target zip
+				target.delete();
+			}
+		} catch (IOException e) {
+			rdProUI.printError(e.getMessage());
+		}
+
+		 //todo for exploded zip files, need to setLastModified.
 
 		try {
 			boolean b = target.setLastModified(source.lastModified());
@@ -261,7 +264,7 @@ public class FileUtils {
 			try {
 				closable.close();
 			} catch (IOException e) {
-				if (FastCopy.debug)
+				if (RunTimeProperties.instance.isDebug())
 					e.printStackTrace();
 			}
 		}
@@ -386,6 +389,7 @@ public class FileUtils {
 		String originalDirname;
 		String sourceZipFileWithPath;
 		String destDir;
+		long zipFileSizeBytes;
 
 		public CompressedackageVO(String zipName, String originalDirname, String zipFileWithPath) {
 			this.zipName = zipName;
@@ -433,7 +437,7 @@ public class FileUtils {
 							byte[] bytes = Files.readAllBytes(file);
 							outputStream.write(bytes, 0, bytes.length);
 							outputStream.closeEntry();
-							
+							ret.zipFileSizeBytes =bytes.length;
 						}
 					} catch (IOException e) {
 						throw new RuntimeException("compressDirectory() failed", e);

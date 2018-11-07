@@ -469,7 +469,7 @@ public class FastCopyMainForm {
 		main.props = uiImpl.parseCommandLineArguments(args);
 
 
-		if (FastCopy.debug || main.props.isDebug()) {
+		if (main.props.isDebug()) {
 			int i = 0;
 			for (String arg : args) {
 				uiImpl.println("arg[" + i + "]=" + arg);

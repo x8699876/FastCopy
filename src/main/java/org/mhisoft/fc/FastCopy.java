@@ -34,7 +34,6 @@ import org.mhisoft.fc.ui.UI;
  * @since Sept 2014
  */
 public class FastCopy {
-	public static boolean debug = Boolean.getBoolean("debug");
 	public static final int DEFAULT_THREAD_NUM = 5;
 
 	FileCopyStatistics frs = new FileCopyStatistics();
