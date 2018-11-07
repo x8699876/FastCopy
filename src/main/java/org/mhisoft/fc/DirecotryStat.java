@@ -8,7 +8,10 @@ package org.mhisoft.fc;
  */
 public class DirecotryStat {
 	long numberOfFiles;
-	double totalFileSize;
+	long totalFileSize;
+
+	long smallFileCount;
+	long totalSmallFileSize;
 
 	public long getNumberOfFiles() {
 		return numberOfFiles;
@@ -28,5 +31,26 @@ public class DirecotryStat {
 
 	public double getAverageFileSize() {
 		return totalFileSize/totalFileSize;
+	}
+
+
+	public void incrementSmallFileCount() {
+		 smallFileCount++;
+	}
+
+	public void setSmallFileCount(long smallFileCount) {
+		this.smallFileCount = smallFileCount;
+	}
+
+	public long getSmallFileCount() {
+		return smallFileCount;
+	}
+
+	public void addToTotalSmallFileSize(long v) {
+		this.totalSmallFileSize+=v;
+	}
+
+	public long getTotalSmallFileSize() {
+		return totalSmallFileSize;
 	}
 }

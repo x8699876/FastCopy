@@ -24,6 +24,7 @@ package org.mhisoft.fc;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -56,7 +57,8 @@ public class FileUtils {
 	static final DecimalFormat dfLong = new DecimalFormat("#,###");
 
 
-	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
+	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI
+			, final FileUtils.CompressedackageVO compressedackageVO) {
 
 		long timeTook = 0;
 		if (source.length() < SMALL_FILE_SIZE) {
@@ -64,6 +66,27 @@ public class FileUtils {
 		} else
 			timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
 
+
+		try {
+			//exploded it  the target zip file on the dest dir
+			if (compressedackageVO!=null) {
+
+				//delete the source zip
+				source.delete();
+
+				//create destdir
+				File destZipDir = new File (compressedackageVO.getDestDir());
+						//+File.separator + compressedackageVO.originalDirname);
+				FileUtils.createDir( destZipDir, rdProUI, statistics);
+
+				unzipFile(target , destZipDir ) ;
+
+				//delete the target zip
+				target.delete();
+			}
+		} catch (IOException e) {
+			rdProUI.printError(e.getMessage());
+		}
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 1024)
@@ -268,7 +291,7 @@ public class FileUtils {
 	 * @param rootDir
 	 * @return
 	 */
-	public static DirecotryStat getDirectoryStats(final File rootDir) {
+	public static DirecotryStat getDirectoryStats(final File rootDir,  final long smallFileSizeThreashold) {
 
 		final AtomicLong size = new AtomicLong(0);
 		final AtomicLong fileCount = new AtomicLong(0);
@@ -280,6 +303,10 @@ public class FileUtils {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 					size.addAndGet(attrs.size());
 					fileCount.incrementAndGet();
+					if (attrs.size()<=smallFileSizeThreashold) {
+						ret.incrementSmallFileCount();
+						ret.addToTotalSmallFileSize(attrs.size());
+					}
 					return FileVisitResult.CONTINUE;
 				}
 
@@ -354,18 +381,43 @@ public class FileUtils {
 	}
 
 
+	public static class CompressedackageVO {
+		String zipName ; //  _originalDirname.zip
+		String originalDirname;
+		String sourceZipFileWithPath;
+		String destDir;
+
+		public CompressedackageVO(String zipName, String originalDirname, String zipFileWithPath) {
+			this.zipName = zipName;
+			this.originalDirname = originalDirname;
+			this.sourceZipFileWithPath = zipFileWithPath;
+		}
+
+		public String getDestDir() {
+			return destDir;
+		}
+
+		public void setDestDir(String destDir) {
+			this.destDir = destDir;
+		}
+	}
+
 	/**
 	 * Compress the directory contains small files.
 	 * @param dirPath   The directory
 	 * @param recursive recursive or not.
-	 * @param smallFileSizeThreashold if the file size is smaller than this, it is included.    if -1, it does not apply
+	 * @param smallFileSizeThreashold if the file size is smaller or equals than this, it is included.    if -1, it does not apply
+	 * @return zip file name without path
 	 */
-	public static void compressDirectory(final String dirPath, final boolean recursive, final long smallFileSizeThreashold) {
+	public static CompressedackageVO compressDirectory(final String dirPath, final boolean recursive, final long smallFileSizeThreashold) {
 		Path sourcePath = Paths.get(dirPath);
 
 		//put the zip under the same sourcePath.
 		String name = "_"+sourcePath.getFileName().toString()+".zip";
 		final String zipFileName = dirPath.concat(File.separator).concat(name);
+
+		CompressedackageVO  ret = new CompressedackageVO(name ,sourcePath.getFileName().toString(), zipFileName);
+
 		try {
 			ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
 			Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
@@ -402,7 +454,75 @@ public class FileUtils {
 			outputStream.close();
 		} catch (IOException e) {
 			throw new RuntimeException("compressDirectory() failed", e);
+			//todo rdProUI.printError(e.getMessage());
 		}
+		return ret;
+	}
+
+	/**
+	 * Unzip the zipFile to the deskDir
+	 * @param zipFile
+	 * @param destDir
+	 * @throws IOException
+	 */
+	public static void unzipFile(File zipFile, File destDir ) throws IOException {
+		byte[] buffer = new byte[4096];
+		ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+		ZipEntry zipEntry = zis.getNextEntry();
+		while (zipEntry != null) {
+			File destFile = new File(destDir, zipEntry.getName());
+			FileOutputStream fos = new FileOutputStream(destFile);
+			int len;
+			while ((len = zis.read(buffer)) > 0) {
+				fos.write(buffer, 0, len);
+			}
+			fos.close();
+			zipEntry = zis.getNextEntry();
+		}
+		zis.closeEntry();
+		zis.close();
+	}
+
+	/**
+	 * Split the file with full patch into three tokens. 1. dir, 2.filename, 3. extension
+	 * no slash at the end and no dots on the file ext.
+	 *
+	 * @param fileWithPath
+	 * @return
+	 */
+	public static String[] splitFileParts(final String fileWithPath) {
+		if (fileWithPath==null || fileWithPath.trim().length()==0)
+			return null;
+
+		String[] ret = new String[3];
+		int k = fileWithPath.lastIndexOf(File.separator);
+		String dir = null;
+		String fileName = null;
+		String fileExt = null;
+		if (k > -1) {
+			dir = fileWithPath.substring(0, k);                         // no slash at the end
+			fileName = fileWithPath.substring(k + 1, fileWithPath.length());
+		} else
+			fileName = fileWithPath;
+
+
+		if (fileName.length() > 0) {
+			String[] tokens = fileName.split("\\.(?=[^\\.]+$)");
+			fileName = tokens[0];
+			if (tokens.length > 1)
+				fileExt = tokens[1];
+		}
+		else
+			fileName=null;
+
+
+		ret[0] = dir;
+		ret[1] = fileName;
+		ret[2] = fileExt;
+
+
+
+		return ret;
 	}
 
 
