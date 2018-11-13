@@ -34,7 +34,6 @@ import org.mhisoft.fc.ui.UI;
  * @since Sept 2014
  */
 public class FastCopy {
-	public static final int DEFAULT_THREAD_NUM = 5;
 
 	FileCopyStatistics frs = new FileCopyStatistics();
 	Workers workerPool;
@@ -80,6 +79,9 @@ public class FastCopy {
 	static DecimalFormat df = new DecimalFormat("#,###.##");
 
 	public void run(RunTimeProperties props) {
+
+		rdProUI.println(props.toString());
+
 		workerPool = new Workers(props.getNumOfThreads(), rdProUI);
 
 		frs.reset();
@@ -103,6 +105,8 @@ public class FastCopy {
 
 		rdProUI.println("");
 		rdProUI.println("Done.");
+		rdProUI.println("Copied from "+ props.sourceDir + " to " +   props.getDestDir() );
+
 		rdProUI.println(frs.printBucketSpeedSummary());
 		rdProUI.println("Dir copied:" + frs.getDirCount() + ", Files copied:" + frs.getFilesCount());
 		rdProUI.println(frs.printOverallProgress());

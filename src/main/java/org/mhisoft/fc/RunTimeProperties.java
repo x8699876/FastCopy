@@ -5,6 +5,7 @@ package org.mhisoft.fc;
  */
 public class RunTimeProperties {
 
+	public static final int DEFAULT_THREAD_NUM = 2;
 	public static String userHome = System.getProperty("user.home") ;
 	public static boolean compressSmallFiles = Boolean.getBoolean("compressSmallFiles");
 	public static boolean debug = Boolean.getBoolean("debug");
@@ -112,7 +113,6 @@ public class RunTimeProperties {
 		final StringBuilder sb = new StringBuilder("RunTimeProperties{");
 		sb.append("sourceDir='").append(sourceDir).append('\'');
 		sb.append(", destDir='").append(destDir).append('\'');
-		sb.append(", success=").append(success);
 		sb.append(", verbose=").append(verbose);
 		sb.append(", numOfThreads=").append(numOfThreads);
 		sb.append(", overwrite=").append(overwrite);
@@ -120,6 +120,7 @@ public class RunTimeProperties {
 		sb.append(", createTheSameSourceFolderUnderTarget=").append(createTheSameSourceFolderUnderTarget);
 		sb.append(", flatCopy=").append(flatCopy);
 		sb.append(", debugArg=").append(debugArg);
+		sb.append(", compressSmallFiles=").append(RunTimeProperties.compressSmallFiles);
 		sb.append('}');
 		return sb.toString();
 	}

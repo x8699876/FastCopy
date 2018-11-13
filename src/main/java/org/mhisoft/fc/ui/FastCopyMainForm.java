@@ -326,7 +326,7 @@ public class FastCopyMainForm {
 
 
 	public void init() {
-		frame = new JFrame("Fast Copy " + UI.version);
+		frame = new JFrame("MHISoft FastCopy " + UI.version);
 		frame.setContentPane(layoutPanel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//progressBar1.setVisible(false);
@@ -388,7 +388,7 @@ public class FastCopyMainForm {
 			props.setDestDir(fldTargetDir.getText());
 
 		if (chkMultiThread.isSelected()) {
-			props.setNumOfThreads(FastCopy.DEFAULT_THREAD_NUM);
+			props.setNumOfThreads(RunTimeProperties.DEFAULT_THREAD_NUM);
 		} else {
 			props.setNumOfThreads(1);
 		}
@@ -475,8 +475,6 @@ public class FastCopyMainForm {
 				uiImpl.println("arg[" + i + "]=" + arg);
 				i++;
 			}
-			uiImpl.println(main.props.toString());
-
 		}
 
 		main.fldSourceDir.setText(main.props.getSourceDir());

@@ -33,7 +33,7 @@ import org.mhisoft.fc.RunTimeProperties;
 public abstract class AbstractUIImpl implements UI {
 
 	public void printBuildAndDisclaimer() {
-		println("Fast Copy (v" +version + ", build " + build + ", by Tony Xue, MHISoft)");
+		println("MHISoft FastCopy (v" +version + ", build " + build );
 		println("(https://github.com/mhisoft/fastcopy)");
 	}
 

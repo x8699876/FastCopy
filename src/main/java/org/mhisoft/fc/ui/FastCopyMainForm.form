@@ -14,8 +14,8 @@
         </constraints>
         <properties>
           <font size="11" style="0"/>
-          <selected value="true"/>
-          <text value="SSD drive, use multi simutaneous workers (don't check for regular hard drive)"/>
+          <selected value="false"/>
+          <text value="Use multi simutaneous workers for cross SSD drives (don't check for regular hard drive)"/>
         </properties>
       </component>
       <scrollpane id="e452" binding="outputTextAreaScrollPane">
