@@ -53,7 +53,7 @@ public class FileWalker {
 
 	final static long SMALL_FILE_SIZE = 20000;
 
-	public void walkTree(int level, final String[] rootDirs, final String destDir) {
+	public void walkTree(int level, final String[] rootDirs, final String destDir, long targetDirLastModified) {
 
 
 		String _targetDir;
@@ -63,8 +63,9 @@ public class FileWalker {
 			_targetDir = destDir;
 
 
-		if (!new File(_targetDir).exists())
-			FileUtils.createDir(new File(_targetDir), rdProUI, statistics);
+		if (!new File(_targetDir).exists()) {
+			FileUtils.createDir(targetDirLastModified, new File(_targetDir), rdProUI, statistics);
+		}
 
 
 		for (String sRootDir : rootDirs) {
@@ -83,7 +84,7 @@ public class FileWalker {
 				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
 				_targetDir = _targetDir + File.separator + rootDir.getName();
 				if (!new File(_targetDir).exists())
-					FileUtils.createDir(new File(_targetDir), rdProUI, statistics);
+					FileUtils.createDir(rootDir.lastModified(), new File(_targetDir), rdProUI, statistics);
 			}
 
 
@@ -165,7 +166,7 @@ public class FileWalker {
 				if (childDir.isDirectory()) {
 					
 					String targeChildDir = _targetDir + File.separator + childDir.getName();
-					walkTree(level + 1, new String[]{childDir.getAbsolutePath()}, targeChildDir);
+					walkTree(level + 1, new String[]{childDir.getAbsolutePath()}, targeChildDir, childDir.lastModified() );
 				}
 			}
 

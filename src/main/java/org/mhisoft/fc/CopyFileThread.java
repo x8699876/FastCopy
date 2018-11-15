@@ -73,7 +73,7 @@ public class CopyFileThread implements Runnable {
 			    File targetZipFile = new File(sTargetDir + File.separator + vo.zipName);
 				FileUtils.copyFile(new File( vo.sourceZipFileWithPath ) , targetZipFile , statistics, rdProUI, vo);
 				if (RunTimeProperties.instance.isDebug()) {
-					rdProUI.println( "Zip up the "+ sRootDir +" dir to zip:"+ targetZipFile + ", size=" + vo.zipFileSizeBytes +" Bytes");
+					rdProUI.println("Zip up the "+ sRootDir +" dir to zip:"+ targetZipFile + ", size=" + vo.zipFileSizeBytes +" Bytes");
 				}
 			}
 			else

@@ -95,7 +95,7 @@ public class FastCopy {
 
 		//rdProUI.println("Copying files under directory " + destDir);
 
-		fw.walkTree(0, files, props.getDestDir());
+		fw.walkTree(0, files, props.getDestDir(), -1);
 
 		workerPool.shutDownandWaitForAllThreadsToComplete();
 

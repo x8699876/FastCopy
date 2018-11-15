@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.text.DecimalFormat;
 
 import org.mhisoft.fc.ui.UI;
@@ -69,13 +70,13 @@ public class FileUtils {
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)
-				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
+				rdProUI.println(String.format("\n\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
 						, timeTook)
 				);
 			else
-				rdProUI.print(String.format("\n\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
+				rdProUI.println(String.format("\n\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length() / 1024)
 						, timeTook)
@@ -96,7 +97,7 @@ public class FileUtils {
 				//create destdir
 				File destZipDir = new File (compressedackageVO.getDestDir());
 				//+File.separator + compressedackageVO.originalDirname);
-				FileUtils.createDir( destZipDir, rdProUI, statistics);
+				FileUtils.createDir( compressedackageVO.originalDirLastModified, destZipDir, rdProUI, statistics);
 
 				unzipFile(target , destZipDir ) ;
 
@@ -107,7 +108,6 @@ public class FileUtils {
 			rdProUI.printError(e.getMessage());
 		}
 
-		 //todo for exploded zip files, need to setLastModified.
 
 		try {
 			boolean b = target.setLastModified(source.lastModified());
@@ -349,20 +349,30 @@ public class FileUtils {
 	}
 
 
-	public static void createDir(final File theDir, final UI ui, final FileCopyStatistics frs) {
+	public static void createDir(long originalDirLastModified,  final File targetDir, final UI ui, final FileCopyStatistics frs) {
 		// if the directory does not exist, create it
-		if (!theDir.exists()) {
+		if (!targetDir.exists()) {
 			//ui.println("creating directory: " + theDir.getName());
 			boolean result = false;
 			try {
-				theDir.mkdir();
+				targetDir.mkdir();
 				result = true;
+
+				if (originalDirLastModified!=-1) {
+					try {
+						boolean b = targetDir.setLastModified(originalDirLastModified);
+					} catch (Exception e) {
+						ui.printError(e.getMessage());
+					}
+				}
+
+
 			} catch (SecurityException se) {
-				ui.println(String.format("[error] Failed to create directory: %s", theDir.getName()));
+				ui.println(String.format("[error] Failed to create directory: %s", targetDir.getName()));
 			}
 			if (result) {
 				if (RunTimeProperties.instance.isVerbose() && RunTimeProperties.instance.isDebug())
-					ui.println(String.format("Directory created: %s", theDir.getName()));
+					ui.println(String.format("Directory created: %s", targetDir.getName()));
 				frs.incrementDirCount();
 			}
 		}
@@ -387,6 +397,7 @@ public class FileUtils {
 	public static class CompressedackageVO {
 		String zipName ; //  _originalDirname.zip
 		String originalDirname;
+		long originalDirLastModified;
 		String sourceZipFileWithPath;
 		String destDir;
 		long zipFileSizeBytes;
@@ -421,6 +432,7 @@ public class FileUtils {
 		final String zipFileName = dirPath.concat(File.separator).concat(name);
 
 		CompressedackageVO  ret = new CompressedackageVO(name ,sourcePath.getFileName().toString(), zipFileName);
+		ret.originalDirLastModified = sourcePath.toFile().lastModified();
 
 		try {
 			ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
@@ -432,7 +444,9 @@ public class FileUtils {
 						    && !file.getFileName().toString().equals(name)) { //exclude the zip file itself. 
 
 							Path targetFile = sourcePath.relativize(file);
-							outputStream.putNextEntry(new ZipEntry(targetFile.toString()));
+							ZipEntry ze = new ZipEntry(targetFile.toString());
+							ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
+							outputStream.putNextEntry(ze);
 							//note read whole file into memory. it is what we wanted for small size files.
 							byte[] bytes = Files.readAllBytes(file);
 							outputStream.write(bytes, 0, bytes.length);
@@ -475,12 +489,16 @@ public class FileUtils {
 		ZipEntry zipEntry = zis.getNextEntry();
 		while (zipEntry != null) {
 			File destFile = new File(destDir, zipEntry.getName());
+
 			FileOutputStream fos = new FileOutputStream(destFile);
 			int len;
 			while ((len = zis.read(buffer)) > 0) {
 				fos.write(buffer, 0, len);
 			}
 			fos.close();
+
+			destFile.setLastModified(zipEntry.getTime());
+
 			zipEntry = zis.getNextEntry();
 		}
 		zis.closeEntry();
