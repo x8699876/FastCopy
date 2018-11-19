@@ -36,12 +36,14 @@ import org.mhisoft.fc.ui.UI;
 public class FastCopy {
 
 	FileCopyStatistics frs = new FileCopyStatistics();
-	Workers workerPool;
-
 	public UI rdProUI;
+	private MultiThreadExecutorService fileCopyWorkersPool = null;
+	private MultiThreadExecutorService packageSmallFilesWorkersPool = null;
+
 
 	public FastCopy(UI rdProUI) {
 		this.rdProUI = rdProUI;
+
 	}
 
 	public UI getRdProUI() {
@@ -65,7 +67,10 @@ public class FastCopy {
 	}
 
 	public void stopWorkers() {
-		workerPool.shutDown();
+		if (fileCopyWorkersPool != null)
+			fileCopyWorkersPool.shutDown();
+		if (packageSmallFilesWorkersPool != null)
+			packageSmallFilesWorkersPool.shutDown();
 	}
 
 	public boolean isRunning() {
@@ -82,30 +87,47 @@ public class FastCopy {
 
 		rdProUI.println(props.toString());
 
-		workerPool = new Workers(props.getNumOfThreads(), rdProUI);
-
 		frs.reset();
-		FileWalker fw = new FileWalker(rdProUI, workerPool, props, frs);
-		long t1 = System.currentTimeMillis();
-
-		running = true;
-
-		String[] files = props.sourceDir.split(";");
 
 
-		//rdProUI.println("Copying files under directory " + destDir);
+		try {
+			fileCopyWorkersPool = new MultiThreadExecutorService(RunTimeProperties.instance.getNumOfThreads(), rdProUI);
+			packageSmallFilesWorkersPool = new MultiThreadExecutorService(RunTimeProperties.instance.getNumberOfThreadsForPackageSmallFiles(), rdProUI);
+			FileCopierService fileCopierService = new FileCopierService(rdProUI, props, frs, fileCopyWorkersPool, packageSmallFilesWorkersPool);
+			long t1 = System.currentTimeMillis();
 
-		fw.walkTree(0, files, props.getDestDir(), -1);
+			running = true;
+			String[] files = props.sourceDir.split(";");
+			fileCopierService.walkTreeAndCopy(0, files, props.getDestDir(), -1);
 
-		workerPool.shutDownandWaitForAllThreadsToComplete();
+		} catch (Exception e) {
+			rdProUI.printError(e.getMessage());
+		} finally {
+			//reset the flags
+			running = false;
+			stopThreads = false;
 
-		//reset the flags
-		running = false;
-		stopThreads = false;
+			if (packageSmallFilesWorkersPool != null) {
+				packageSmallFilesWorkersPool.shutDownandWaitForAllThreadsToComplete();
+				packageSmallFilesWorkersPool = null;
+			}
+			
+			if (fileCopyWorkersPool != null) {
+				fileCopyWorkersPool.shutDownandWaitForAllThreadsToComplete();
+				fileCopyWorkersPool = null;
+
+			}
+
+
+		}
 
 		rdProUI.println("");
 		rdProUI.println("Done.");
-		rdProUI.println("Copied from "+ props.sourceDir + " to " +   props.getDestDir() );
+		rdProUI.println("Copied from " + props.sourceDir + " to " + props.getDestDir());
+		if (RunTimeProperties.instance.isDebug()) {
+			rdProUI.println("\tFile copier workers count:" + RunTimeProperties.instance.getNumOfThreads());
+			rdProUI.println("\tPackage Small Files workers count:" + RunTimeProperties.instance.getNumberOfThreadsForPackageSmallFiles());
+		}
 
 		rdProUI.println(frs.printBucketSpeedSummary());
 		rdProUI.println("Dir copied:" + frs.getDirCount() + ", Files copied:" + frs.getFilesCount());

@@ -33,28 +33,23 @@ public class CopyFileThread implements Runnable {
 
 	static final int TRIGGER_MULTI_THREAD_THRESHHOLD = 20;
 
-	private String sRootDir, sTargetDir;
 	private FileCopyStatistics statistics;
 	private UI rdProUI;
 
-	File sourceFile;
-	File targetFile;
-	boolean compress;
-
+	private File sourceFile;
+	private File targetFile;
+	private FileUtils.CompressedackageVO compressedackageVO;
 
 
 	public CopyFileThread(UI rdProUI
-			, String sRootDir, String sTargetDir
 			, File sourceFile, File targetFile
-			, boolean compress
+			, FileUtils.CompressedackageVO compressedackageVO
 			, FileCopyStatistics frs) {
-		this.sRootDir = sRootDir;
-		this.sTargetDir = sTargetDir;
 		this.sourceFile = sourceFile;
 		this.targetFile = targetFile;
 		this.statistics = frs;
-		this.compress = compress;
 		this.rdProUI = rdProUI;
+		this.compressedackageVO = compressedackageVO;
 	}
 
 	@Override
@@ -66,26 +61,14 @@ public class CopyFileThread implements Runnable {
 				rdProUI.println(Thread.currentThread().getName() + " Starts");
 			long t1 = System.currentTimeMillis();
 
-			if (compress) {
-
-				FileUtils.CompressedackageVO vo = FileUtils.compressDirectory(sRootDir, false, FileWalker.SMALL_FILE_SIZE);
-				vo.setDestDir(sTargetDir);
-			    File targetZipFile = new File(sTargetDir + File.separator + vo.zipName);
-				FileUtils.copyFile(new File( vo.sourceZipFileWithPath ) , targetZipFile , statistics, rdProUI, vo);
-				if (RunTimeProperties.instance.isDebug()) {
-					rdProUI.println("Zip up the "+ sRootDir +" dir to zip:"+ targetZipFile + ", size=" + vo.zipFileSizeBytes +" Bytes");
-				}
-			}
-			else
-				FileUtils.copyFile(sourceFile, targetFile, statistics, rdProUI, null);
-
+			FileUtils.copyFile(sourceFile, targetFile, statistics, rdProUI, compressedackageVO);
 
 
 			if (RunTimeProperties.instance.isDebug())
 				rdProUI.println("\n"
 						+ Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
 		} else {
-			rdProUI.println("\n" + Thread.currentThread().getName() +   "is stopped.");
+			rdProUI.println("\n" + Thread.currentThread().getName() + "is stopped.");
 
 		}
 

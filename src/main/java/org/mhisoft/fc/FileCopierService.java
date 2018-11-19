@@ -25,27 +25,31 @@ import java.io.FilenameFilter;
 import org.mhisoft.fc.ui.UI;
 
 /**
- * Description: walk the directory and schedule works to remove the target files and directories.
+ * Description: walk the directory and schedule workers to copy over files
  *
  * @author Tony Xue
  * @since Oct, 2014
  */
-public class FileWalker {
+public class FileCopierService {
 
 	//Integer threads;
 	boolean lastAnsweredDeleteAll = false;
 	boolean initialConfirmation = false;
-	Workers workerPool;
-	UI rdProUI;
-	FileCopyStatistics statistics;
+	private UI rdProUI;
+	private FileCopyStatistics statistics;
+	private MultiThreadExecutorService fileCopyWorkersPool;
+	private MultiThreadExecutorService packageSmallFilesWorkersPool;
 
-	public FileWalker(UI rdProUI,
-			Workers workerPool,
+
+	public FileCopierService(UI rdProUI,
 			RunTimeProperties props
 			, FileCopyStatistics frs
+			, MultiThreadExecutorService fileCopyWorkersPool
+			,  MultiThreadExecutorService packageSmallFilesWorkersPool
 	) {
-		this.workerPool = workerPool;
 		this.rdProUI = rdProUI;
+		this.fileCopyWorkersPool = fileCopyWorkersPool;
+		this.packageSmallFilesWorkersPool = packageSmallFilesWorkersPool;
 		this.statistics = frs;
 		rdProUI.reset();
 	}
@@ -53,7 +57,7 @@ public class FileWalker {
 
 	final static long SMALL_FILE_SIZE = 20000;
 
-	public void walkTree(int level, final String[] rootDirs, final String destDir, long targetDirLastModified) {
+	public void walkTreeAndCopy(int level, final String[] rootDirs, final String destDir, long targetDirLastModified) {
 
 
 		String _targetDir;
@@ -101,25 +105,23 @@ public class FileWalker {
 			rdProUI.println("Copying files under directory: " + rootDir);
 
 			//List<File> notQualifiedToPackDirList = new ArrayList<>();
-			boolean thisRootDirQualifiedToPack=false;
+			boolean thisRootDirQualifiedToPack = false;
 
 			/* process files under this "source" dir,  package small files */
-			if (RunTimeProperties.compressSmallFiles && rootDir.isDirectory()) {
+			if (RunTimeProperties.packageSmallFiles && rootDir.isDirectory()) {
 				DirecotryStat direcotryStat = FileUtils.getDirectoryStats(rootDir, SMALL_FILE_SIZE);
 				if (
-						direcotryStat.getSmallFileCount()>=3 //number criteria
-					  || (direcotryStat.getSmallFileCount()>=2 && direcotryStat.getTotalSmallFileSize()>=4096/0.7) //size criteria
+						direcotryStat.getSmallFileCount() >= 3 //number criteria
+								|| (direcotryStat.getSmallFileCount() >= 2 && direcotryStat.getTotalSmallFileSize() >= 4096 / 0.7) //size criteria
 
 
 				) {
 					thisRootDirQualifiedToPack = true;
-					CopyFileThread t = new CopyFileThread(rdProUI
-							, sRootDir, _targetDir
-							,null, null, true, statistics);
-					workerPool.addTask(t);
-				}
-				else
-					thisRootDirQualifiedToPack=false;
+					PackageSmallFilesThread t = new PackageSmallFilesThread(rdProUI
+							, sRootDir, _targetDir, statistics, fileCopyWorkersPool);
+					packageSmallFilesWorkersPool.addTask(t);
+				} else
+					thisRootDirQualifiedToPack = false;
 			}
 
 
@@ -134,16 +136,16 @@ public class FileWalker {
 
 
 				//now what's left in the dir are the large files
-				if ( childFile.isFile()
-				     && (!thisRootDirQualifiedToPack || childFile.length() > SMALL_FILE_SIZE)) {
+				if (childFile.isFile()
+						&& !childFile.getName().startsWith(RunTimeProperties.zip_prefix) //not my zip
+						&& (!thisRootDirQualifiedToPack || childFile.length() > SMALL_FILE_SIZE)) {  //this dir has files I need to copy over
 
 					String newDestFile = _targetDir + File.separator + childFile.getName();
 					File targetFile = new File(newDestFile);
 					if (overrideTargetFile(childFile, targetFile)) {
 						CopyFileThread t = new CopyFileThread(rdProUI
-								, sRootDir, _targetDir
-								, childFile, targetFile, false, statistics);
-						workerPool.addTask(t);
+								, childFile, targetFile, null, statistics);
+						fileCopyWorkersPool.addTask(t);
 					} else {
 						if (RunTimeProperties.instance.isVerbose())
 							rdProUI.println(String.format("\tFile %s exists on the target dir. Skip based on the input. ", newDestFile));
@@ -164,9 +166,9 @@ public class FileWalker {
 				}
 
 				if (childDir.isDirectory()) {
-					
+
 					String targeChildDir = _targetDir + File.separator + childDir.getName();
-					walkTree(level + 1, new String[]{childDir.getAbsolutePath()}, targeChildDir, childDir.lastModified() );
+					walkTreeAndCopy(level + 1, new String[]{childDir.getAbsolutePath()}, targeChildDir, childDir.lastModified());
 				}
 			}
 
@@ -178,6 +180,7 @@ public class FileWalker {
 
 	/**
 	 * do the copy if return true
+	 *
 	 * @param srcFile
 	 * @param targetFile
 	 * @return
@@ -196,8 +199,7 @@ public class FileWalker {
 					return false;
 			}
 			return true;
-		}
-		else
+		} else
 			return false;
 	}
 

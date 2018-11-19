@@ -23,6 +23,7 @@
 package org.mhisoft.fc;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -428,7 +429,7 @@ public class FileUtils {
 		Path sourcePath = Paths.get(dirPath);
 
 		//put the zip under the same sourcePath.
-		String name = "_"+sourcePath.getFileName().toString()+".zip";
+		String name = RunTimeProperties.zip_prefix + sourcePath.getFileName().toString()+".zip";
 		final String zipFileName = dirPath.concat(File.separator).concat(name);
 
 		CompressedackageVO  ret = new CompressedackageVO(name ,sourcePath.getFileName().toString(), zipFileName);
@@ -436,6 +437,7 @@ public class FileUtils {
 
 		try {
 			ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
+			outputStream.setLevel(Deflater.BEST_COMPRESSION);
 			Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {

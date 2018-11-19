@@ -6,15 +6,21 @@ package org.mhisoft.fc;
 public class RunTimeProperties {
 
 	public static final int DEFAULT_THREAD_NUM = 2;
+	public static final int DEFAULT_PACKAGE_SMALL_FILES_THREAD_NUM = 5;
 	public static String userHome = System.getProperty("user.home") ;
-	public static boolean compressSmallFiles = Boolean.getBoolean("compressSmallFiles");
+
+	public static String zip_prefix ="_fastcopy_auto_create_";
+
+	public static boolean packageSmallFiles = Boolean.valueOf(System.getProperty("compressSmallFiles", "true"));
 	public static boolean debug = Boolean.getBoolean("debug");
+
 
 	public static RunTimeProperties instance = new RunTimeProperties();
 
 	private RunTimeProperties() {
 		//
 	}
+
 
 	String sourceDir = null;
 	String destDir = null;
@@ -26,6 +32,7 @@ public class RunTimeProperties {
 	boolean flatCopy;
 	boolean debugArg;
 	boolean createTheSameSourceFolderUnderTarget;
+
 
 
 	public String getSourceDir() {
@@ -62,6 +69,15 @@ public class RunTimeProperties {
 
 	public int getNumOfThreads() {
 		return numOfThreads;
+	}
+
+
+	public  boolean isPackageSmallFiles() {
+		return packageSmallFiles;
+	}
+
+	public int getNumberOfThreadsForPackageSmallFiles() {
+		return isPackageSmallFiles()?  DEFAULT_PACKAGE_SMALL_FILES_THREAD_NUM : 1;
 	}
 
 	public void setNumOfThreads(int numOfThreads) {
@@ -120,7 +136,7 @@ public class RunTimeProperties {
 		sb.append(", createTheSameSourceFolderUnderTarget=").append(createTheSameSourceFolderUnderTarget);
 		sb.append(", flatCopy=").append(flatCopy);
 		sb.append(", debugArg=").append(debugArg);
-		sb.append(", compressSmallFiles=").append(RunTimeProperties.compressSmallFiles);
+		sb.append(", compressSmallFiles=").append(RunTimeProperties.packageSmallFiles);
 		sb.append('}');
 		return sb.toString();
 	}
