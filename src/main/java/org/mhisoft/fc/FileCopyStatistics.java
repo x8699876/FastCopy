@@ -93,6 +93,10 @@ public class FileCopyStatistics {
 		return filesCount.get();
 	}
 
+	public void addFileCount(long value) {
+		filesCount.addAndGet(value);
+	}
+
 
 	public double getTotalFileSize() {
 		return totalFileSize.get();
@@ -195,7 +199,7 @@ public class FileCopyStatistics {
 
 
 
-	String sOverall = "Total Files: %s, Total size: %s Mb, Took: %s ms, Overall Avg Speed=%s Mb/s";
+	String sOverall = "Total Files: %s, Total size: %s Mb, Took: %s, Overall Avg Speed=%s Mb/s";
 
 	public String printOverallProgress() {
 		double fsize = getTotalFileSize() / 1024 /1024;

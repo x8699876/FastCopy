@@ -100,7 +100,7 @@ public class FileUtils {
 				//+File.separator + compressedackageVO.originalDirname);
 				FileUtils.createDir( compressedackageVO.originalDirLastModified, destZipDir, rdProUI, statistics);
 
-				unzipFile(target , destZipDir ) ;
+				unzipFile(target , destZipDir, statistics ) ;
 
 				//delete the target zip
 				target.delete();
@@ -485,13 +485,14 @@ public class FileUtils {
 	 * @param destDir
 	 * @throws IOException
 	 */
-	public static void unzipFile(File zipFile, File destDir ) throws IOException {
+	protected static void unzipFile(File zipFile, File destDir, FileCopyStatistics statistics ) throws IOException {
 		byte[] buffer = new byte[4096];
 		ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
 		ZipEntry zipEntry = zis.getNextEntry();
+		long filesCount =0;
 		while (zipEntry != null) {
+			filesCount++;
 			File destFile = new File(destDir, zipEntry.getName());
-
 			FileOutputStream fos = new FileOutputStream(destFile);
 			int len;
 			while ((len = zis.read(buffer)) > 0) {
@@ -505,6 +506,9 @@ public class FileUtils {
 		}
 		zis.closeEntry();
 		zis.close();
+
+		statistics.addFileCount(filesCount-1);//exclude the zip file itself. 
+
 	}
 
 	/**
