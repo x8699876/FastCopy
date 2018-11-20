@@ -57,7 +57,7 @@ Examples:
 
 ## GUI version:
 
-![Screenshot](/doc/10-14-2018%201-58-04%20PM.png "screenshot")
+![Screenshot](/doc/fastcopy-v1.2.6-screenshot-2018-11-19_23-31-58.png "screenshot")
 
 
 * The source can be a combination of multiple directories and files delimited by the semicolon ";". You can either use the browse button to choose directories or copy paste directly into the input box. The file choose supports multiple directories selections.
