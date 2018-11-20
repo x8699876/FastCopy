@@ -71,13 +71,13 @@ public class FileUtils {
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)
-				rdProUI.println(String.format("\n\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
+				rdProUI.println(String.format("\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
 						, timeTook)
 				);
 			else
-				rdProUI.println(String.format("\n\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
+				rdProUI.println(String.format("\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length() / 1024)
 						, timeTook)
