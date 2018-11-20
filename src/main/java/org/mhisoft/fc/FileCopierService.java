@@ -142,13 +142,13 @@ public class FileCopierService {
 
 					String newDestFile = _targetDir + File.separator + childFile.getName();
 					File targetFile = new File(newDestFile);
-					if (overrideTargetFile(childFile, targetFile)) {
+					if (!targetFile.exists() || overrideTargetFile(childFile, targetFile)) {
 						CopyFileThread t = new CopyFileThread(rdProUI
 								, childFile, targetFile, null, statistics);
 						fileCopyWorkersPool.addTask(t);
 					} else {
 						if (RunTimeProperties.instance.isVerbose())
-							rdProUI.println(String.format("\tFile %s exists on the target dir. Skip based on the input. ", newDestFile));
+							rdProUI.println(String.format("\tFile %s exists on the target dir, skipped. ", newDestFile));
 					}
 
 

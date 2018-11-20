@@ -128,16 +128,16 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	public  void help() {
 		printBuildAndDisclaimer();
 		println("Usages:");
-		println("\t fastcopy [option] -from source-dir -to target-dir ");
+		println("\t fc [option] -from source_dir -to target_dir ");
 		println("\t source-dir: The source files and directories delimited with semicolon.");
 		println("\t target-dir: The target directory.");
 		println("\t Options: ");
-		println("\t\t -v verbose mode");
-		println("\t\t -m use multi thread for SSD");
-		println("\t\t -o override");
-		println("\t\t -f flat copy, copy everything to one flat target directory");
-		println("\t\t -n override if new or different");
-		println("\t\t -w number of worker threads, default 5");
+		println("\t\t -v verbose mode.");
+		println("\t\t -m use multiple threads, best for copying across the SSD drives.");
+		println("\t\t -w number of worker threads, default:" + RunTimeProperties.DEFAULT_THREAD_NUM+".");
+		println("\t\t -o always override.");
+		println("\t\t -n override only when the source file newer or different in size.");
+		println("\t\t -f flat copy, copy everything to the same target directory.");
 		println("Examples:");
 		println("\t\t copy from current dir to the backup directory: fastcopy t:\\backup");
 		println("\t\t fastcopy -from s:\\projects\\dir1;s:\\projects\\dir2 -to t:\\backup");

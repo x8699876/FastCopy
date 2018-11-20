@@ -126,6 +126,7 @@ public class FastCopy {
 		rdProUI.println("Copied from " + props.sourceDir + " to " + props.getDestDir());
 		if (RunTimeProperties.instance.isDebug()) {
 			rdProUI.println("\tFile copier workers count:" + RunTimeProperties.instance.getNumOfThreads());
+			rdProUI.println("\tisPackageSmallFiles:" + RunTimeProperties.instance.isPackageSmallFiles());
 			rdProUI.println("\tPackage Small Files workers count:" + RunTimeProperties.instance.getNumberOfThreadsForPackageSmallFiles());
 		}
 

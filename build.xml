@@ -5,7 +5,7 @@
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 
-    <property name="AppVersion" value="1.2.5"/>
+    <property name="AppVersion" value="1.2.6"/>
     <property name="repository.dir" value="~/repository"/>
 
     <!-- set the operating system test properties -->

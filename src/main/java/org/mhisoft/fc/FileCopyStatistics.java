@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.text.DecimalFormat;
 
-//import com.sun.jna.Library;
-//import com.sun.jna.Native;
-//import com.sun.jna.WString;
 
 /**
  * Description: Statistics on files and directories copied.
@@ -67,9 +64,6 @@ public class FileCopyStatistics {
 		AtomicLong totalSize =new AtomicLong(0); //bytes
 		AtomicLong totalTime =new AtomicLong(0);   // milli seconds
 
-//		double speed; //Byte Per Seconds
-//		double minSpeed = 0; //Byte Per Seconds
-//		double maxSpeed = 0; //Byte Per Seconds
 		AtomicLong fileCount =new AtomicLong(0);
 
 		public BucketBySize(long size, String name) {
@@ -153,27 +147,6 @@ public class FileCopyStatistics {
 
 
 
-	/**
-	 * @param fsize    in KB
-	 * @param speed    KB/s
-	 * @param fileTime milli sec
-	 */
-	/*public void setSpeedForBucket(double fsize, double speed, long fileTime) {
-		if (fileTime<=0)
-			return;
-
-        BucketBySize bucketBySize = getBucket(fsize);
-		bucketBySize.atomicAdd(fsize, fileTime);
-
-		if (speed > 0) {
-			bucketBySize.speed = speed;
-			if (bucketBySize.minSpeed == 0 || speed < bucketBySize.minSpeed)
-				bucketBySize.minSpeed = speed;
-			if (bucketBySize.maxSpeed == 0 || speed > bucketBySize.maxSpeed)
-				bucketBySize.maxSpeed = speed;
-		}
-	}*/
-
 	static DecimalFormat df = new DecimalFormat("###,###.##");
 
 	public String printBucketSpeedSummary() {
@@ -192,11 +165,8 @@ public class FileCopyStatistics {
 				else
 				avgSpeed = "NA";
 
-			//slong totalTimeInSeconds = entry.totalTime.get()/1000;
-
 			sb.append("Files ").append(entry.name).append(": ")
-//					.append(String.format("Max Speed: %s KB/s, Avg Speed:%s MB/s, ", df.format(entry.maxSpeed),avgSpeed ))
-					.append( "Total Time:").append(entry.totalTime.get()).append(" (ms)")
+					.append( "Total Time:").append(getDisplayTime(entry.totalTime.get()))
 					.append( ", count:").append(entry.fileCount)
 					.append(String.format(", Avg Speed:%s (Mb/s)", avgSpeed ))
 					.append("\n");
@@ -205,6 +175,17 @@ public class FileCopyStatistics {
 
 		return sb.toString();
 
+	}
+
+
+	public static String getDisplayTime(final long millis) {
+		double _d= millis;
+		if (millis<1000) {
+			return  millis + " (ms)";
+		}
+		else {
+			return  df.format(_d/1000) + " (s)";
+		}
 	}
 
 	public static String getAvgSpeedString(double fileSizeInKB, long totalTimeInMillis) {
@@ -221,47 +202,9 @@ public class FileCopyStatistics {
 		return String.format(sOverall
 				, df.format(getFilesCount())
 				, df.format(fsize)
-				, df.format(this.totalTime)
+				, getDisplayTime(this.totalTime.get())
 				, df.format(fsize*1000/totalTime.get()));
 	}
-
-
-//	interface Kernel32 extends Library {
-//		public int GetFileAttributesW(WString fileName);
-//	}
-//
-//	static Kernel32 lib = null;
-//	public static int getWin32FileAttributes(File f) throws IOException {
-//		if (lib == null) {
-//			synchronized (Kernel32.class) {
-//				lib = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class);
-//			}
-//		}
-//		return lib.GetFileAttributesW(new WString(f.getCanonicalPath()));
-//	}
-
-//	public static boolean isJunctionOrSymlink(File f) throws IOException {
-//		if (!f.exists()) { return false; }
-//		int attributes = getWin32FileAttributes(f);
-//		if (-1 == attributes) { return false; }
-//		return ((0x400 & attributes) != 0);
-//	}
-//
-//	public static void main(String[] args) {
-//		try {
-//			String link = "D:\\plateau-talent-management-b1408\\webapps\\learning";
-//			boolean b = isJunctionOrSymlink( new File (link));
-//			System.out.println("isJunctionOrSymlink=" + b);
-//			Path p =  Paths.get(link);
-//			boolean isSymbolicLink = Files.isSymbolicLink(p);
-//			System.out.println("isSymbolicLink=" + isSymbolicLink);
-//
-//
-//
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 
 
