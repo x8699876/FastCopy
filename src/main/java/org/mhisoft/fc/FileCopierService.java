@@ -19,6 +19,9 @@
  */
 package org.mhisoft.fc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.io.File;
 import java.io.FilenameFilter;
 
@@ -91,18 +94,29 @@ public class FileCopierService {
 					FileUtils.createDir(rootDir.lastModified(), new File(_targetDir), rdProUI, statistics);
 			}
 
+			List<File> filesList = new ArrayList<>();
+			if (rootDir.isFile()) {
+				/* the rootDir here is only a file  */
+				filesList.add(rootDir);
+			}
+			else {
 
-			File[] list = rootDir.listFiles(new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String name) {
-					return true; //todo
-				}
-			});
+				File[] childFiles = rootDir.listFiles(new FilenameFilter() {
+					@Override
+					public boolean accept(File dir, String name) {
+						return true; //todo
+					}
+				});
 
-			if (list == null)
+				filesList = Arrays.asList(childFiles);
+				rdProUI.println("Copying files under directory: " + rootDir);
+
+
+			}
+
+			if (filesList.isEmpty())
 				return;
 
-			rdProUI.println("Copying files under directory: " + rootDir);
 
 			//List<File> notQualifiedToPackDirList = new ArrayList<>();
 			boolean thisRootDirQualifiedToPack = false;
@@ -127,7 +141,7 @@ public class FileCopierService {
 
 
 			/*iterate the child files  of this "rootDir, copy over the reset of the large files*/
-			for (File childFile : list) {
+			for (File childFile : filesList) {
 
 				if (FastCopy.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
@@ -158,7 +172,7 @@ public class FileCopierService {
 
 
 			/*iterate the child directories of this "rootDir*/
-			for (File childDir : list) {
+			for (File childDir : filesList) {
 
 				if (FastCopy.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
