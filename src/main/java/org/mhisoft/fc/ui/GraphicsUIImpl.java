@@ -211,9 +211,10 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 				props.setSourceDir(noneHyfenArgs.get(0));
 
 			else {
-				//rdpro classes
-				props.setSourceDir(RunTimeProperties.userHome);
-				props.setDestDir(noneHyfenArgs.get(0));
+
+				//for the UI version, it needs to be working from the context menu, which only takes one noneHyfenArgs dir from
+				// the windows explorer
+				props.setSourceDir(noneHyfenArgs.get(0));
 			}
 
 		} else {
