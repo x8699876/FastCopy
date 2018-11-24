@@ -76,7 +76,7 @@ public class FileCopierService {
 
 
 		for (String sRootDir : rootDirs) {
-			File rootDir = new File(sRootDir);
+			File rootDir = new File(sRootDir.trim());
 
 			if (FastCopy.isStopThreads()) {
 				rdProUI.println("[warn]Cancelled by user. stop walk. ");

@@ -22,6 +22,7 @@
 
 package org.mhisoft.fc;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -32,15 +33,26 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 
 import org.mhisoft.fc.ui.UI;
@@ -84,30 +96,37 @@ public class FileUtils {
 				);
 		}
 
-		             //todo need to adjust for packaged zip
+		//todo need to adjust for packaged zip
 		statistics.getBucket(source.length()).incrementFileCount();
 
 
 		try {
 			//exploded it  the target zip file on the dest dir
-			if (compressedackageVO!=null) {
+			if (compressedackageVO != null) {
 
-				//delete the source zip
-				source.delete();
 
-				//create destdir
-				File destZipDir = new File (compressedackageVO.getDestDir());
-				//+File.separator + compressedackageVO.originalDirname);
-				FileUtils.createDir( compressedackageVO.originalDirLastModified, destZipDir, rdProUI, statistics);
+				try {
+					//create destdir
+					File destZipDir = new File(compressedackageVO.getDestDir());
+					//+File.separator + compressedackageVO.originalDirname);
+					FileUtils.createDir(compressedackageVO.originalDirLastModified, destZipDir, rdProUI, statistics);
 
-				unzipFile(target , destZipDir, statistics ) ;
+					unzipFile(target, destZipDir, statistics);
 
-				//delete the target zip
-				target.delete();
+				} finally {
+						//delete the source zip
+						source.delete();
+
+						//delete the target zip
+						deleteFile(target.getAbsolutePath(), rdProUI);
+				}
+
+
 			}
 		} catch (IOException e) {
 			rdProUI.printError(e.getMessage());
 		}
+
 
 
 		try {
@@ -115,6 +134,27 @@ public class FileUtils {
 			//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
 		} catch (Exception e) {
 			rdProUI.printError(e.getMessage());
+		}
+
+	}
+
+
+	public static void  deleteFile(String file,  final UI rdProUI) {
+		try
+		{
+			Files.deleteIfExists(Paths.get(file));
+		}
+		catch(NoSuchFileException e)
+		{
+			rdProUI.printError("Can not delete file:"+ file+", No such file/directory exists");
+		}
+		catch(DirectoryNotEmptyException e)
+		{
+			rdProUI.printError("Can not delete file:"+ file+",Directory is not empty.");
+		}
+		catch(IOException e)
+		{
+			rdProUI.printError("Can not delete file:"+ file+",Invalid permissions."+ e.getMessage());
 		}
 
 	}
@@ -198,23 +238,51 @@ public class FileUtils {
 	}*/
 
 
-	private static long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
-		FileChannel in = null;
-		FileChannel out = null;
+	private static long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics
+			, final UI rdProUI
+//			, boolean isCalculateDigest
+//			, int bufferCapacity
+
+	) {
+		ReadableByteChannel inChannel = null;
+		WritableByteChannel outChannel = null;
 		long totalFileSize = 0;
 		rdProUI.showProgress(0, statistics);
 		long startTime, endTime = 0;
+		MessageDigest md5In=null, md5Out=null;
 
 		startTime = System.currentTimeMillis();
+		InputStream inputStream ;
+		OutputStream outputStream ;
 
 		try {
-			in = new FileInputStream(source).getChannel();
-			out = new FileOutputStream(target).getChannel();
-			totalFileSize = in.size();
+			//in = new FileInputStream(source).getChannel();
+			totalFileSize = source.length();
+
+			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+				md5In = MessageDigest.getInstance("MD5");
+				inputStream = new DigestInputStream(new FileInputStream(source),md5In);
+			}
+			else {
+				inputStream =   new FileInputStream(source);
+			}
+
+			inChannel = Channels.newChannel(inputStream);
+
+
+			//out = new FileOutputStream(target).getChannel();
+			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+				md5Out = MessageDigest.getInstance("MD5");
+				outputStream = new DigestOutputStream(new FileOutputStream(target), md5Out);
+			}
+			else {
+				outputStream =   new FileOutputStream(target);
+			}
+			outChannel = Channels.newChannel( outputStream);
 
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
-			int readSize = in.read(buffer);
+			int readSize = inChannel.read(buffer);
 			long totalRead = 0;
 			int progress = 0;
 
@@ -235,14 +303,26 @@ public class FileUtils {
 				buffer.flip();
 
 				while (buffer.hasRemaining()) {
-					out.write(buffer);
+					outChannel.write(buffer);
 					//System.out.printf(".");
 					//showPercent(rdProUI, totalSize/size );
 				}
 				buffer.clear();
-				readSize = in.read(buffer);
+				readSize = inChannel.read(buffer);
 
 			}
+
+
+			/* compare the digest */
+			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+				byte[] sourceFileMD5 = md5In.digest();
+				byte[] targetFileMD5 = md5Out.digest();
+				if (Arrays.equals(sourceFileMD5, targetFileMD5)) {
+					//todo
+					rdProUI.print("Verified,");
+				}
+			}
+
 
 			endTime = System.currentTimeMillis();
 
@@ -253,9 +333,14 @@ public class FileUtils {
 
 		} catch (IOException e) {
 			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
-		} finally {
-			close(in);
-			close(out);
+		} catch (NoSuchAlgorithmException e) {
+			rdProUI.printError(e.getMessage());
+			throw new RuntimeException(e);
+		}
+
+		finally {
+			close(inChannel);
+			close(outChannel);
 		}
 		return (endTime - startTime);
 	}
@@ -286,8 +371,6 @@ public class FileUtils {
 	*/
 
 
-
-
 	/**
 	 * Get total size of all the files immediately under this rootDir.
 	 * It does not count the sub directories.
@@ -295,7 +378,7 @@ public class FileUtils {
 	 * @param rootDir
 	 * @return
 	 */
-	public static DirecotryStat getDirectoryStats(final File rootDir,  final long smallFileSizeThreashold) {
+	public static DirecotryStat getDirectoryStats(final File rootDir, final long smallFileSizeThreashold) {
 
 		final AtomicLong size = new AtomicLong(0);
 		final AtomicLong fileCount = new AtomicLong(0);
@@ -307,7 +390,7 @@ public class FileUtils {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 					size.addAndGet(attrs.size());
 					fileCount.incrementAndGet();
-					if (attrs.size()<=smallFileSizeThreashold) {
+					if (attrs.size() <= smallFileSizeThreashold) {
 						ret.incrementSmallFileCount();
 						ret.addToTotalSmallFileSize(attrs.size());
 					}
@@ -350,7 +433,7 @@ public class FileUtils {
 	}
 
 
-	public static void createDir(long originalDirLastModified,  final File targetDir, final UI ui, final FileCopyStatistics frs) {
+	public static void createDir(long originalDirLastModified, final File targetDir, final UI ui, final FileCopyStatistics frs) {
 		// if the directory does not exist, create it
 		if (!targetDir.exists()) {
 			//ui.println("creating directory: " + theDir.getName());
@@ -359,7 +442,7 @@ public class FileUtils {
 				targetDir.mkdir();
 				result = true;
 
-				if (originalDirLastModified!=-1) {
+				if (originalDirLastModified != -1) {
 					try {
 						boolean b = targetDir.setLastModified(originalDirLastModified);
 					} catch (Exception e) {
@@ -396,7 +479,7 @@ public class FileUtils {
 
 
 	public static class CompressedackageVO {
-		String zipName ; //  _originalDirname.zip
+		String zipName; //  _originalDirname.zip
 		String originalDirname;
 		long originalDirLastModified;
 		String sourceZipFileWithPath;
@@ -420,19 +503,22 @@ public class FileUtils {
 
 	/**
 	 * Compress the directory contains small files.
-	 * @param dirPath   The directory
-	 * @param recursive recursive or not.
+	 *
+	 * @param dirPath                 The directory
+	 * @param recursive               recursive or not.
 	 * @param smallFileSizeThreashold if the file size is smaller or equals than this, it is included.    if -1, it does not apply
 	 * @return zip file name without path
 	 */
+
+	//todo if target file exists and override is not check. need to skip zipping it.
 	public static CompressedackageVO compressDirectory(final String dirPath, final boolean recursive, final long smallFileSizeThreashold) {
 		Path sourcePath = Paths.get(dirPath);
 
 		//put the zip under the same sourcePath.
-		String name = RunTimeProperties.zip_prefix + sourcePath.getFileName().toString()+".zip";
+		String name = RunTimeProperties.zip_prefix + sourcePath.getFileName().toString() + ".zip";
 		final String zipFileName = dirPath.concat(File.separator).concat(name);
 
-		CompressedackageVO  ret = new CompressedackageVO(name ,sourcePath.getFileName().toString(), zipFileName);
+		CompressedackageVO ret = new CompressedackageVO(name, sourcePath.getFileName().toString(), zipFileName);
 		ret.originalDirLastModified = sourcePath.toFile().lastModified();
 
 		try {
@@ -442,8 +528,8 @@ public class FileUtils {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
 					try {
-						if (( smallFileSizeThreashold==-1 ||file.toFile().length()<=smallFileSizeThreashold) //
-						    && !file.getFileName().toString().equals(name)) { //exclude the zip file itself. 
+						if ((smallFileSizeThreashold == -1 || file.toFile().length() <= smallFileSizeThreashold) //
+								&& !file.getFileName().toString().equals(name)) { //exclude the zip file itself.
 
 							Path targetFile = sourcePath.relativize(file);
 							ZipEntry ze = new ZipEntry(targetFile.toString());
@@ -451,9 +537,10 @@ public class FileUtils {
 							outputStream.putNextEntry(ze);
 							//note read whole file into memory. it is what we wanted for small size files.
 							byte[] bytes = Files.readAllBytes(file);
+							ret.zipFileSizeBytes = bytes.length;
+
 							outputStream.write(bytes, 0, bytes.length);
 							outputStream.closeEntry();
-							ret.zipFileSizeBytes =bytes.length;
 						}
 					} catch (IOException e) {
 						throw new RuntimeException("compressDirectory() failed", e);
@@ -467,7 +554,7 @@ public class FileUtils {
 					if (dir.equals(sourcePath))
 						return FileVisitResult.CONTINUE;
 					else
-						return recursive?FileVisitResult.CONTINUE:FileVisitResult.SKIP_SUBTREE;
+						return recursive ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
 				}
 
 			});
@@ -481,33 +568,37 @@ public class FileUtils {
 
 	/**
 	 * Unzip the zipFile to the deskDir
+	 *
 	 * @param zipFile
 	 * @param destDir
 	 * @throws IOException
 	 */
-	protected static void unzipFile(File zipFile, File destDir, FileCopyStatistics statistics ) throws IOException {
+	protected static void unzipFile(File zipFile, File destDir, FileCopyStatistics statistics) throws IOException {
 		byte[] buffer = new byte[4096];
 		ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
 		ZipEntry zipEntry = zis.getNextEntry();
-		long filesCount =0;
-		while (zipEntry != null) {
-			filesCount++;
-			File destFile = new File(destDir, zipEntry.getName());
-			FileOutputStream fos = new FileOutputStream(destFile);
-			int len;
-			while ((len = zis.read(buffer)) > 0) {
-				fos.write(buffer, 0, len);
+		long filesCount;
+		try {
+			filesCount = 0;
+			while (zipEntry != null) {
+				filesCount++;
+				File destFile = new File(destDir, zipEntry.getName());
+				FileOutputStream fos = new FileOutputStream(destFile);
+				int len;
+				while ((len = zis.read(buffer)) > 0) {
+					fos.write(buffer, 0, len);
+				}
+				fos.close();
+				destFile.setLastModified(zipEntry.getTime());
+				zipEntry = zis.getNextEntry();
 			}
-			fos.close();
-
-			destFile.setLastModified(zipEntry.getTime());
-
-			zipEntry = zis.getNextEntry();
+		} finally {
+			zis.closeEntry();
+			zis.close();
 		}
-		zis.closeEntry();
-		zis.close();
 
-		statistics.addFileCount(filesCount-1);//exclude the zip file itself. 
+
+		statistics.addFileCount(filesCount - 1);//exclude the zip file itself.
 
 	}
 
@@ -519,7 +610,7 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String[] splitFileParts(final String fileWithPath) {
-		if (fileWithPath==null || fileWithPath.trim().length()==0)
+		if (fileWithPath == null || fileWithPath.trim().length() == 0)
 			return null;
 
 		String[] ret = new String[3];
@@ -539,15 +630,13 @@ public class FileUtils {
 			fileName = tokens[0];
 			if (tokens.length > 1)
 				fileExt = tokens[1];
-		}
-		else
-			fileName=null;
+		} else
+			fileName = null;
 
 
 		ret[0] = dir;
 		ret[1] = fileName;
 		ret[2] = fileExt;
-
 
 
 		return ret;
@@ -556,8 +645,10 @@ public class FileUtils {
 
 	public static void main(String[] args) {
 		String dir = "S:\\src\\b1611-trunk\\dev-light\\apps\\learning\\sapui5-modules\\browse-catalog\\src\\main\\control";
-		compressDirectory(dir, true, 20000 );
+		compressDirectory(dir, true, 20000);
 	}
+
+
 }
 
 

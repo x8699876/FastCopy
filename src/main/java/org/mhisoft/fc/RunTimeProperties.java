@@ -11,8 +11,9 @@ public class RunTimeProperties {
 
 	public static String zip_prefix ="_fastcopy_auto_create_";
 
-	public static boolean packageSmallFiles = Boolean.valueOf(System.getProperty("compressSmallFiles", "true"));
-	public static boolean debug = Boolean.getBoolean("debug");
+	static boolean packageSmallFiles = Boolean.valueOf(System.getProperty("compressSmallFiles", "true"));
+	private static boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "true"));
+	private  static boolean debug = Boolean.getBoolean("debug");
 
 
 	public static RunTimeProperties instance = new RunTimeProperties();
@@ -124,6 +125,15 @@ public class RunTimeProperties {
 		this.createTheSameSourceFolderUnderTarget = createTheSameSourceFolderUnderTarget;
 	}
 
+	public  void setVerifyAfterCopy(boolean verifyAfterCopy) {
+		RunTimeProperties.verifyAfterCopy = verifyAfterCopy;
+	}
+
+
+	public  boolean isVerifyAfterCopy() {
+		return verifyAfterCopy;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RunTimeProperties{");
@@ -137,6 +147,7 @@ public class RunTimeProperties {
 		sb.append(", flatCopy=").append(flatCopy);
 		sb.append(", debugArg=").append(debugArg);
 		sb.append(", compressSmallFiles=").append(RunTimeProperties.packageSmallFiles);
+		sb.append(", verifyAfterCopy=").append(RunTimeProperties.verifyAfterCopy);
 		sb.append('}');
 		return sb.toString();
 	}
