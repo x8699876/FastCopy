@@ -15,6 +15,10 @@ public class RunTimeProperties {
 	private static boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "true"));
 	private  static boolean debug = Boolean.getBoolean("debug");
 
+	private static boolean stopThreads = false;
+	private boolean running;
+
+
 
 	public static RunTimeProperties instance = new RunTimeProperties();
 
@@ -33,6 +37,24 @@ public class RunTimeProperties {
 	boolean flatCopy;
 	boolean debugArg;
 	boolean createTheSameSourceFolderUnderTarget;
+
+
+	public  boolean isStopThreads() {
+		return stopThreads;
+	}
+
+
+	public  void setStopThreads(boolean stopThreads) {
+		stopThreads = stopThreads;
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
 
 
 

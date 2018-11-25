@@ -102,7 +102,7 @@ public class FastCopyMainForm {
 	}
 
 	public void stopIt() {
-		fastCopy.setStopThreads(true);
+		RunTimeProperties.instance.setStopThreads(true);
 		progressPanel.setVisible(false);
 
 		fastCopy.stopWorkers();
@@ -112,7 +112,7 @@ public class FastCopyMainForm {
 
 
 		//set running false only afer all threads are shutdown.
-		fastCopy.setRunning(false);
+		RunTimeProperties.instance.setRunning(false);
 		btnCancel.setText("Close");
 
 	}
@@ -138,7 +138,7 @@ public class FastCopyMainForm {
 		btnCancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (fastCopy.isRunning()) {
+				if (RunTimeProperties.instance.isRunning()) {
 					stopIt();
 
 				} else {

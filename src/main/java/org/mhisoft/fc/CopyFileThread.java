@@ -55,7 +55,7 @@ public class CopyFileThread implements Runnable {
 	@Override
 	public void run() {
 
-		if (!FastCopy.isStopThreads()) {
+		if (!RunTimeProperties.instance.isStopThreads()) {
 
 			if (RunTimeProperties.instance.isDebug())
 				rdProUI.println(Thread.currentThread().getName() + " Starts");

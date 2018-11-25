@@ -23,6 +23,7 @@
 package org.mhisoft.fc;
 
 import java.util.Arrays;
+import java.util.Formatter;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -55,6 +56,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 
+import org.mhisoft.fc.ui.ConsoleRdProUIImpl;
 import org.mhisoft.fc.ui.UI;
 
 /**
@@ -75,21 +77,27 @@ public class FileUtils {
 			, final FileUtils.CompressedackageVO compressedackageVO) {
 
 		long timeTook = 0;
-		if (source.length() < SMALL_FILE_SIZE) {
-			timeTook = FileUtils.copySmallFiles(source, target, statistics, rdProUI);
-		} else
-			timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
+		try {
+			if (source.length() < SMALL_FILE_SIZE) {
+				timeTook = FileUtils.copySmallFiles(source, target, statistics, rdProUI);
+			} else
+				timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
+		} catch (Exception e) {
+			rdProUI.printError(e.getMessage());
+			RunTimeProperties.instance.setStopThreads(true);
+			return;
+		}
 
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)
-				rdProUI.println(String.format("\tCopy file %s-->%s, size:%s (bytes), took %s (ms)"
+				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (bytes), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
 						, timeTook)
 				);
 			else
-				rdProUI.println(String.format("\tCopy file %s-->%s, size:%s (Kb), took %s (ms)"
+				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (Kb), took %s (ms)"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length() / 1024)
 						, timeTook)
@@ -114,11 +122,11 @@ public class FileUtils {
 					unzipFile(target, destZipDir, statistics);
 
 				} finally {
-						//delete the source zip
-						source.delete();
+					//delete the source zip
+					source.delete();
 
-						//delete the target zip
-						deleteFile(target.getAbsolutePath(), rdProUI);
+					//delete the target zip
+					deleteFile(target.getAbsolutePath(), rdProUI);
 				}
 
 
@@ -126,7 +134,6 @@ public class FileUtils {
 		} catch (IOException e) {
 			rdProUI.printError(e.getMessage());
 		}
-
 
 
 		try {
@@ -139,22 +146,15 @@ public class FileUtils {
 	}
 
 
-	public static void  deleteFile(String file,  final UI rdProUI) {
-		try
-		{
+	public static void deleteFile(String file, final UI rdProUI) {
+		try {
 			Files.deleteIfExists(Paths.get(file));
-		}
-		catch(NoSuchFileException e)
-		{
-			rdProUI.printError("Can not delete file:"+ file+", No such file/directory exists");
-		}
-		catch(DirectoryNotEmptyException e)
-		{
-			rdProUI.printError("Can not delete file:"+ file+",Directory is not empty.");
-		}
-		catch(IOException e)
-		{
-			rdProUI.printError("Can not delete file:"+ file+",Invalid permissions."+ e.getMessage());
+		} catch (NoSuchFileException e) {
+			rdProUI.printError("Can not delete file:" + file + ", No such file/directory exists");
+		} catch (DirectoryNotEmptyException e) {
+			rdProUI.printError("Can not delete file:" + file + ",Directory is not empty.");
+		} catch (IOException e) {
+			rdProUI.printError("Can not delete file:" + file + ",Invalid permissions." + e.getMessage());
 		}
 
 	}
@@ -184,15 +184,29 @@ public class FileUtils {
 			//do the copy
 			inChannel.transferTo(0, inChannel.size(), outChannel);
 
+
+			//verify
+			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+				byte[] sourceHash = readFileContentHash(source, rdProUI);
+				byte[] targetHash = readFileContentHash(target, rdProUI);
+				if(!Arrays.equals(sourceHash, targetHash)) {
+					//rdProUI.printError("Failed to verify the copy:" + target.getAbsolutePath());
+					throw new RuntimeException("Failed to verify the copy:" + target.getAbsolutePath());
+				}
+				else {
+					rdProUI.print("Verified.");
+				}
+			}
+
+
 			//done
 			endTime = System.currentTimeMillis();
 			rdProUI.showProgress(100, statistics);
-
 			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
 			statistics.incrementFileCount();
-			rdProUI.showProgress(100, statistics);
 
-		} catch (IOException e) {
+
+		} catch (IOException | NoSuchAlgorithmException e) {
 			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
 		} finally {
 			close(inChannel);
@@ -201,41 +215,6 @@ public class FileUtils {
 		return (endTime - startTime);
 	}
 
-
-	/*public static long copyDirectory(final File source, final File target
-			, FileCopyStatistics statistics, final UI rdProUI) {
-		long startTime = 0, endTime = 0;
-		Path sourcePath = Paths.get(source.getAbsolutePath());
-		Path targetPath = Paths.get(target.getAbsolutePath());
-
-
-		startTime = System.currentTimeMillis();
-		try {
-			List<CopyOption> options = new ArrayList<>();
-			options.add(StandardCopyOption.COPY_ATTRIBUTES);
-			if (RunTimeProperties.instance.overwrite)
-				options.add(StandardCopyOption.REPLACE_EXISTING);
-
-			Files.copy(sourcePath, targetPath, options.toArray(new CopyOption[0]));
-
-			endTime = System.currentTimeMillis();
-			long totalFileSize = getDirectoryStats(source);
-			statistics.addToTotalFileSizeAndTime(totalFileSize, (endTime - startTime));
-			statistics.setFilesCount(statistics.getFilesCount() + 1);
-			rdProUI.print(String.format("\n\tCopying direcotry %s-->%s, size:%s (Kb), took %s (ms)"
-					, source.getAbsolutePath(), target.getAbsolutePath()
-					, df.format(totalFileSize / 1024)
-					, df.format(source.length()), dfLong.format(endTime - startTime))
-			);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			rdProUI.println(String.format("[error] Copy dir from %s to %s failed: %s"
-					, source.getAbsolutePath(), target.getAbsolutePath(), e.getMessage()));
-		}
-
-		return (endTime - startTime);
-	}*/
 
 
 	private static long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics
@@ -249,36 +228,32 @@ public class FileUtils {
 		long totalFileSize = 0;
 		rdProUI.showProgress(0, statistics);
 		long startTime, endTime = 0;
-		MessageDigest md5In=null, md5Out=null;
+		MessageDigest md5In = null, md5Out = null;
 
 		startTime = System.currentTimeMillis();
-		InputStream inputStream ;
-		OutputStream outputStream ;
+		InputStream inputStream;
+		OutputStream outputStream;
 
 		try {
-			//in = new FileInputStream(source).getChannel();
 			totalFileSize = source.length();
 
 			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
 				md5In = MessageDigest.getInstance("MD5");
-				inputStream = new DigestInputStream(new FileInputStream(source),md5In);
-			}
-			else {
-				inputStream =   new FileInputStream(source);
+				inputStream = new DigestInputStream(new FileInputStream(source), md5In);
+			} else {
+				inputStream = new FileInputStream(source);
 			}
 
 			inChannel = Channels.newChannel(inputStream);
 
 
-			//out = new FileOutputStream(target).getChannel();
 			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
 				md5Out = MessageDigest.getInstance("MD5");
 				outputStream = new DigestOutputStream(new FileOutputStream(target), md5Out);
+			} else {
+				outputStream = new FileOutputStream(target);
 			}
-			else {
-				outputStream =   new FileOutputStream(target);
-			}
-			outChannel = Channels.newChannel( outputStream);
+			outChannel = Channels.newChannel(outputStream);
 
 
 			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
@@ -289,7 +264,7 @@ public class FileUtils {
 
 			while (readSize != -1) {
 
-				if (FastCopy.isStopThreads()) {
+				if (RunTimeProperties.instance.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
 					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
 					return 0;
@@ -312,16 +287,18 @@ public class FileUtils {
 
 			}
 
-
-			/* compare the digest */
+			//verify
 			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
 				byte[] sourceFileMD5 = md5In.digest();
-				byte[] targetFileMD5 = md5Out.digest();
-				if (Arrays.equals(sourceFileMD5, targetFileMD5)) {
-					//todo
-					rdProUI.print("Verified,");
+				byte[] targetHash = readFileContentHash(target, rdProUI);
+				if(!Arrays.equals(sourceFileMD5, targetHash)) {
+					throw new RuntimeException("Failed to verify the copy:" + target.getAbsolutePath());
+				}
+				else {
+					rdProUI.print("Verified.");
 				}
 			}
+
 
 
 			endTime = System.currentTimeMillis();
@@ -336,9 +313,7 @@ public class FileUtils {
 		} catch (NoSuchAlgorithmException e) {
 			rdProUI.printError(e.getMessage());
 			throw new RuntimeException(e);
-		}
-
-		finally {
+		} finally {
 			close(inChannel);
 			close(outChannel);
 		}
@@ -511,6 +486,7 @@ public class FileUtils {
 	 */
 
 	//todo if target file exists and override is not check. need to skip zipping it.
+	//todo verfiry the MD5 of the exploded files. 
 	public static CompressedackageVO compressDirectory(final String dirPath, final boolean recursive, final long smallFileSizeThreashold) {
 		Path sourcePath = Paths.get(dirPath);
 
@@ -538,6 +514,10 @@ public class FileUtils {
 							//note read whole file into memory. it is what we wanted for small size files.
 							byte[] bytes = Files.readAllBytes(file);
 							ret.zipFileSizeBytes = bytes.length;
+							//todo
+							//get MD5 of the bytes.
+
+							//ze.setExtra();
 
 							outputStream.write(bytes, 0, bytes.length);
 							outputStream.closeEntry();
@@ -643,9 +623,95 @@ public class FileUtils {
 	}
 
 
+	public static byte[] readFileContentHash(final File source
+	, UI rdProUI ) throws NoSuchAlgorithmException, IOException {
+		InputStream fis =null;
+		ReadableByteChannel inChannel = null;
+		try {
+			MessageDigest md5In = MessageDigest.getInstance("MD5");
+			fis = new DigestInputStream(new FileInputStream(source), md5In);
+/*use channel*/
+//			inChannel = Channels.newChannel(fis);
+//			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
+//
+//			int readSize = inChannel.read(buffer);
+//			while (readSize != -1) {
+//
+//				if (FastCopy.isStopThreads()) {
+//					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
+//					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
+//					return null;
+//				}
+//
+//				buffer.flip();
+//
+//				// write it out
+//				//				while (buffer.hasRemaining()) {
+//				//					//outChannel.write(buffer);
+//				//				}
+//				buffer.clear();
+//
+//				readSize = inChannel.read(buffer);
+//
+//			}
+
+
+//			/* compare the digest */
+//			byte[] sourceFileMD5 = md5In.digest();
+//		    return sourceFileMD5;
+
+
+
+			/*use file inputstream*/
+			int i = 0;
+			do {
+
+				if (RunTimeProperties.instance.isStopThreads()) {
+					rdProUI.println("[warn]Cancelled by user. readFileContentHash() stops.", true);
+					return null;
+				}
+				byte[] buf = new byte[10240];
+				i = fis.read(buf);
+			} while (i != -1);
+
+			return md5In.digest();
+		}
+		finally {
+			try {
+				if (fis != null)
+					fis.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+	}
+
+
 	public static void main(String[] args) {
-		String dir = "S:\\src\\b1611-trunk\\dev-light\\apps\\learning\\sapui5-modules\\browse-catalog\\src\\main\\control";
-		compressDirectory(dir, true, 20000);
+		try {
+			long t1 = System.currentTimeMillis();
+			byte[] md51 = FileUtils.readFileContentHash(new File("Z:\\SOFTWARE\\win8\\Windows.iso")
+			, new ConsoleRdProUIImpl());
+			System.out.println(toHexString(md51));
+			System.out.println("took " + (System.currentTimeMillis()-t1));
+			
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static  String toHexString(byte[] bytes) {
+		if (bytes==null)
+			return "";
+		Formatter formatter = new Formatter();
+		for (byte b : bytes) {
+			formatter.format("%02x", b);
+		}
+		String hex = formatter.toString();
+		return hex;
 	}
 
 

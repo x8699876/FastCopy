@@ -78,7 +78,7 @@ public class FileCopierService {
 		for (String sRootDir : rootDirs) {
 			File rootDir = new File(sRootDir.trim());
 
-			if (FastCopy.isStopThreads()) {
+			if (RunTimeProperties.instance.isStopThreads()) {
 				rdProUI.println("[warn]Cancelled by user. stop walk. ");
 				return;
 			}
@@ -143,7 +143,7 @@ public class FileCopierService {
 			/*iterate the child files  of this "rootDir, copy over the reset of the large files*/
 			for (File childFile : filesList) {
 
-				if (FastCopy.isStopThreads()) {
+				if (RunTimeProperties.instance.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
 					return;
 				}
@@ -174,7 +174,7 @@ public class FileCopierService {
 			/*iterate the child directories of this "rootDir*/
 			for (File childDir : filesList) {
 
-				if (FastCopy.isStopThreads()) {
+				if (RunTimeProperties.instance.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. stop walk. ", true);
 					return;
 				}

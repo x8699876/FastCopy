@@ -54,17 +54,7 @@ public class FastCopy {
 		return frs;
 	}
 
-	public static boolean stopThreads = false;
-	private boolean running;
 
-	public static boolean isStopThreads() {
-		return stopThreads;
-	}
-
-
-	public static void setStopThreads(boolean stopThreads) {
-		FastCopy.stopThreads = stopThreads;
-	}
 
 	public void stopWorkers() {
 		if (fileCopyWorkersPool != null)
@@ -73,13 +63,6 @@ public class FastCopy {
 			packageSmallFilesWorkersPool.shutDown();
 	}
 
-	public boolean isRunning() {
-		return running;
-	}
-
-	public void setRunning(boolean running) {
-		this.running = running;
-	}
 
 	static DecimalFormat df = new DecimalFormat("#,###.##");
 
@@ -96,7 +79,7 @@ public class FastCopy {
 			FileCopierService fileCopierService = new FileCopierService(rdProUI, props, frs, fileCopyWorkersPool, packageSmallFilesWorkersPool);
 			long t1 = System.currentTimeMillis();
 
-			running = true;
+			RunTimeProperties.instance.setRunning( true );
 			String[] files = props.sourceDir.split(";");
 			fileCopierService.walkTreeAndCopy(0, files, props.getDestDir(), -1);
 
@@ -104,8 +87,8 @@ public class FastCopy {
 			rdProUI.printError(e.getMessage());
 		} finally {
 			//reset the flags
-			running = false;
-			stopThreads = false;
+			RunTimeProperties.instance.setRunning(false);
+			RunTimeProperties.instance.setStopThreads(false);
 
 			if (packageSmallFilesWorkersPool != null) {
 				packageSmallFilesWorkersPool.shutDownandWaitForAllThreadsToComplete();

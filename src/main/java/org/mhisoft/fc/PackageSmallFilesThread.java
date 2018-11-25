@@ -54,7 +54,7 @@ public class PackageSmallFilesThread implements Runnable {
 	@Override
 	public void run() {
 
-		if (!FastCopy.isStopThreads()) {
+		if (!RunTimeProperties.instance.isStopThreads()) {
 
 			if (RunTimeProperties.instance.isDebug())
 				rdProUI.println("[PackageSmallFilesThread] "+ Thread.currentThread().getName() + " Starts");
