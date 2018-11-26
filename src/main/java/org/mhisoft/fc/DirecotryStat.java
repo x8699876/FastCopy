@@ -12,6 +12,8 @@ public class DirecotryStat {
 
 	long smallFileCount;
 	long totalSmallFileSize;
+	boolean fail;
+	String failMsg;
 
 	public long getNumberOfFiles() {
 		return numberOfFiles;
@@ -52,5 +54,21 @@ public class DirecotryStat {
 
 	public long getTotalSmallFileSize() {
 		return totalSmallFileSize;
+	}
+
+	public boolean isFail() {
+		return fail;
+	}
+
+	public void setFail(boolean fail) {
+		this.fail = fail;
+	}
+
+	public String getFailMsg() {
+		return failMsg;
+	}
+
+	public void setFailMsg(String failMsg) {
+		this.failMsg = failMsg;
 	}
 }

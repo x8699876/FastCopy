@@ -68,7 +68,8 @@ public class CopyFileThread implements Runnable {
 				rdProUI.println("\n"
 						+ Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
 		} else {
-			rdProUI.println("\n" + Thread.currentThread().getName() + "is stopped.");
+			if (RunTimeProperties.instance.isDebug())
+				rdProUI.println("\n" + Thread.currentThread().getName() + "is stopped.");
 
 		}
 

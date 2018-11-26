@@ -84,7 +84,8 @@ public class PackageSmallFilesThread implements Runnable {
 				rdProUI.println("[PackageSmallFilesThread]\n"
 						+ Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
 		} else {
-			rdProUI.println("[PackageSmallFilesThread]\n" + Thread.currentThread().getName() + "is stopped.");
+			if (RunTimeProperties.instance.isDebug())
+				rdProUI.println("[PackageSmallFilesThread]\n" + Thread.currentThread().getName() + "is stopped.");
 
 		}
 

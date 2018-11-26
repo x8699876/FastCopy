@@ -121,6 +121,10 @@ public class FileUtils {
 
 					unzipFile(target, destZipDir, statistics);
 
+					if (RunTimeProperties.instance.isVerbose()) {
+					 rdProUI.println("\tUnzipped under " + destZipDir);
+					}
+
 				} finally {
 					//delete the source zip
 					source.delete();
@@ -266,6 +270,7 @@ public class FileUtils {
 
 				if (RunTimeProperties.instance.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
+					if (RunTimeProperties.instance.isDebug())
 					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
 					return 0;
 				}
@@ -358,7 +363,7 @@ public class FileUtils {
 		final AtomicLong size = new AtomicLong(0);
 		final AtomicLong fileCount = new AtomicLong(0);
 		Path rootPath = rootDir.toPath();
-		DirecotryStat ret = new DirecotryStat();
+		final DirecotryStat ret = new DirecotryStat();
 		try {
 			Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
 				@Override
@@ -382,10 +387,10 @@ public class FileUtils {
 
 				@Override
 				public FileVisitResult visitFileFailed(Path file, IOException exc) {
-					//todo 
-					System.out.println("skipped: " + file + " (" + exc + ")");
+					ret.setFailMsg("visitFileFailed for: " + file + " (" + exc.getMessage() + ")");
+					ret.setFail(true);
 					// Skip folders that can't be traversed
-					return FileVisitResult.CONTINUE;
+					return FileVisitResult.TERMINATE;
 				}
 
 //				@Override
@@ -401,10 +406,9 @@ public class FileUtils {
 			throw new AssertionError("walkFileTree will not throw IOException if the FileVisitor does not");
 		}
 
-		ret.setTotalFileSize(size.get());
-		ret.setNumberOfFiles(fileCount.get());
-
-		return ret;
+			ret.setTotalFileSize(size.get());
+			ret.setNumberOfFiles(fileCount.get());
+			return ret;
 	}
 
 
@@ -576,6 +580,7 @@ public class FileUtils {
 			zis.closeEntry();
 			zis.close();
 		}
+
 
 
 		statistics.addFileCount(filesCount - 1);//exclude the zip file itself.

@@ -44,8 +44,8 @@ public class RunTimeProperties {
 	}
 
 
-	public  void setStopThreads(boolean stopThreads) {
-		stopThreads = stopThreads;
+	public  void setStopThreads(boolean v) {
+		stopThreads = v;
 	}
 
 	public boolean isRunning() {

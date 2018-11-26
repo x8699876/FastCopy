@@ -86,9 +86,6 @@ public class FastCopy {
 		} catch (Exception e) {
 			rdProUI.printError(e.getMessage());
 		} finally {
-			//reset the flags
-			RunTimeProperties.instance.setRunning(false);
-			RunTimeProperties.instance.setStopThreads(false);
 
 			if (packageSmallFilesWorkersPool != null) {
 				packageSmallFilesWorkersPool.shutDownandWaitForAllThreadsToComplete();
@@ -101,6 +98,9 @@ public class FastCopy {
 
 			}
 
+			//reset the flags
+			RunTimeProperties.instance.setRunning(false);
+			RunTimeProperties.instance.setStopThreads(false);
 
 		}
 

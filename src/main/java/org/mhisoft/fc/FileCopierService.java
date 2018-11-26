@@ -104,14 +104,12 @@ public class FileCopierService {
 				File[] childFiles = rootDir.listFiles(new FilenameFilter() {
 					@Override
 					public boolean accept(File dir, String name) {
-						return true; //todo
+						return true; //filters
 					}
 				});
 
 				filesList = Arrays.asList(childFiles);
 				rdProUI.println("Copying files under directory: " + rootDir);
-
-
 			}
 
 			if (filesList.isEmpty())
@@ -124,18 +122,26 @@ public class FileCopierService {
 			/* process files under this "source" dir,  package small files */
 			if (RunTimeProperties.packageSmallFiles && rootDir.isDirectory()) {
 				DirecotryStat direcotryStat = FileUtils.getDirectoryStats(rootDir, SMALL_FILE_SIZE);
-				if (
-						direcotryStat.getSmallFileCount() >= 3 //number criteria
-								|| (direcotryStat.getSmallFileCount() >= 2 && direcotryStat.getTotalSmallFileSize() >= 4096 / 0.7) //size criteria
 
-
-				) {
-					thisRootDirQualifiedToPack = true;
-					PackageSmallFilesThread t = new PackageSmallFilesThread(rdProUI
-							, sRootDir, _targetDir, statistics, fileCopyWorkersPool);
-					packageSmallFilesWorkersPool.addTask(t);
-				} else
+				if (  direcotryStat.isFail()) {
+					rdProUI.printError(direcotryStat.getFailMsg());
 					thisRootDirQualifiedToPack = false;
+				}
+				else{
+
+						if ((direcotryStat.getSmallFileCount() >= 3 //number criteria
+								|| (direcotryStat.getSmallFileCount() >= 2 && direcotryStat.getTotalSmallFileSize() >= 4096 / 0.7) //
+						) //size criteria
+
+
+						) {
+							thisRootDirQualifiedToPack = true;
+							PackageSmallFilesThread t = new PackageSmallFilesThread(rdProUI
+									, sRootDir, _targetDir, statistics, fileCopyWorkersPool);
+							packageSmallFilesWorkersPool.addTask(t);
+						} else
+							thisRootDirQualifiedToPack = false;
+					}
 			}
 
 
