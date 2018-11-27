@@ -120,7 +120,10 @@ public class FastCopy {
 
 
 	public static void main(String[] args) {
-		FastCopy fastCopy = new FastCopy(new ConsoleRdProUIImpl());
+		UI ui = new ConsoleRdProUIImpl();
+		FastCopy fastCopy = new FastCopy(ui);
+		FileUtils.instance.setRdProUI(ui);
+
 		RunTimeProperties props = fastCopy.getRdProUI().parseCommandLineArguments(args);
 		if (!props.isSuccess()) {
 			System.exit(-1);

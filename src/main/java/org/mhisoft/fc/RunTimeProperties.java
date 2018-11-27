@@ -12,7 +12,7 @@ public class RunTimeProperties {
 	public static String zip_prefix ="_fastcopy_auto_create_";
 
 	static boolean packageSmallFiles = Boolean.valueOf(System.getProperty("compressSmallFiles", "true"));
-	private static boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "true"));
+	private static boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "false"));
 	private  static boolean debug = Boolean.getBoolean("debug");
 
 	private static boolean stopThreads = false;

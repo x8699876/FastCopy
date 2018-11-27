@@ -32,7 +32,7 @@ import org.mhisoft.fc.ui.UI;
 public class PackageSmallFilesThread implements Runnable {
 
 
-	private String sRootDir, sTargetDir;
+	private String sSourceDir, sTargetDir;
 	private FileCopyStatistics statistics;
 	private UI rdProUI;
 
@@ -41,10 +41,10 @@ public class PackageSmallFilesThread implements Runnable {
 
 
 	public PackageSmallFilesThread(UI rdProUI
-			, String sRootDir, String sTargetDir
+			, String sSourceDir, String sTargetDir
 			, FileCopyStatistics frs
 			, MultiThreadExecutorService fileCopyWorkersPool) {
-		this.sRootDir = sRootDir;
+		this.sSourceDir = sSourceDir;
 		this.sTargetDir = sTargetDir;
 		this.statistics = frs;
 		this.rdProUI = rdProUI;
@@ -56,33 +56,38 @@ public class PackageSmallFilesThread implements Runnable {
 
 		if (!RunTimeProperties.instance.isStopThreads()) {
 
-			if (RunTimeProperties.instance.isDebug())
-				rdProUI.println("[PackageSmallFilesThread] "+ Thread.currentThread().getName() + " Starts");
-			long t1 = System.currentTimeMillis();
+
+			FileUtils.CompressedackageVO compressedackageVO = FileUtils.instance.compressDirectory(sSourceDir, sTargetDir, false, FileCopierService.SMALL_FILE_SIZE);
+			if (compressedackageVO.getNumberOfFiles() > 0) {
+
+				if (RunTimeProperties.instance.isDebug())
+					rdProUI.println("[PackageSmallFilesThread] " + Thread.currentThread().getName() + " Starts");
+				long t1 = System.currentTimeMillis();
 
 
-			FileUtils.CompressedackageVO compressedackageVO = FileUtils.compressDirectory(sRootDir, false, FileCopierService.SMALL_FILE_SIZE);
-			compressedackageVO.setDestDir(sTargetDir);
-			File targetZipFile = new File(sTargetDir + File.separator + compressedackageVO.zipName);
+				compressedackageVO.setDestDir(sTargetDir);
+				File targetZipFile = new File(sTargetDir + File.separator + compressedackageVO.zipName);
 
-			if (RunTimeProperties.instance.isDebug()) {
-				rdProUI.println("[PackageSmallFilesThread] Ziped up the " + sRootDir + " dir to zip:" + targetZipFile + ", size=" + compressedackageVO.zipFileSizeBytes + " Bytes");
+				if (RunTimeProperties.instance.isDebug()) {
+					rdProUI.println("[PackageSmallFilesThread] Ziped up the " + sSourceDir + " dir to zip:" + targetZipFile + ", size=" + compressedackageVO.zipFileSizeBytes + " Bytes");
+				}
+
+
+				//FileUtils.copyFile(new File(vo.sourceZipFileWithPath), targetZipFile, statistics, rdProUI, vo);
+				/* then send it to the copier  thread */
+				CopyFileThread t = new CopyFileThread(rdProUI //
+						, new File(compressedackageVO.sourceZipFileWithPath), targetZipFile //
+						, compressedackageVO //
+						, statistics);
+
+				fileCopyWorkersPool.addTask(t);
+
+
+				if (RunTimeProperties.instance.isDebug())
+					rdProUI.println("[PackageSmallFilesThread]\n"
+							+ Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
 			}
 
-
-			//FileUtils.copyFile(new File(vo.sourceZipFileWithPath), targetZipFile, statistics, rdProUI, vo);
-		    /* then send it to the copier  thread */
-			CopyFileThread t = new CopyFileThread(rdProUI //
-					, new File(compressedackageVO.sourceZipFileWithPath), targetZipFile //
-					, compressedackageVO //
-					, statistics);
-
-			fileCopyWorkersPool.addTask(t);
-
-
-			if (RunTimeProperties.instance.isDebug())
-				rdProUI.println("[PackageSmallFilesThread]\n"
-						+ Thread.currentThread().getName() + " End. took " + (System.currentTimeMillis() - t1) + "ms");
 		} else {
 			if (RunTimeProperties.instance.isDebug())
 				rdProUI.println("[PackageSmallFilesThread]\n" + Thread.currentThread().getName() + "is stopped.");

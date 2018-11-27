@@ -133,6 +133,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		println("\t target-dir: The target directory.");
 		println("\t Options: ");
 		println("\t\t -v verbose mode.");
+		println("\t\t -verify verify each file copy by comparing the file content hash.");
 		println("\t\t -m use multiple threads, best for copying across the SSD drives.");
 		println("\t\t -w number of worker threads, default:" + RunTimeProperties.DEFAULT_THREAD_NUM+".");
 		println("\t\t -o always override.");
@@ -176,6 +177,8 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				props.setOverwriteIfNewerOrDifferent(true);
 			}else if (arg.equalsIgnoreCase("-f")) {
 				props.setFlatCopy(true);
+			}else if (arg.equalsIgnoreCase("-verify")) {
+				props.setVerifyAfterCopy(true);
 			}
 			else if (arg.equalsIgnoreCase("-w")) {
 

@@ -47,6 +47,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.mhisoft.fc.FastCopy;
+import org.mhisoft.fc.FileUtils;
 import org.mhisoft.fc.RunTimeProperties;
 import org.mhisoft.fc.ViewHelper;
 import org.mhisoft.fc.preference.UserPreference;
@@ -90,6 +91,7 @@ public class FastCopyMainForm {
 	private JCheckBox chkCreateTheSameSourceCheckBox;
 	private JSpinner fldFontSize;
 	private JLabel labelFontSize;
+	private JCheckBox ckVerify;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -393,6 +395,13 @@ public class FastCopyMainForm {
 			props.setNumOfThreads(1);
 		}
 
+		if (ckVerify.isSelected()) {
+			props.setVerifyAfterCopy(true);
+		}
+		else {
+			props.setVerifyAfterCopy(false);
+		}
+		
 		props.setOverwrite(chkOverrideAlways.isSelected());
 		props.setOverwriteIfNewerOrDifferent(overrideOnlyIfNewerCheckBox.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
@@ -458,6 +467,8 @@ public class FastCopyMainForm {
 		main.init();
 		GraphicsUIImpl uiImpl = new GraphicsUIImpl();
 		main.setRdProUI(uiImpl);
+		FileUtils.instance.setRdProUI(uiImpl);
+
 		uiImpl.setOutputTextArea(main.outputTextArea);
 		uiImpl.setLabelStatus(main.labelStatus);
 		uiImpl.setProgressBar(main.progressBar1);

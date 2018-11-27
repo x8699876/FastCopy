@@ -162,7 +162,7 @@ public class FileCopierService {
 
 					String newDestFile = _targetDir + File.separator + childFile.getName();
 					File targetFile = new File(newDestFile);
-					if (!targetFile.exists() || overrideTargetFile(childFile, targetFile)) {
+					if (!targetFile.exists() || FileUtils.overrideTargetFile(childFile, targetFile)) {
 						CopyFileThread t = new CopyFileThread(rdProUI
 								, childFile, targetFile, null, statistics);
 						fileCopyWorkersPool.addTask(t);
@@ -198,30 +198,6 @@ public class FileCopierService {
 	}
 
 
-	/**
-	 * do the copy if return true
-	 *
-	 * @param srcFile
-	 * @param targetFile
-	 * @return
-	 */
-	private boolean overrideTargetFile(final File srcFile, final File targetFile) {
-
-		if (RunTimeProperties.instance.overwrite)
-			return true;
-
-		if (RunTimeProperties.instance.isOverwriteIfNewerOrDifferent()) {
-			if (targetFile.exists()) {    //File IO
-				if (srcFile.lastModified() > targetFile.lastModified()
-						|| (srcFile.length() != targetFile.length()))
-					return true;
-				else
-					return false;
-			}
-			return true;
-		} else
-			return false;
-	}
 
 
 }

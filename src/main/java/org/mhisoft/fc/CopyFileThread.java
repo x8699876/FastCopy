@@ -61,7 +61,7 @@ public class CopyFileThread implements Runnable {
 				rdProUI.println(Thread.currentThread().getName() + " Starts");
 			long t1 = System.currentTimeMillis();
 
-			FileUtils.copyFile(sourceFile, targetFile, statistics, rdProUI, compressedackageVO);
+			FileUtils.instance.copyFile(sourceFile, targetFile, statistics, rdProUI, compressedackageVO);
 
 
 			if (RunTimeProperties.instance.isDebug())

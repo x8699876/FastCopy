@@ -71,17 +71,33 @@ public class FileUtils {
 	private static final int SMALL_FILE_SIZE = 20000;
 	static final DecimalFormat df = new DecimalFormat("#,###.##");
 	static final DecimalFormat dfLong = new DecimalFormat("#,###");
+	UI rdProUI;
+
+	public UI getRdProUI() {
+		return rdProUI;
+	}
+
+	public void setRdProUI(UI rdProUI) {
+		this.rdProUI = rdProUI;
+	}
+
+	public static FileUtils instance = new FileUtils();
 
 
-	public static void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI
+	public void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI
 			, final FileUtils.CompressedackageVO compressedackageVO) {
 
-		long timeTook = 0;
+		long timeTook;
 		try {
 			if (source.length() < SMALL_FILE_SIZE) {
-				timeTook = FileUtils.copySmallFiles(source, target, statistics, rdProUI);
+				timeTook = FileUtils.instance.copySmallFiles(source, target, statistics, rdProUI);
 			} else
-				timeTook = FileUtils.nioBufferCopy(source, target, statistics, rdProUI);
+				timeTook = FileUtils.instance.nioBufferCopy(source, target, statistics, rdProUI);
+
+
+
+
+
 		} catch (Exception e) {
 			rdProUI.printError(e.getMessage());
 			RunTimeProperties.instance.setStopThreads(true);
@@ -150,7 +166,7 @@ public class FileUtils {
 	}
 
 
-	public static void deleteFile(String file, final UI rdProUI) {
+	public  void deleteFile(String file, final UI rdProUI) {
 		try {
 			Files.deleteIfExists(Paths.get(file));
 		} catch (NoSuchFileException e) {
@@ -164,7 +180,7 @@ public class FileUtils {
 	}
 
 
-	public static void showPercent(final UI rdProUI, double digital) {
+	public  void showPercent(final UI rdProUI, double digital) {
 		long p = (long) digital * 100;
 		DecimalFormat df = new DecimalFormat("000");
 		String s = df.format(p);
@@ -173,7 +189,7 @@ public class FileUtils {
 	}
 
 
-	private static long copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) {
+	private  long copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) throws IOException, NoSuchAlgorithmException {
 
 		long startTime = 0, endTime = 0;
 		FileChannel inChannel = null, outChannel = null;
@@ -211,7 +227,7 @@ public class FileUtils {
 
 
 		} catch (IOException | NoSuchAlgorithmException e) {
-			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
+			throw e;
 		} finally {
 			close(inChannel);
 			close(outChannel);
@@ -221,12 +237,12 @@ public class FileUtils {
 
 
 
-	private static long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics
+	private  long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics
 			, final UI rdProUI
 //			, boolean isCalculateDigest
 //			, int bufferCapacity
 
-	) {
+	) throws IOException, NoSuchAlgorithmException {
 		ReadableByteChannel inChannel = null;
 		WritableByteChannel outChannel = null;
 		long totalFileSize = 0;
@@ -270,8 +286,10 @@ public class FileUtils {
 
 				if (RunTimeProperties.instance.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
+					close(outChannel);
+					deleteFile(target.getAbsolutePath(), rdProUI );
 					if (RunTimeProperties.instance.isDebug())
-					rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
+						rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
 					return 0;
 				}
 
@@ -313,11 +331,6 @@ public class FileUtils {
 			rdProUI.showProgress(100, statistics);
 
 
-		} catch (IOException e) {
-			rdProUI.println(String.format("[error] Copy file %s to %s: %s", source.getAbsoluteFile(), target.getAbsolutePath(), e.getMessage()));
-		} catch (NoSuchAlgorithmException e) {
-			rdProUI.printError(e.getMessage());
-			throw new RuntimeException(e);
 		} finally {
 			close(inChannel);
 			close(outChannel);
@@ -464,6 +477,7 @@ public class FileUtils {
 		String sourceZipFileWithPath;
 		String destDir;
 		long zipFileSizeBytes;
+		int numberOfFiles=0;
 
 		public CompressedackageVO(String zipName, String originalDirname, String zipFileWithPath) {
 			this.zipName = zipName;
@@ -478,6 +492,18 @@ public class FileUtils {
 		public void setDestDir(String destDir) {
 			this.destDir = destDir;
 		}
+
+		public int getNumberOfFiles() {
+			return numberOfFiles;
+		}
+
+		public void setNumberOfFiles(int numberOfFiles) {
+			this.numberOfFiles = numberOfFiles;
+		}
+
+		public void incrementFileCount(int v) {
+			this.numberOfFiles+=v;
+		}
 	}
 
 	/**
@@ -491,63 +517,130 @@ public class FileUtils {
 
 	//todo if target file exists and override is not check. need to skip zipping it.
 	//todo verfiry the MD5 of the exploded files. 
-	public static CompressedackageVO compressDirectory(final String dirPath, final boolean recursive, final long smallFileSizeThreashold) {
+	public  CompressedackageVO compressDirectory(final String dirPath, final String targetDir,  final boolean recursive
+			, final long smallFileSizeThreashold) {
 		Path sourcePath = Paths.get(dirPath);
 
 		//put the zip under the same sourcePath.
-		String name = RunTimeProperties.zip_prefix + sourcePath.getFileName().toString() + ".zip";
-		final String zipFileName = dirPath.concat(File.separator).concat(name);
+		String zipName = RunTimeProperties.zip_prefix + sourcePath.getFileName().toString() + ".zip";
+		final String zipFileName = dirPath.concat(File.separator).concat(zipName);
 
-		CompressedackageVO ret = new CompressedackageVO(name, sourcePath.getFileName().toString(), zipFileName);
-		ret.originalDirLastModified = sourcePath.toFile().lastModified();
+		CompressedackageVO compressedackageVO = new CompressedackageVO(zipName, sourcePath.getFileName().toString(), zipFileName);
+		compressedackageVO.originalDirLastModified = sourcePath.toFile().lastModified();
+		ZipOutputStream outputStream=null;
 
 		try {
-			ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
+			outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
 			outputStream.setLevel(Deflater.BEST_COMPRESSION);
-			Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-					try {
-						if ((smallFileSizeThreashold == -1 || file.toFile().length() <= smallFileSizeThreashold) //
-								&& !file.getFileName().toString().equals(name)) { //exclude the zip file itself.
 
-							Path targetFile = sourcePath.relativize(file);
-							ZipEntry ze = new ZipEntry(targetFile.toString());
-							ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
-							outputStream.putNextEntry(ze);
-							//note read whole file into memory. it is what we wanted for small size files.
-							byte[] bytes = Files.readAllBytes(file);
-							ret.zipFileSizeBytes = bytes.length;
-							//todo
-							//get MD5 of the bytes.
+			MyZipFileVisitor visitor = new MyZipFileVisitor(compressedackageVO, targetDir, smallFileSizeThreashold, zipName, sourcePath, outputStream, false);
 
-							//ze.setExtra();
-
-							outputStream.write(bytes, 0, bytes.length);
-							outputStream.closeEntry();
-						}
-					} catch (IOException e) {
-						throw new RuntimeException("compressDirectory() failed", e);
-					}
-					return FileVisitResult.CONTINUE;
-				}
+			Files.walkFileTree(sourcePath, visitor );
 
 
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					if (dir.equals(sourcePath))
-						return FileVisitResult.CONTINUE;
-					else
-						return recursive ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
-				}
-
-			});
-			outputStream.close();
+			
 		} catch (IOException e) {
+			rdProUI.printError("compressDirectory() failed:" + e.getMessage());
 			throw new RuntimeException("compressDirectory() failed", e);
-			//todo rdProUI.printError(e.getMessage());
+
 		}
-		return ret;
+		finally {
+			if (outputStream!=null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					//
+				}
+			}
+
+			if (compressedackageVO.getNumberOfFiles()==0) {
+				deleteFile(zipFileName,rdProUI);
+			}
+
+		}
+		return compressedackageVO;
+	}
+
+
+	class  MyZipFileVisitor extends SimpleFileVisitor<Path> {
+
+		CompressedackageVO compressedackageVO;
+		String targetDir;
+		long smallFileSizeThreashold;
+		String zipName;
+		Path sourcePath;
+		ZipOutputStream outputStream;
+		boolean recursive;
+
+		public MyZipFileVisitor(CompressedackageVO compressedackageVO, String targetDir, long smallFileSizeThreashold, String zipName, Path sourcePath, ZipOutputStream outputStream
+		, boolean recursive) {
+			this.compressedackageVO = compressedackageVO;
+			this.targetDir = targetDir;
+			this.smallFileSizeThreashold = smallFileSizeThreashold;
+			this.zipName = zipName;
+			this.sourcePath = sourcePath;
+			this.outputStream = outputStream;
+			this.recursive = recursive;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+			try {
+				boolean include = true;
+				if (!RunTimeProperties.instance.isOverwrite()) {
+					//target file
+					File _targetFile = new File(targetDir + File.separator +file.getFileName().toString() );
+					if (_targetFile.exists()) {
+						include = overrideTargetFile(file.toFile(), _targetFile);
+						if (!include) {
+							rdProUI.println("\tFile " + _targetFile.getAbsolutePath() +" exists, skipped.");
+						}
+					}
+					else {
+						include = true;
+					}
+				}
+				else
+					include = true;
+
+
+				if (include) {
+					if ((smallFileSizeThreashold == -1 || file.toFile().length() <= smallFileSizeThreashold) //
+							&& !file.getFileName().toString().equals(zipName)) { //exclude the zip file itself.
+
+						compressedackageVO.incrementFileCount(1);
+
+						Path targetFile = sourcePath.relativize(file);
+						ZipEntry ze = new ZipEntry(targetFile.toString());
+						ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
+						outputStream.putNextEntry(ze);
+						//note read whole file into memory. it is what we wanted for small size files.
+						byte[] bytes = Files.readAllBytes(file);
+						compressedackageVO.zipFileSizeBytes = bytes.length;
+						//todo
+						//get MD5 of the bytes.
+
+						//ze.setExtra();
+
+						outputStream.write(bytes, 0, bytes.length);
+						outputStream.closeEntry();
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException("compressDirectory() failed", e);
+			}
+			return FileVisitResult.CONTINUE;
+		}
+
+
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+			if (dir.equals(sourcePath))
+				return FileVisitResult.CONTINUE;
+			else
+				return recursive ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
+		}
+
 	}
 
 	/**
@@ -692,6 +785,45 @@ public class FileUtils {
 
 	}
 
+	/**
+	 * do the copy if return true
+	 *
+	 * @param srcFile
+	 * @param targetFile
+	 * @return
+	 */
+	public static boolean overrideTargetFile(final File srcFile, final File targetFile) {
+
+		if (RunTimeProperties.instance.overwrite)
+			return true;
+
+		if (RunTimeProperties.instance.isOverwriteIfNewerOrDifferent()) {
+			if (targetFile.exists()) {    //File IO
+				if (srcFile.lastModified() - targetFile.lastModified() >1000
+						|| (srcFile.length() != targetFile.length()))
+					return true;
+				else
+					return false;
+			}
+			return true;
+		} else
+			return false;
+	}
+
+
+	public static  String toHexString(byte[] bytes) {
+		if (bytes==null)
+			return "";
+		Formatter formatter = new Formatter();
+		for (byte b : bytes) {
+			formatter.format("%02x", b);
+		}
+		String hex = formatter.toString();
+		return hex;
+	}
+
+
+
 
 	public static void main(String[] args) {
 		try {
@@ -708,16 +840,6 @@ public class FileUtils {
 		}
 	}
 
-	public static  String toHexString(byte[] bytes) {
-		if (bytes==null)
-			return "";
-		Formatter formatter = new Formatter();
-		for (byte b : bytes) {
-			formatter.format("%02x", b);
-		}
-		String hex = formatter.toString();
-		return hex;
-	}
 
 
 }
