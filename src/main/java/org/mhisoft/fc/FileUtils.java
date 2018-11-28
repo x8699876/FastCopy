@@ -42,12 +42,14 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.security.DigestInputStream;
@@ -87,37 +89,40 @@ public class FileUtils {
 	public void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI
 			, final FileUtils.CompressedackageVO compressedackageVO) {
 
-		long timeTook;
+		CopyFileResultVO vo ;
 		try {
 			if (source.length() < SMALL_FILE_SIZE) {
-				timeTook = FileUtils.instance.copySmallFiles(source, target, statistics, rdProUI);
+				vo = FileUtils.instance.copySmallFiles(source, target, statistics, rdProUI);
 			} else
-				timeTook = FileUtils.instance.nioBufferCopy(source, target, statistics, rdProUI);
-
-
-
-
+				vo = FileUtils.instance.nioBufferCopy(source, target, statistics, rdProUI);
 
 		} catch (Exception e) {
-			rdProUI.printError(e.getMessage());
-			RunTimeProperties.instance.setStopThreads(true);
+			rdProUI.printError("Copy file failed for " + source.getAbsolutePath(), e);
 			return;
 		}
 
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)
-				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (bytes), took %s (ms)"
+				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (bytes), took %s (ms). %s"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
-						, timeTook)
+						, vo.took
+						, vo.verified!=null? (vo.verified?"Verified":"Verify Error!") : ""
+
+						)
 				);
 			else
-				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (Kb), took %s (ms)"
+				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (Kb), took %s (ms). %s"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length() / 1024)
-						, timeTook)
+						, vo.took
+						, vo.verified!=null? (vo.verified?"Verified":"Verify Error!") : ""
+						)
 				);
+		}
+		if (vo.verified!=null && !vo.verified) {
+			rdProUI.printError("Verify copy of file failed:" + target.getAbsolutePath());
 		}
 
 		//todo need to adjust for packaged zip
@@ -138,7 +143,7 @@ public class FileUtils {
 					unzipFile(target, destZipDir, statistics);
 
 					if (RunTimeProperties.instance.isVerbose()) {
-					 rdProUI.println("\tUnzipped under " + destZipDir);
+						rdProUI.println("\tUnzipped under " + destZipDir);
 					}
 
 				} finally {
@@ -152,21 +157,33 @@ public class FileUtils {
 
 			}
 		} catch (IOException e) {
-			rdProUI.printError(e.getMessage());
+			rdProUI.printError("Exploding the zip failed", e);
 		}
 
 
 		try {
-			boolean b = target.setLastModified(source.lastModified());
+			//boolean b = target.setLastModified(source.lastModified());
+
+			setFileLastModified(target.getAbsolutePath(), source.lastModified());
+
 			//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
 		} catch (Exception e) {
-			rdProUI.printError(e.getMessage());
+			rdProUI.printError("setLastModified() failed.", e);
 		}
 
 	}
 
 
-	public  void deleteFile(String file, final UI rdProUI) {
+	public static void setFileLastModified(String filePath, long millis) throws IOException{
+		if (RunTimeProperties.instance.isKeepOriginalFileDates()) {
+			BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(filePath), BasicFileAttributeView.class);
+			FileTime time = FileTime.fromMillis(millis);
+			attributes.setTimes(time, time, time);
+		}
+
+	}
+
+	public void deleteFile(String file, final UI rdProUI) {
 		try {
 			Files.deleteIfExists(Paths.get(file));
 		} catch (NoSuchFileException e) {
@@ -180,7 +197,7 @@ public class FileUtils {
 	}
 
 
-	public  void showPercent(final UI rdProUI, double digital) {
+	public void showPercent(final UI rdProUI, double digital) {
 		long p = (long) digital * 100;
 		DecimalFormat df = new DecimalFormat("000");
 		String s = df.format(p);
@@ -188,11 +205,19 @@ public class FileUtils {
 		rdProUI.printf("\u0008\u0008\u0008\u0008%s", df.format(p) + "%");
 	}
 
+	class CopyFileResultVO {
+		long took;
+		Boolean verified;
 
-	private  long copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI) throws IOException, NoSuchAlgorithmException {
+
+	}
+
+	private CopyFileResultVO copySmallFiles(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI)
+			throws IOException, NoSuchAlgorithmException {
 
 		long startTime = 0, endTime = 0;
 		FileChannel inChannel = null, outChannel = null;
+		CopyFileResultVO vo = new CopyFileResultVO();
 
 		try {
 			inChannel = new FileInputStream(source).getChannel();
@@ -209,12 +234,11 @@ public class FileUtils {
 			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
 				byte[] sourceHash = readFileContentHash(source, rdProUI);
 				byte[] targetHash = readFileContentHash(target, rdProUI);
-				if(!Arrays.equals(sourceHash, targetHash)) {
+				if (!Arrays.equals(sourceHash, targetHash)) {
 					//rdProUI.printError("Failed to verify the copy:" + target.getAbsolutePath());
-					throw new RuntimeException("Failed to verify the copy:" + target.getAbsolutePath());
-				}
-				else {
-					rdProUI.print("Verified.");
+					vo.verified = false;
+				} else {
+					vo.verified = true;
 				}
 			}
 
@@ -232,12 +256,12 @@ public class FileUtils {
 			close(inChannel);
 			close(outChannel);
 		}
-		return (endTime - startTime);
+		vo.took =  (endTime - startTime);
+		return vo;
 	}
 
 
-
-	private  long nioBufferCopy(final File source, final File target, FileCopyStatistics statistics
+	private CopyFileResultVO  nioBufferCopy(final File source, final File target, FileCopyStatistics statistics
 			, final UI rdProUI
 //			, boolean isCalculateDigest
 //			, int bufferCapacity
@@ -253,6 +277,8 @@ public class FileUtils {
 		startTime = System.currentTimeMillis();
 		InputStream inputStream;
 		OutputStream outputStream;
+
+		CopyFileResultVO vo = new CopyFileResultVO();
 
 		try {
 			totalFileSize = source.length();
@@ -287,10 +313,10 @@ public class FileUtils {
 				if (RunTimeProperties.instance.isStopThreads()) {
 					rdProUI.println("[warn]Cancelled by user. Stoping copying.", true);
 					close(outChannel);
-					deleteFile(target.getAbsolutePath(), rdProUI );
+					deleteFile(target.getAbsolutePath(), rdProUI);
 					if (RunTimeProperties.instance.isDebug())
 						rdProUI.println("\t" + Thread.currentThread().getName() + "is stopped.", true);
-					return 0;
+					return vo;
 				}
 
 				totalRead = totalRead + readSize;
@@ -314,14 +340,12 @@ public class FileUtils {
 			if (RunTimeProperties.instance.isVerifyAfterCopy()) {
 				byte[] sourceFileMD5 = md5In.digest();
 				byte[] targetHash = readFileContentHash(target, rdProUI);
-				if(!Arrays.equals(sourceFileMD5, targetHash)) {
-					throw new RuntimeException("Failed to verify the copy:" + target.getAbsolutePath());
-				}
-				else {
-					rdProUI.print("Verified.");
+				if (!Arrays.equals(sourceFileMD5, targetHash)) {
+					vo.verified=false;
+				} else {
+					vo.verified=true;
 				}
 			}
-
 
 
 			endTime = System.currentTimeMillis();
@@ -332,10 +356,23 @@ public class FileUtils {
 
 
 		} finally {
-			close(inChannel);
-			close(outChannel);
+			if (inChannel!=null) {
+				try {
+					inChannel.close();
+				} catch (IOException e) {
+					rdProUI.printError("failed to close the inChannel", e);
+				}
+			}
+			if (outChannel!=null) {
+				try {
+					outChannel.close();
+				} catch (IOException e) {
+					rdProUI.printError("failed to close the outChannel", e);
+				}
+			}
 		}
-		return (endTime - startTime);
+		vo.took =  (endTime - startTime);
+		return vo;
 	}
 
 	private static void close(Closeable closable) {
@@ -419,28 +456,41 @@ public class FileUtils {
 			throw new AssertionError("walkFileTree will not throw IOException if the FileVisitor does not");
 		}
 
-			ret.setTotalFileSize(size.get());
-			ret.setNumberOfFiles(fileCount.get());
-			return ret;
+		ret.setTotalFileSize(size.get());
+		ret.setNumberOfFiles(fileCount.get());
+		return ret;
 	}
 
 
 	public static void createDir(long originalDirLastModified, final File targetDir, final UI ui, final FileCopyStatistics frs) {
 		// if the directory does not exist, create it
-		if (!targetDir.exists()) {
+
+		try {
+			Files.createDirectory(Paths.get(targetDir.getAbsolutePath()));
+			frs.incrementDirCount();
+		} catch (FileAlreadyExistsException e) {
+			//ignore.
+		}
+		catch (IOException | SecurityException  | UnsupportedOperationException e) {
+			ui.printError("createDir() failed", e);
+			throw new RuntimeException(e);
+		}
+
+
+	/*	if (!targetDir.exists()) {
 			//ui.println("creating directory: " + theDir.getName());
 			boolean result = false;
 			try {
 				targetDir.mkdir();
 				result = true;
 
-				if (originalDirLastModified != -1) {
-					try {
-						boolean b = targetDir.setLastModified(originalDirLastModified);
-					} catch (Exception e) {
-						ui.printError(e.getMessage());
-					}
-				}
+//				if (originalDirLastModified != -1) {
+//					try {
+//						boolean b = targetDir.setLastModified(originalDirLastModified);
+//					} catch (Exception e) {
+//						ui.printError("error in createDir()", e);
+//					}
+//				}
 
 
 			} catch (SecurityException se) {
@@ -451,7 +501,7 @@ public class FileUtils {
 					ui.println(String.format("Directory created: %s", targetDir.getName()));
 				frs.incrementDirCount();
 			}
-		}
+		}*/
 	}
 
 
@@ -477,7 +527,7 @@ public class FileUtils {
 		String sourceZipFileWithPath;
 		String destDir;
 		long zipFileSizeBytes;
-		int numberOfFiles=0;
+		int numberOfFiles = 0;
 
 		public CompressedackageVO(String zipName, String originalDirname, String zipFileWithPath) {
 			this.zipName = zipName;
@@ -502,7 +552,7 @@ public class FileUtils {
 		}
 
 		public void incrementFileCount(int v) {
-			this.numberOfFiles+=v;
+			this.numberOfFiles += v;
 		}
 	}
 
@@ -517,8 +567,8 @@ public class FileUtils {
 
 	//todo if target file exists and override is not check. need to skip zipping it.
 	//todo verfiry the MD5 of the exploded files. 
-	public  CompressedackageVO compressDirectory(final String dirPath, final String targetDir,  final boolean recursive
-			, final long smallFileSizeThreashold) {
+	public CompressedackageVO compressDirectory(final String dirPath, final String targetDir, final boolean recursive
+			, final long smallFileSizeThreashold) throws IOException {
 		Path sourcePath = Paths.get(dirPath);
 
 		//put the zip under the same sourcePath.
@@ -527,7 +577,7 @@ public class FileUtils {
 
 		CompressedackageVO compressedackageVO = new CompressedackageVO(zipName, sourcePath.getFileName().toString(), zipFileName);
 		compressedackageVO.originalDirLastModified = sourcePath.toFile().lastModified();
-		ZipOutputStream outputStream=null;
+		ZipOutputStream outputStream = null;
 
 		try {
 			outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
@@ -535,17 +585,25 @@ public class FileUtils {
 
 			MyZipFileVisitor visitor = new MyZipFileVisitor(compressedackageVO, targetDir, smallFileSizeThreashold, zipName, sourcePath, outputStream, false);
 
-			Files.walkFileTree(sourcePath, visitor );
+			Files.walkFileTree(sourcePath, visitor);
 
-
-			
-		} catch (IOException e) {
-			rdProUI.printError("compressDirectory() failed:" + e.getMessage());
-			throw new RuntimeException("compressDirectory() failed", e);
 
 		}
-		finally {
-			if (outputStream!=null) {
+		catch (IOException e) {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+					outputStream =null;
+				} catch (IOException e2) {
+					//
+				}
+			}
+			deleteFile(zipFileName, rdProUI);
+			throw e;
+		}
+		
+		finally{
+			if (outputStream != null) {
 				try {
 					outputStream.close();
 				} catch (IOException e) {
@@ -553,8 +611,8 @@ public class FileUtils {
 				}
 			}
 
-			if (compressedackageVO.getNumberOfFiles()==0) {
-				deleteFile(zipFileName,rdProUI);
+			if (compressedackageVO.getNumberOfFiles() == 0) {
+				deleteFile(zipFileName, rdProUI);
 			}
 
 		}
@@ -562,7 +620,7 @@ public class FileUtils {
 	}
 
 
-	class  MyZipFileVisitor extends SimpleFileVisitor<Path> {
+	class MyZipFileVisitor extends SimpleFileVisitor<Path> {
 
 		CompressedackageVO compressedackageVO;
 		String targetDir;
@@ -573,7 +631,7 @@ public class FileUtils {
 		boolean recursive;
 
 		public MyZipFileVisitor(CompressedackageVO compressedackageVO, String targetDir, long smallFileSizeThreashold, String zipName, Path sourcePath, ZipOutputStream outputStream
-		, boolean recursive) {
+				, boolean recursive) {
 			this.compressedackageVO = compressedackageVO;
 			this.targetDir = targetDir;
 			this.smallFileSizeThreashold = smallFileSizeThreashold;
@@ -584,50 +642,45 @@ public class FileUtils {
 		}
 
 		@Override
-		public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-			try {
-				boolean include = true;
-				if (!RunTimeProperties.instance.isOverwrite()) {
-					//target file
-					File _targetFile = new File(targetDir + File.separator +file.getFileName().toString() );
-					if (_targetFile.exists()) {
-						include = overrideTargetFile(file.toFile(), _targetFile);
-						if (!include) {
-							rdProUI.println("\tFile " + _targetFile.getAbsolutePath() +" exists, skipped.");
-						}
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+			boolean include = true;
+			if (!RunTimeProperties.instance.isOverwrite()) {
+				//target file
+				File _targetFile = new File(targetDir + File.separator + file.getFileName().toString());
+				if (_targetFile.exists()) {
+					include = overrideTargetFile(file.toFile(), _targetFile);
+					if (!include) {
+						rdProUI.println(LogLevel.debug,"\tFile " + _targetFile.getAbsolutePath() + " exists, skipped.");
 					}
-					else {
-						include = true;
-					}
-				}
-				else
+				} else {
 					include = true;
-
-
-				if (include) {
-					if ((smallFileSizeThreashold == -1 || file.toFile().length() <= smallFileSizeThreashold) //
-							&& !file.getFileName().toString().equals(zipName)) { //exclude the zip file itself.
-
-						compressedackageVO.incrementFileCount(1);
-
-						Path targetFile = sourcePath.relativize(file);
-						ZipEntry ze = new ZipEntry(targetFile.toString());
-						ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
-						outputStream.putNextEntry(ze);
-						//note read whole file into memory. it is what we wanted for small size files.
-						byte[] bytes = Files.readAllBytes(file);
-						compressedackageVO.zipFileSizeBytes = bytes.length;
-						//todo
-						//get MD5 of the bytes.
-
-						//ze.setExtra();
-
-						outputStream.write(bytes, 0, bytes.length);
-						outputStream.closeEntry();
-					}
 				}
-			} catch (IOException e) {
-				throw new RuntimeException("compressDirectory() failed", e);
+			} else
+				include = true;
+
+
+			if (include) {
+				if ((smallFileSizeThreashold == -1 || file.toFile().length() <= smallFileSizeThreashold) //
+						&& !file.getFileName().toString().equals(zipName)) { //exclude the zip file itself.
+
+					compressedackageVO.incrementFileCount(1);
+
+					Path targetFile = sourcePath.relativize(file);
+					ZipEntry ze = new ZipEntry(targetFile.toString());
+					ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
+
+					outputStream.putNextEntry(ze);
+					//note read whole file into memory. it is what we wanted for small size files.
+					byte[] bytes = Files.readAllBytes(file);
+					compressedackageVO.zipFileSizeBytes = bytes.length;
+					//todo
+					//get MD5 of the bytes.
+
+					//ze.setExtra();
+
+					outputStream.write(bytes, 0, bytes.length);
+					outputStream.closeEntry();
+				}
 			}
 			return FileVisitResult.CONTINUE;
 		}
@@ -666,14 +719,16 @@ public class FileUtils {
 					fos.write(buffer, 0, len);
 				}
 				fos.close();
-				destFile.setLastModified(zipEntry.getTime());
+
+				//destFile.setLastModified(zipEntry.getTime());
+				setFileLastModified(destFile.getAbsolutePath(), zipEntry.getTime() );
+
 				zipEntry = zis.getNextEntry();
 			}
 		} finally {
 			zis.closeEntry();
 			zis.close();
 		}
-
 
 
 		statistics.addFileCount(filesCount - 1);//exclude the zip file itself.
@@ -722,13 +777,13 @@ public class FileUtils {
 
 
 	public static byte[] readFileContentHash(final File source
-	, UI rdProUI ) throws NoSuchAlgorithmException, IOException {
-		InputStream fis =null;
+			, UI rdProUI) throws NoSuchAlgorithmException, IOException {
+		InputStream fis = null;
 		ReadableByteChannel inChannel = null;
 		try {
 			MessageDigest md5In = MessageDigest.getInstance("MD5");
 			fis = new DigestInputStream(new FileInputStream(source), md5In);
-/*use channel*/
+			/*use channel*/
 //			inChannel = Channels.newChannel(fis);
 //			ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER);
 //
@@ -773,8 +828,7 @@ public class FileUtils {
 			} while (i != -1);
 
 			return md5In.digest();
-		}
-		finally {
+		} finally {
 			try {
 				if (fis != null)
 					fis.close();
@@ -799,7 +853,7 @@ public class FileUtils {
 
 		if (RunTimeProperties.instance.isOverwriteIfNewerOrDifferent()) {
 			if (targetFile.exists()) {    //File IO
-				if (srcFile.lastModified() - targetFile.lastModified() >1000
+				if (srcFile.lastModified() - targetFile.lastModified() > 1000
 						|| (srcFile.length() != targetFile.length()))
 					return true;
 				else
@@ -811,8 +865,8 @@ public class FileUtils {
 	}
 
 
-	public static  String toHexString(byte[] bytes) {
-		if (bytes==null)
+	public static String toHexString(byte[] bytes) {
+		if (bytes == null)
 			return "";
 		Formatter formatter = new Formatter();
 		for (byte b : bytes) {
@@ -823,23 +877,20 @@ public class FileUtils {
 	}
 
 
-
-
 	public static void main(String[] args) {
 		try {
 			long t1 = System.currentTimeMillis();
 			byte[] md51 = FileUtils.readFileContentHash(new File("Z:\\SOFTWARE\\win8\\Windows.iso")
-			, new ConsoleRdProUIImpl());
+					, new ConsoleRdProUIImpl());
 			System.out.println(toHexString(md51));
-			System.out.println("took " + (System.currentTimeMillis()-t1));
-			
+			System.out.println("took " + (System.currentTimeMillis() - t1));
+
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 
 
 }

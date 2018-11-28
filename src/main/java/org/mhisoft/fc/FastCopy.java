@@ -84,7 +84,7 @@ public class FastCopy {
 			fileCopierService.walkTreeAndCopy(0, files, props.getDestDir(), -1);
 
 		} catch (Exception e) {
-			rdProUI.printError(e.getMessage());
+			rdProUI.printError("", e);
 		} finally {
 
 			if (packageSmallFilesWorkersPool != null) {

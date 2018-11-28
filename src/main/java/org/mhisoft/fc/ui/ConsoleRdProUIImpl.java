@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.mhisoft.fc.FileCopyStatistics;
+import org.mhisoft.fc.LogLevel;
 import org.mhisoft.fc.RunTimeProperties;
 
 /**
@@ -257,5 +258,20 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	@Override
 	public void reset() {
 		//
+	}
+
+	@Override
+	public void showCurrentDir(String text) {
+		println(text);
+	}
+
+	@Override
+	public void print(LogLevel logLevel, String msg) {
+		
+	}
+
+	@Override
+	public void println(LogLevel logLevel, String msg) {
+
 	}
 }

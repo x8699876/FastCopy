@@ -40,7 +40,7 @@ import org.mhisoft.fc.RunTimeProperties;
 public class GraphicsUIImpl extends AbstractUIImpl {
 
 	JTextArea outputTextArea;
-	JLabel labelStatus;
+	JLabel labelStatus,labelCurrentDir ;
 	JProgressBar progressBar;
 	public static int bufferLineThreshold = 9999;
 	private int lineNumber = 0;
@@ -68,9 +68,18 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 		this.labelStatus = labelStatus;
 	}
 
+	public JLabel getLabelCurrentDir() {
+		return labelCurrentDir;
+	}
+
+	public void setLabelCurrentDir(JLabel labelCurrentDir) {
+		this.labelCurrentDir = labelCurrentDir;
+	}
+
 	public void setProgressBar(JProgressBar progressBar) {
 		this.progressBar = progressBar;
 	}
+
 
 	@Override
 	public void print(String msg) {
@@ -82,7 +91,6 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 		//invokeLater()
 		//This method allows us to post a "job" to Swing, which it will then run
 		// on the event dispatch thread at its next convenience.
-
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				// Here, we can safely update the GUI
@@ -100,12 +108,23 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 	}
 
-	@Override
-	public void printError(String msg) {
-		print("[Error] " + msg, true);
+	public void showCurrentDir(String text) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				labelCurrentDir.setText(text);
+			}
+		});
+
+
 	}
 
+
 	@Override
+	public void printError(String msg) {
+		println("[Error] " + msg, true);
+	}
+
 	public void println(final String msg) {
 		print(msg + "\n");
 	}
@@ -235,6 +254,7 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 	public void reset() {
 		lastProgressTime = -1;
 		labelStatus.setText("");
+		labelCurrentDir.setText("");
 		progressBar.setValue(0);
 	}
 

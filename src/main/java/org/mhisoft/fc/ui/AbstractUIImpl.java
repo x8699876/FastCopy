@@ -22,6 +22,10 @@
 
 package org.mhisoft.fc.ui;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import org.mhisoft.fc.LogLevel;
 import org.mhisoft.fc.RunTimeProperties;
 
 /**
@@ -47,6 +51,47 @@ public abstract class AbstractUIImpl implements UI {
 		println(props.toString());
 
 	}
+
+	@Override
+	public void printError(String msg, Exception e) {
+		if (RunTimeProperties.instance.isDebug()) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			printError(sw.toString());
+		}
+		else
+			printError(msg+", error=" + e.getMessage());
+
+
+		e.printStackTrace();
+
+
+	}
+
+
+	@Override
+	public void print(LogLevel logLevel, String msg) {
+		switch (logLevel) {
+			case debug :{
+				if (RunTimeProperties.instance.isVerbose() || RunTimeProperties.instance.isDebug())
+					print(msg);
+				break;
+			}
+			case error : {
+				printError(msg);
+				break;
+			}
+
+		}
+		
+	}
+
+	@Override
+	public void println(LogLevel logLevel, final String msg) {
+		print(logLevel, msg + "\n");
+	}
+
 
 
 }

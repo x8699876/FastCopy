@@ -20,6 +20,7 @@
 package org.mhisoft.fc.ui;
 
 import org.mhisoft.fc.FileCopyStatistics;
+import org.mhisoft.fc.LogLevel;
 import org.mhisoft.fc.RunTimeProperties;
 
 /**
@@ -43,6 +44,12 @@ public interface UI {
 	 * @param msg
 	 */
 	void print(String msg);
+
+	void print(LogLevel logLevel, String msg);
+
+	public void println(LogLevel logLevel, final String msg);
+
+
 	void print(String msg, boolean force);
 
 	/**
@@ -55,7 +62,11 @@ public interface UI {
 
 	public  void printf(final String msg, Object args);
 
+
 	public void printError(final String msg) ;
+
+
+	public void printError(String msg, Exception e);
 
 	/**
 	 * Present a confirmation and return true if confirmed.
@@ -95,4 +106,6 @@ public interface UI {
 	public void reset() ;
 
 	public void dumpArguments(String[] args, RunTimeProperties props) ;
+
+	public void showCurrentDir(String text);
 }

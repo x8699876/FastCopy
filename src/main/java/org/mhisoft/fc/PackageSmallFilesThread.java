@@ -56,8 +56,17 @@ public class PackageSmallFilesThread implements Runnable {
 
 		if (!RunTimeProperties.instance.isStopThreads()) {
 
+			FileUtils.CompressedackageVO compressedackageVO = null;
+			try {
+				compressedackageVO = FileUtils.instance.compressDirectory(sSourceDir, sTargetDir, false, FileCopierService.SMALL_FILE_SIZE);
+			} catch (Exception e) {
+				rdProUI.printError("compressDirectory failed for " + sSourceDir, e);
+				fallbackToCopyFilesDirectly();
+				return;
 
-			FileUtils.CompressedackageVO compressedackageVO = FileUtils.instance.compressDirectory(sSourceDir, sTargetDir, false, FileCopierService.SMALL_FILE_SIZE);
+			}
+
+
 			if (compressedackageVO.getNumberOfFiles() > 0) {
 
 				if (RunTimeProperties.instance.isDebug())
@@ -91,6 +100,33 @@ public class PackageSmallFilesThread implements Runnable {
 		} else {
 			if (RunTimeProperties.instance.isDebug())
 				rdProUI.println("[PackageSmallFilesThread]\n" + Thread.currentThread().getName() + "is stopped.");
+
+		}
+
+	}
+
+	private void fallbackToCopyFilesDirectly() {
+		File[] files = new File(sSourceDir).listFiles();
+		rdProUI.println(LogLevel.debug, "Fall back to copy files directly for dir:" + sSourceDir );
+		if (files!=null) {
+			for (File childFile : files) {
+
+				if (RunTimeProperties.instance.isStopThreads()) {
+					rdProUI.println("[PackageSmallFilesThread]\n" + Thread.currentThread().getName() + "is stopped.");
+					return;
+				}
+
+
+				String newDestFile = sTargetDir + File.separator + childFile.getName();
+				File targetFile = new File(newDestFile);
+				if (!targetFile.exists() || FileUtils.overrideTargetFile(childFile, targetFile)) {
+					CopyFileThread t = new CopyFileThread(rdProUI
+							, childFile, targetFile, null, statistics);
+					fileCopyWorkersPool.addTask(t);
+				} else {
+						rdProUI.println(LogLevel.debug, String.format("\tFile %s exists on the target dir, skipped. ", newDestFile));
+				}
+			}
 
 		}
 

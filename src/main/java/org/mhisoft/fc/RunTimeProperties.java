@@ -17,7 +17,10 @@ public class RunTimeProperties {
 
 	private static boolean stopThreads = false;
 	private boolean running;
+	private boolean keepOriginalFileDates = Boolean.valueOf(System.getProperty("keepOriginalFileDates", "false"));;
 
+
+	private LogLevel logLevel=LogLevel.info;;
 
 
 	public static RunTimeProperties instance = new RunTimeProperties();
@@ -156,6 +159,26 @@ public class RunTimeProperties {
 		return verifyAfterCopy;
 	}
 
+	public boolean isKeepOriginalFileDates() {
+		return keepOriginalFileDates;
+	}
+
+	public void setKeepOriginalFileDates(boolean keepOriginalFileDates) {
+		this.keepOriginalFileDates = keepOriginalFileDates;
+	}
+
+	public LogLevel getLogLevel() {
+		if (logLevel==null && System.getProperty("logLevel")!=null) {
+			logLevel = LogLevel.valueOf(System.getProperty("logLevel"));
+		}
+
+		return logLevel;
+	}
+
+	public void setLogLevel(LogLevel logLevel) {
+		this.logLevel = logLevel;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RunTimeProperties{");
@@ -170,6 +193,7 @@ public class RunTimeProperties {
 		sb.append(", debugArg=").append(debugArg);
 		sb.append(", compressSmallFiles=").append(RunTimeProperties.packageSmallFiles);
 		sb.append(", verifyAfterCopy=").append(RunTimeProperties.verifyAfterCopy);
+		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isKeepOriginalFileDates());
 		sb.append('}');
 		return sb.toString();
 	}

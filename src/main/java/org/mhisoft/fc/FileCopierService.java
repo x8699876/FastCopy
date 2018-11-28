@@ -63,19 +63,25 @@ public class FileCopierService {
 	public void walkTreeAndCopy(int level, final String[] rootDirs, final String destDir, long targetDirLastModified) {
 
 
-		String _targetDir;
+		String _destDir; //the global target dir
+
 		if (RunTimeProperties.instance.flatCopy) {
-			_targetDir = RunTimeProperties.instance.getDestDir();
+			_destDir = RunTimeProperties.instance.getDestDir();
 		} else
-			_targetDir = destDir;
+			_destDir = destDir;
 
 
-		if (!new File(_targetDir).exists()) {
-			FileUtils.createDir(targetDirLastModified, new File(_targetDir), rdProUI, statistics);
+		if (!new File(_destDir).exists()) {
+			FileUtils.createDir(targetDirLastModified, new File(_destDir), rdProUI, statistics);
 		}
 
 
 		for (String sRootDir : rootDirs) {
+
+			//the targetDir relative to each root Dir. it changes for each rootDir.
+			//scope is within the loop. 
+			String _targetDir =  _destDir;
+
 			File rootDir = new File(sRootDir.trim());
 
 			if (RunTimeProperties.instance.isStopThreads()) {
@@ -108,8 +114,10 @@ public class FileCopierService {
 					}
 				});
 
-				filesList = Arrays.asList(childFiles);
-				rdProUI.println("Copying files under directory: " + rootDir);
+				if (childFiles!=null)
+					filesList = Arrays.asList(childFiles);
+				
+				rdProUI.showCurrentDir("Copying files under directory: " + rootDir);
 			}
 
 			if (filesList.isEmpty())
@@ -124,7 +132,7 @@ public class FileCopierService {
 				DirecotryStat direcotryStat = FileUtils.getDirectoryStats(rootDir, SMALL_FILE_SIZE);
 
 				if (  direcotryStat.isFail()) {
-					rdProUI.printError(direcotryStat.getFailMsg());
+					rdProUI.print(LogLevel.debug, direcotryStat.getFailMsg() +", will not pack this directory.");
 					thisRootDirQualifiedToPack = false;
 				}
 				else{

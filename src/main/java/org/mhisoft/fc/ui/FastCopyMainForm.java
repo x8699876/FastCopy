@@ -92,6 +92,7 @@ public class FastCopyMainForm {
 	private JSpinner fldFontSize;
 	private JLabel labelFontSize;
 	private JCheckBox ckVerify;
+	private JLabel labelCurrentDir;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -471,6 +472,7 @@ public class FastCopyMainForm {
 
 		uiImpl.setOutputTextArea(main.outputTextArea);
 		uiImpl.setLabelStatus(main.labelStatus);
+		uiImpl.setLabelCurrentDir(main.labelCurrentDir);
 		uiImpl.setProgressBar(main.progressBar1);
 
 
