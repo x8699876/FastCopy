@@ -40,6 +40,7 @@ public class RunTimeProperties {
 	boolean flatCopy;
 	boolean debugArg;
 	boolean createTheSameSourceFolderUnderTarget;
+	boolean skipEmptyDirs=Boolean.valueOf(System.getProperty("skipEmptyDirs", "true"));;;
 
 
 	public  boolean isStopThreads() {
@@ -179,6 +180,14 @@ public class RunTimeProperties {
 		this.logLevel = logLevel;
 	}
 
+	public boolean isSkipEmptyDirs() {
+		return skipEmptyDirs;
+	}
+
+	public void setSkipEmptyDirs(boolean skipEmptyDirs) {
+		this.skipEmptyDirs = skipEmptyDirs;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RunTimeProperties{");
@@ -194,6 +203,7 @@ public class RunTimeProperties {
 		sb.append(", compressSmallFiles=").append(RunTimeProperties.packageSmallFiles);
 		sb.append(", verifyAfterCopy=").append(RunTimeProperties.verifyAfterCopy);
 		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isKeepOriginalFileDates());
+		sb.append(", skipEmptyDirs=").append(RunTimeProperties.instance.isSkipEmptyDirs());
 		sb.append('}');
 		return sb.toString();
 	}

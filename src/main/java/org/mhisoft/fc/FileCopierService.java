@@ -70,11 +70,7 @@ public class FileCopierService {
 		} else
 			_destDir = destDir;
 
-
-		if (!new File(_destDir).exists()) {
-			FileUtils.createDir(targetDirLastModified, new File(_destDir), rdProUI, statistics);
-		}
-
+		boolean _destDirCreated = false;
 
 		for (String sRootDir : rootDirs) {
 
@@ -89,20 +85,12 @@ public class FileCopierService {
 				return;
 			}
 
-			//make the TheSameSourceFolderUnderTarget only once at the top level.
-			//use the _targetDir
-			if (level == 0 && rootDir.isDirectory()
-					&& RunTimeProperties.instance.isCreateTheSameSourceFolderUnderTarget()) {
-				//   get the last dir of the source and make it under dest
-				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
-				_targetDir = _targetDir + File.separator + rootDir.getName();
-				if (!new File(_targetDir).exists())
-					FileUtils.createDir(rootDir.lastModified(), new File(_targetDir), rdProUI, statistics);
-			}
 
+
+			/*examine the dir*/
 			List<File> filesList = new ArrayList<>();
 			if (rootDir.isFile()) {
-				/* the rootDir here is only a file  */
+				//the rootDir here is only a file 
 				filesList.add(rootDir);
 			}
 			else {
@@ -120,8 +108,29 @@ public class FileCopierService {
 				rdProUI.showCurrentDir("Copying files under directory: " + rootDir);
 			}
 
+			/*nothing under this directory. don't even create the target empty dir*/
 			if (filesList.isEmpty())
 				return;
+
+
+			if (!_destDirCreated && !new File(_destDir).exists()) {
+				_destDirCreated = true;
+				FileUtils.createDir(targetDirLastModified, new File(_destDir), rdProUI, statistics);
+			}
+
+
+
+			//make the TheSameSourceFolderUnderTarget only once at the top level.
+			//use the _targetDir
+			if (level == 0 && rootDir.isDirectory()
+					&& RunTimeProperties.instance.isCreateTheSameSourceFolderUnderTarget()) {
+				//   get the last dir of the source and make it under dest
+				//ext  /Users/me/doc --> /Users/me/target make /Users/me/target/doc
+				_targetDir = _targetDir + File.separator + rootDir.getName();
+				if (!new File(_targetDir).exists())
+					FileUtils.createDir(rootDir.lastModified(), new File(_targetDir), rdProUI, statistics);
+			}
+
 
 
 			//List<File> notQualifiedToPackDirList = new ArrayList<>();

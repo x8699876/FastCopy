@@ -199,11 +199,12 @@ public class FileCopyStatistics {
 
 
 
-	String sOverall = "Total Files: %s, Total size: %s Mb, Took: %s, Overall Avg Speed=%s Mb/s";
+	String sOverall = "Directories: %s, Total Files: %s, Total size: %s Mb, Took: %s, Overall Avg Speed=%s Mb/s";
 
 	public String printOverallProgress() {
 		double fsize = getTotalFileSize() / 1024 /1024;
 		return String.format(sOverall
+				, df.format(getDirCount())
 				, df.format(getFilesCount())
 				, df.format(fsize)
 				, getDisplayTime(this.totalTime.get())
