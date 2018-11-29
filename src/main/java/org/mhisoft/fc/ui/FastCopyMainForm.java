@@ -93,6 +93,7 @@ public class FastCopyMainForm {
 	private JLabel labelFontSize;
 	private JCheckBox ckVerify;
 	private JLabel labelCurrentDir;
+	private JCheckBox cbPackageSmallFiles;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -405,6 +406,7 @@ public class FastCopyMainForm {
 		
 		props.setOverwrite(chkOverrideAlways.isSelected());
 		props.setOverwriteIfNewerOrDifferent(overrideOnlyIfNewerCheckBox.isSelected());
+		props.setPackageSmallFiles(cbPackageSmallFiles.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
 		props.setCreateTheSameSourceFolderUnderTarget(chkCreateTheSameSourceCheckBox.isSelected());

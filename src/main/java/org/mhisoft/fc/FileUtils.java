@@ -128,7 +128,6 @@ public class FileUtils {
 			rdProUI.printError("Verify copy of file failed:" + target.getAbsolutePath());
 		}
 
-		//todo need to adjust for packaged zip
 		statistics.getBucket(source.length()).incrementFileCount();
 
 

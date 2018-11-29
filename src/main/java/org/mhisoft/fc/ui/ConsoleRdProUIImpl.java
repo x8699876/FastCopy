@@ -140,6 +140,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		println("\t\t -o always override.");
 		println("\t\t -n override only when the source file newer or different in size.");
 		println("\t\t -f flat copy, copy everything to the same target directory.");
+		println("\t\t -pack Package the small files first to speed up the copy, requires write access on the source folder or drive.");
 		println("Examples:");
 		println("\t\t copy from current dir to the backup directory: fastcopy t:\\backup");
 		println("\t\t fastcopy -from s:\\projects\\dir1;s:\\projects\\dir2 -to t:\\backup");
@@ -172,9 +173,13 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				props.setDebug(true);
 			}else if (arg.equalsIgnoreCase("-m")) {
 				props.setNumOfThreads(4);
-			}else if (arg.equalsIgnoreCase("-o")) {
+			}
+			else if (arg.equalsIgnoreCase("-o")) {
 				props.setOverwrite(true);
-			}else if (arg.equalsIgnoreCase("-n")) {
+			}else if (arg.equalsIgnoreCase("-pack")) {
+				props.setPackageSmallFiles(true);
+			}
+			else if (arg.equalsIgnoreCase("-n")) {
 				props.setOverwriteIfNewerOrDifferent(true);
 			}else if (arg.equalsIgnoreCase("-f")) {
 				props.setFlatCopy(true);

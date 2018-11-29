@@ -11,7 +11,7 @@ public class RunTimeProperties {
 
 	public static String zip_prefix ="_fastcopy_auto_create_";
 
-	static boolean packageSmallFiles = Boolean.valueOf(System.getProperty("compressSmallFiles", "true"));
+
 	private static boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "false"));
 	private  static boolean debug = Boolean.getBoolean("debug");
 
@@ -41,7 +41,7 @@ public class RunTimeProperties {
 	boolean debugArg;
 	boolean createTheSameSourceFolderUnderTarget;
 	boolean skipEmptyDirs=Boolean.valueOf(System.getProperty("skipEmptyDirs", "true"));;;
-
+	boolean packageSmallFiles = Boolean.valueOf(System.getProperty("packageSmallFiles", "true"));
 
 	public  boolean isStopThreads() {
 		return stopThreads;
@@ -101,6 +101,10 @@ public class RunTimeProperties {
 
 	public  boolean isPackageSmallFiles() {
 		return packageSmallFiles;
+	}
+
+	public void setPackageSmallFiles(boolean packageSmallFiles) {
+		this.packageSmallFiles = packageSmallFiles;
 	}
 
 	public int getNumberOfThreadsForPackageSmallFiles() {
@@ -200,7 +204,7 @@ public class RunTimeProperties {
 		sb.append(", createTheSameSourceFolderUnderTarget=").append(createTheSameSourceFolderUnderTarget);
 		sb.append(", flatCopy=").append(flatCopy);
 		sb.append(", debugArg=").append(debugArg);
-		sb.append(", compressSmallFiles=").append(RunTimeProperties.packageSmallFiles);
+		sb.append(", compressSmallFiles=").append(RunTimeProperties.instance.isPackageSmallFiles());
 		sb.append(", verifyAfterCopy=").append(RunTimeProperties.verifyAfterCopy);
 		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isKeepOriginalFileDates());
 		sb.append(", skipEmptyDirs=").append(RunTimeProperties.instance.isSkipEmptyDirs());

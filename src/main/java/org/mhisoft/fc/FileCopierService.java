@@ -137,7 +137,7 @@ public class FileCopierService {
 			boolean thisRootDirQualifiedToPack = false;
 
 			/* process files under this "source" dir,  package small files */
-			if (RunTimeProperties.packageSmallFiles && rootDir.isDirectory()) {
+			if (RunTimeProperties.instance.isPackageSmallFiles() && rootDir.isDirectory()) {
 				DirecotryStat direcotryStat = FileUtils.getDirectoryStats(rootDir, SMALL_FILE_SIZE);
 
 				if (  direcotryStat.isFail()) {
