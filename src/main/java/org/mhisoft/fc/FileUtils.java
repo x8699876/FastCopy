@@ -23,11 +23,11 @@
 package org.mhisoft.fc;
 
 import java.util.Arrays;
-import java.util.Formatter;
+import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -60,6 +60,9 @@ import java.text.DecimalFormat;
 
 import org.mhisoft.fc.ui.ConsoleRdProUIImpl;
 import org.mhisoft.fc.ui.UI;
+import org.mhisoft.fc.utils.StrUtils;
+
+import junit.framework.Assert;
 
 /**
  * Description:
@@ -156,7 +159,7 @@ public class FileUtils {
 
 
 			}
-		} catch (IOException e) {
+		} catch (IOException | NoSuchAlgorithmException e) {
 			rdProUI.printError("Exploding the zip failed", e);
 		}
 
@@ -564,8 +567,6 @@ public class FileUtils {
 	 * @return zip file name without path
 	 */
 
-	//todo if target file exists and override is not check. need to skip zipping it.
-	//todo verfiry the MD5 of the exploded files. 
 	public CompressedackageVO compressDirectory(final String dirPath, final String targetDir, final boolean recursive
 			, final long smallFileSizeThreashold) throws IOException {
 		Path sourcePath = Paths.get(dirPath);
@@ -664,16 +665,15 @@ public class FileUtils {
 					Path targetFile = sourcePath.relativize(file);
 					ZipEntry ze = new ZipEntry(targetFile.toString());
 					ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
-
-					outputStream.putNextEntry(ze);
 					//note read whole file into memory. it is what we wanted for small size files.
 					byte[] bytes = Files.readAllBytes(file);
 					compressedackageVO.zipFileSizeBytes = bytes.length;
-					//todo
-					//get MD5 of the bytes.
 
-					//ze.setExtra();
-
+					//set the MD5 to the extra of the entry. this is source MD5. 
+					if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+						ze.setComment(StrUtils.toHexString(getHash(bytes)));
+					}
+					outputStream.putNextEntry(ze);
 					outputStream.write(bytes, 0, bytes.length);
 					outputStream.closeEntry();
 				}
@@ -695,35 +695,55 @@ public class FileUtils {
 	/**
 	 * Unzip the zipFile to the deskDir
 	 *
-	 * @param zipFile
+	 * @param file
 	 * @param destDir
 	 * @throws IOException
 	 */
-	protected static void unzipFile(File zipFile, File destDir, FileCopyStatistics statistics) throws IOException {
+	protected void unzipFile(File file, File destDir, FileCopyStatistics statistics) throws NoSuchAlgorithmException, IOException {
+
+		long filesCount = 0;
 		byte[] buffer = new byte[4096];
-		ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
-		ZipEntry zipEntry = zis.getNextEntry();
-		long filesCount;
+		//zip input stream does not read zip entry comments. use ZipFile.
+		//ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+		ZipFile zipFile = new ZipFile(file);
+
 		try {
-			filesCount = 0;
-			while (zipEntry != null) {
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry zipEntry = entries.nextElement();
+
+
 				filesCount++;
 				File destFile = new File(destDir, zipEntry.getName());
+
 				FileOutputStream fos = new FileOutputStream(destFile);
+				InputStream inputStream = zipFile.getInputStream(zipEntry);
 				int len;
-				while ((len = zis.read(buffer)) > 0) {
+				while ((len = inputStream.read(buffer)) > 0) {
 					fos.write(buffer, 0, len);
 				}
 				fos.close();
 
-				//destFile.setLastModified(zipEntry.getTime());
 				setFileLastModified(destFile.getAbsolutePath(), zipEntry.getTime());
 
-				zipEntry = zis.getNextEntry();
+
+				//verify
+				if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+					byte[] sourceHash = StrUtils.toByteArray(zipEntry.getComment());
+					byte[] targetHash = readFileContentHash(destFile, this.rdProUI);
+					if (!Arrays.equals(sourceHash, targetHash)) {
+						rdProUI.printError("\tVerify file failed:" + destFile.getAbsolutePath());
+					} else {
+						rdProUI.println(LogLevel.debug, "\tVerified file:" + destFile.getAbsolutePath());
+					}
+				}
+
+
 			}
+
+
 		} finally {
-			zis.closeEntry();
-			zis.close();
+			zipFile.close();
 		}
 
 
@@ -771,6 +791,16 @@ public class FileUtils {
 		return ret;
 	}
 
+
+	public static byte[] getHash(byte[] input) throws IOException {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("MD5");
+			byte[] md5 = digest.digest(input);
+			return md5;
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+	}
 
 	public static byte[] readFileContentHash(final File source
 			, UI rdProUI) throws NoSuchAlgorithmException, IOException {
@@ -861,25 +891,15 @@ public class FileUtils {
 	}
 
 
-	public static String toHexString(byte[] bytes) {
-		if (bytes == null)
-			return "";
-		Formatter formatter = new Formatter();
-		for (byte b : bytes) {
-			formatter.format("%02x", b);
-		}
-		String hex = formatter.toString();
-		return hex;
-	}
-
-
 	public static void main(String[] args) {
 		try {
 			long t1 = System.currentTimeMillis();
-			byte[] md51 = FileUtils.readFileContentHash(new File("Z:\\SOFTWARE\\win8\\Windows.iso")
+			byte[] md51 = FileUtils.readFileContentHash(new File("D:\\temp\\test2\\Local\\Resmon.ResmonCfg")
 					, new ConsoleRdProUIImpl());
-			System.out.println(toHexString(md51));
+			String s = StrUtils.toHexString(md51);
+			System.out.println(s);
 			System.out.println("took " + (System.currentTimeMillis() - t1));
+			Assert.assertTrue(Arrays.equals(md51, StrUtils.toByteArray(s)));
 
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
