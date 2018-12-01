@@ -162,23 +162,27 @@ public class FileUtils {
 			rdProUI.printError("Exploding the zip failed", e);
 		}
 
-
-		try {
-			//boolean b = target.setLastModified(source.lastModified());
-
-			setFileLastModified(target.getAbsolutePath(), source.lastModified());
-
-			//rdProUI.println("modify file date to: " + b + "," + new Timestamp(target.lastModified()));
-		} catch (Exception e) {
-			rdProUI.printError("setLastModified() failed.", e);
+		if (compressedackageVO == null) { //
+			try {
+				setFileLastModified(target.getAbsolutePath(), source.lastModified());
+			} catch (Exception e) {
+				rdProUI.printError("setLastModified() failed.", e);
+			}
 		}
 
 	}
 
+	public static BasicFileAttributes getFileAttributes(Path sourceFile) throws IOException {
+		BasicFileAttributes attr = Files.readAttributes(sourceFile, BasicFileAttributes.class);
+		return attr;
+	}
 
-	public static void setFileLastModified(String filePath, long millis) throws IOException {
+
+	public static void setFileLastModified(String targetFile, long millis) throws IOException {
 		if (RunTimeProperties.instance.isKeepOriginalFileDates()) {
-			BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(filePath), BasicFileAttributeView.class);
+			Path tPath = Paths.get(targetFile);
+
+			BasicFileAttributeView attributes = Files.getFileAttributeView(tPath, BasicFileAttributeView.class);
 			FileTime time = FileTime.fromMillis(millis);
 			attributes.setTimes(time, time, time);
 		}

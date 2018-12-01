@@ -94,6 +94,7 @@ public class FastCopyMainForm {
 	private JCheckBox ckVerify;
 	private JLabel labelCurrentDir;
 	private JCheckBox cbPackageSmallFiles;
+	private JCheckBox ckKeepOriginalFileTimestamp;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -410,6 +411,7 @@ public class FastCopyMainForm {
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(chkFlat.isSelected());
 		props.setCreateTheSameSourceFolderUnderTarget(chkCreateTheSameSourceCheckBox.isSelected());
+		props.setKeepOriginalFileDates(ckKeepOriginalFileTimestamp.isSelected());
 		return true;
 
 	}
