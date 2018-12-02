@@ -172,19 +172,22 @@ public class FileUtils {
 
 	}
 
-	public static BasicFileAttributes getFileAttributes(Path sourceFile) throws IOException {
+	public  BasicFileAttributes getFileAttributes(Path sourceFile) throws IOException {
 		BasicFileAttributes attr = Files.readAttributes(sourceFile, BasicFileAttributes.class);
 		return attr;
 	}
 
 
-	public static void setFileLastModified(String targetFile, long millis) throws IOException {
+	public  void setFileLastModified(String targetFile, long millis)  {
 		if (RunTimeProperties.instance.isKeepOriginalFileDates()) {
 			Path tPath = Paths.get(targetFile);
-
 			BasicFileAttributeView attributes = Files.getFileAttributeView(tPath, BasicFileAttributeView.class);
 			FileTime time = FileTime.fromMillis(millis);
-			attributes.setTimes(time, time, time);
+			try {
+				attributes.setTimes(time, time, null);
+			} catch (IOException e) {
+				rdProUI.print(LogLevel.debug, "Failed to set last modified timestamp for " + targetFile);
+			}
 		}
 
 	}
