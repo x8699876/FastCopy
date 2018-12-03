@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.text.DecimalFormat;
 
+import org.mhisoft.fc.utils.StrUtils;
+
 
 /**
  * Description: Statistics on files and directories copied.
@@ -170,7 +172,7 @@ public class FileCopyStatistics {
 				avgSpeed = "NA";
 
 			sb.append("Files ").append(entry.name).append(": ")
-					.append( "Total Time:").append(getDisplayTime(entry.totalTime.get()))
+					.append( "Total Time:").append(StrUtils.getDisplayTime(entry.totalTime.get()))
 					.append( ", count:").append(entry.fileCount)
 					.append(String.format(", Avg Speed:%s (Mb/s)", avgSpeed ))
 					.append("\n");
@@ -181,16 +183,6 @@ public class FileCopyStatistics {
 
 	}
 
-
-	public static String getDisplayTime(final long millis) {
-		double _d= millis;
-		if (millis<1000) {
-			return  millis + " (ms)";
-		}
-		else {
-			return  df.format(_d/1000) + " (s)";
-		}
-	}
 
 	public static String getAvgSpeedString(double fileSizeInKB, long totalTimeInMillis) {
 		double avgSpeed = fileSizeInKB*1000/totalTimeInMillis;
@@ -207,7 +199,7 @@ public class FileCopyStatistics {
 				, df.format(getDirCount())
 				, df.format(getFilesCount())
 				, df.format(fsize)
-				, getDisplayTime(this.totalTime.get())
+				, StrUtils.getDisplayTime(this.totalTime.get())
 				, df.format(fsize*1000/totalTime.get()));
 	}
 

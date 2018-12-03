@@ -107,25 +107,28 @@ public class FileUtils {
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)
-				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (bytes), took %s (ms). %s"
+				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (bytes), took %s. %s"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
-						, vo.took
+						, StrUtils.getDisplayTime(vo.took)
 						, vo.verified != null ? (vo.verified ? "Verified" : "Verify Error!") : ""
 
 						)
 				);
 			else
-				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (Kb), took %s (ms). %s"
+				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (Kb), took %s. %s"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length() / 1024)
-						, vo.took
+						, StrUtils.getDisplayTime(vo.took)
 						, vo.verified != null ? (vo.verified ? "Verified" : "Verify Error!") : ""
 						)
 				);
 		}
 		if (vo.verified != null && !vo.verified) {
 			rdProUI.printError("Verify copy of file failed:" + target.getAbsolutePath());
+			//delete it.
+			target.delete();
+
 		}
 
 		statistics.getBucket(source.length()).incrementFileCount();
@@ -739,6 +742,8 @@ public class FileUtils {
 					byte[] targetHash = readFileContentHash(destFile, this.rdProUI);
 					if (!Arrays.equals(sourceHash, targetHash)) {
 						rdProUI.printError("\tVerify file failed:" + destFile.getAbsolutePath());
+						//delete it. 
+						destFile.delete();
 					} else {
 						rdProUI.println(LogLevel.debug, "\tVerified file:" + destFile.getAbsolutePath());
 					}
