@@ -24,6 +24,7 @@ https://www.oracle.com/technetwork/java/javase/overview/index.html
 * Mac OS: 
   Exploded the downloaded zip to ~/bin/fastcopy</br>
   The "Fastcopy(1.2).app" is the MacOS app,  copy it to the ~/Applications and run.</br>
+  For the first time, it might alert saying the app can't be opened because it is from a untrusted source. Go to the Finder, right click to bring up the context menu and click "Open" from there. You will have the option to open it there after. <br>
   Also see below on how to add as service to the context menu in the Finder.</br> 
 
 
