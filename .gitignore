@@ -5,3 +5,6 @@ dist/tmp_make_exe/
 dist/Fastcopy(1.1).app/
 .idea/
 dist/Fastcopy(1.2.7).app/
+dist/Fastcopy(*).app/Contents/Info.plist
+Fastcopy(*).app
+mhisoft-fastcopy-v*-binaries.zip

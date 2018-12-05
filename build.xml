@@ -53,9 +53,6 @@
     </target>
 
     <target name="package">
-
-
-
         <if>
             <equals arg1="${isWindows}" arg2="true"/>
             <then>
@@ -65,6 +62,20 @@
         </if>
 
         <antcall target="bundle-mac-app"/>
+        
+        <delete dir="${launch4j.dir}"/>
+
+    </target>
+
+    <target name="release">
+
+        <delete dir="dist" includes="*.jar, *.exe"/>
+
+        <antcall target="build"/>
+
+        <delete file="mhisoft-fastcopy-v${AppVersion}-binaries.zip"/>
+        <zip destfile="mhisoft-fastcopy-v${AppVersion}-binaries.zip"  basedir="dist"/>
+
 
     </target>
 
@@ -72,7 +83,10 @@
 
     <target name="bundle-mac-app">
 
-        <delete file="dist/Fastcopy(v1.0).app"/>
+        <delete includeEmptyDirs="true" failonerror="false">
+            <fileset dir="dist/Fastcopy(${AppVersion}).app" includes="**"/>
+        </delete>
+
 
         <property name="sourceJar" value="fastcopy-ui.jar"/>
         <property name="launch4jFinalJar" value="fastcopy-ui-combined.jar"/>

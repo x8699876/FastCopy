@@ -133,15 +133,16 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		println("\t source-dir: The source files and directories delimited with semicolon.");
 		println("\t target-dir: The target directory.");
 		println("\t Options: ");
-		println("\t\t -v verbose mode.");
+		println("\t\t -v      verbose mode.");
 		println("\t\t -verify verify each file copy by comparing the file content hash.");
-		println("\t\t -m use multiple threads, best for copying across the SSD drives.");
-		println("\t\t -w number of worker threads, default:" + RunTimeProperties.DEFAULT_THREAD_NUM+".");
-		println("\t\t -o always override.");
-		println("\t\t -n override only when the source file newer or different in size.");
-		println("\t\t -f flat copy, copy everything to the same target directory.");
-		println("\t\t -pack Package the small files first to speed up the copy, requires write access on the source folder or drive.");
-		println("\t\t -k Keep the original file timestamp.");
+		println("\t\t -m      use multiple threads, best for copying across the SSD drives.");
+		println("\t\t -w      number of worker threads in the multi threads mode, default:" + RunTimeProperties.DEFAULT_THREAD_NUM+".");
+		println("\t\t -o      always override.");
+		println("\t\t -n      override only when the source file newer or different in size.");
+		println("\t\t -f      flat copy, copy everything to the same target directory.");
+		println("\t\t -pack   Package the small files first to speed up the copy, requires write access on the source folder or drive.");
+		println("\t\t -k      Keep the original file timestamp.");
+		println("\t\t -sf     Create the same source folder under the target and copies to it.");
 		println("Examples:");
 		println("\t\t copy from current dir to the backup directory: fastcopy t:\\backup");
 		println("\t\t fastcopy -from s:\\projects\\dir1;s:\\projects\\dir2 -to t:\\backup");
@@ -189,6 +190,8 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				props.setFlatCopy(true);
 			}else if (arg.equalsIgnoreCase("-verify")) {
 				props.setVerifyAfterCopy(true);
+			}else if (arg.equalsIgnoreCase("-sf")) {
+				props.setCreateTheSameSourceFolderUnderTarget(true);
 			}
 			else if (arg.equalsIgnoreCase("-w")) {
 
