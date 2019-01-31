@@ -35,22 +35,26 @@ ex:
 ```
     
 $ ./fc.sh -help
-Fast Copy (v1.2, build Oct 2018, by Tony Xue, MHISoft)
+MHISoft FastCopy (v1.3, build Dec 2018)
 (https://github.com/mhisoft/fastcopy)
 Usages:
-	 fastcopy [option] -from source-dir -to target-dir 
-	 source-dir: The source files and directories delimited with semicolon.
-	 target-dir: The target directory.
-	 Options: 
-		 -v verbose mode
-		 -m use multi thread for SSD
-		 -o override
-		 -f flat copy, copy everything to one flat target directory
-		 -n override if new or different
-		 -w number of worker threads, default 5
+         fc [option] -from source_dir -to target_dir
+         source-dir: The source files and directories delimited with semicolon.
+         target-dir: The target directory.
+         Options:
+                 -v      verbose mode.
+                 -verify verify each file copy by comparing the file content hash.
+                 -m      use multiple threads, best for copying across the SSD drives.
+                 -w      number of worker threads in the multi threads mode, default:2.
+                 -o      always override.
+                 -n      override only when the source file newer or different in size.
+                 -f      flat copy, copy everything to the same target directory.
+                 -pack   Package the small files first to speed up the copy, requires write access on the source folder or drive.
+                 -k      Keep the original file timestamp.
+                 -sf     Create the same source folder under the target and copies to it.
 Examples:
-		 copy from current dir to the backup directory: fastcopy t:\backup
-		 fastcopy -from s:\projects\dir1;s:\projects\dir2 -to t:\backup
+                 copy from current dir to the backup directory: fastcopy t:\backup
+                 fastcopy -from s:\projects\dir1;s:\projects\dir2 -to t:\backup
    
 ```
 
