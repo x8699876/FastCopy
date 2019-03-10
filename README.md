@@ -3,7 +3,8 @@
 * A very handy tool for copying or backup a large set of directories and files, recursively, i.e. all the sub directories under will be copied over to the target. Support all the hidden and system files, long file names, file names of all languages. 
 * Fast! Use multiple workers to copy from/to the SSD drives. 
 * Support mounted external drives on Mac.
-* Drive speed tester/Benchmark tool.
+* A Drive speed tester/Benchmark tool.  
+The fastcopy reports real life file copying speed for various file size groups. You will notice the transfering speed of large files and smaller files are quite different. Used in combination with the synthetic drive benchmark tools such as the CrystalDiskMark and Anvil's Storage Utilities, you'll have a better picture of your system's performance. 
 * Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
 
 
@@ -67,11 +68,11 @@ Examples:
 
 * The source can be a combination of multiple directories and files delimited by the semicolon ";". You can either use the browse button to choose directories or copy paste directly into the input box. The file choose supports multiple directories selections.
 * The target should always be one directory or drive. 
-* Check the SSD deivers to leverage multiple works for copying files simuteneously.  usually it should speed things up if there no other bottlenecks on such as the network or calbe, ports.
+* Check the SSD deivers to leverage multiple works for copying files simuteneously.  Usually it should speed things up if there no other bottlenecks on such as the network or cable, ports.  
 * The "override only if newer or a size difference is detected" is handy to when you need to stop and resume a copy task. say you stop a copying task in the middle , when you resume it by running again , it will skip the already copied files on the target directory and copies only the not yet copied over files. 
 * "Create the same source folder..." option, for example: 
 source is "/Users/myhome/Repository", target is "/Volumes/externaldrive/backup", with this option checked, a "Repository" diorectory will be created under /Volumes/externaldrive/backup and the contents under the source will be copied to /Volumes/externaldrive/backup/Repository
-
+* Package the small files first -- will sppeed up the overal copying if you plan to copy lots of small files in some directories. Those small filess files will be zipped up first and copied over to the target as one package. This will greatly help copying large amount small files over the network , or to external attached USB drives, because copying small files one by one to such external devies are the slowest no matter what software you use. 
 
 
 ## Hook to the Windows Explorer Context menu
