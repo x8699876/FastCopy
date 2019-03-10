@@ -3,7 +3,7 @@
 * A very handy tool for copying or backup a large set of directories and files, recursively, i.e. all the sub directories under will be copied over to the target. Support all the hidden and system files, long file names, file names of all languages. 
 * Fast! Use multiple workers to copy from/to the SSD drives. 
 * Support mounted external drives on Mac.
-* Speed tester/Benchmark.
+* Drive speed tester/Benchmark tool.
 * Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
 
 
