@@ -104,6 +104,8 @@ public class FileUtils {
 			return;
 		}
 
+		rdProUI.showCurrentDir("Copying files under directory: " + source.getParent());
+
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)

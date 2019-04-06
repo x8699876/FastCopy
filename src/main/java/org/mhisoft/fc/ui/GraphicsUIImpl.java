@@ -41,9 +41,12 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 	JTextArea outputTextArea;
 	JLabel labelStatus,labelCurrentDir ;
+	JLabel labelWallClock;
+
 	JProgressBar progressBar;
 	public static int bufferLineThreshold = 9999;
 	private int lineNumber = 0;
+
 
 	public GraphicsUIImpl(JTextArea outputTextArea) {
 		this.outputTextArea = outputTextArea;
@@ -74,6 +77,10 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 	public void setLabelCurrentDir(JLabel labelCurrentDir) {
 		this.labelCurrentDir = labelCurrentDir;
+	}
+
+	public void setLabelWallClock(JLabel labelWallClock) {
+		this.labelWallClock = labelWallClock;
 	}
 
 	public void setProgressBar(JProgressBar progressBar) {
@@ -113,6 +120,18 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				labelCurrentDir.setText(text);
+			}
+		});
+
+
+	}
+
+	public void updateWallClock(long startTime) {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				long s = (System.currentTimeMillis()-startTime)/1000;
+				labelWallClock.setText(    String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60)) );
 			}
 		});
 

@@ -20,6 +20,8 @@
 package org.mhisoft.fc.ui;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
@@ -95,6 +97,7 @@ public class FastCopyMainForm {
 	private JLabel labelCurrentDir;
 	private JCheckBox cbPackageSmallFiles;
 	private JCheckBox ckKeepOriginalFileTimestamp;
+	private JLabel labelWallClock;
 
 	GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
@@ -426,14 +429,28 @@ public class FastCopyMainForm {
 			btnCancel.setText("Cancel");
 			btnOk.setEnabled(false);
 			progressPanel.setVisible(true);
+			Long startTime = System.currentTimeMillis();
 
+			TimerTask task = new TimerTask() {
+				public void run() {
+					fastCopy.getRdProUI().updateWallClock(startTime);
+				}
+			};
+
+			Timer timer = new Timer("Timer");
+			timer.schedule(task, 0L, 1000L);
+
+			/* run */
 			fastCopy.run(props);
+
+			timer.cancel();
 
 			labelStatus.setText(fastCopy.getStatistics().printOverallProgress());
 			progressPanel.setVisible(false);
 
 			btnOk.setEnabled(true);
 			btnCancel.setText("Close");
+
 			//labelStatus.setText("Dir copied:" + fastCopy.getStatistics().getDirCount() + ", Files copied:" + fastCopy.getStatistics().getFilesCount());
 		}
 	}
@@ -477,6 +494,7 @@ public class FastCopyMainForm {
 		uiImpl.setOutputTextArea(main.outputTextArea);
 		uiImpl.setLabelStatus(main.labelStatus);
 		uiImpl.setLabelCurrentDir(main.labelCurrentDir);
+		uiImpl.setLabelWallClock(main.labelWallClock);
 		uiImpl.setProgressBar(main.progressBar1);
 
 

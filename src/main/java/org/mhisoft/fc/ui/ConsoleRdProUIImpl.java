@@ -286,4 +286,9 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 	public void println(LogLevel logLevel, String msg) {
 
 	}
+
+	@Override
+	public void updateWallClock(long startTime) {
+		//
+	}
 }

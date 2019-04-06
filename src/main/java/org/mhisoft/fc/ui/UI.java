@@ -108,4 +108,6 @@ public interface UI {
 	public void dumpArguments(String[] args, RunTimeProperties props) ;
 
 	public void showCurrentDir(String text);
+
+	public void updateWallClock(long startTime);
 }

@@ -105,7 +105,7 @@ public class FileCopierService {
 				if (childFiles!=null)
 					filesList = Arrays.asList(childFiles);
 				
-				rdProUI.showCurrentDir("Copying files under directory: " + rootDir);
+				//rdProUI.showCurrentDir("Copying files under directory: " + rootDir);
 			}
 
 			/*nothing under this directory. don't even create the target empty dir*/
