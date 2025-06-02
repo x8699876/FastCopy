@@ -10,15 +10,59 @@
     <name>Fast Copy</name>
     <description>Fast Copy</description>
 
+
+
     <repositories>
+
         <repository>
-         <id>public-central</id>
-         <url>https://repo1.maven.org/maven2</url>
-         <releases>
-           <enabled>true</enabled>
-         </releases>
-       </repository>
+            <id>localRepo</id>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <url>file://${project.basedir}/../localRepo</url>
+        </repository>
+
+        <!-- use maven default -->
+        <repository>
+            <id>public-central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+
+
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>localRepo</id>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <url>file://${project.basedir}/../localRepo</url>
+        </pluginRepository>
+
+        <!-- use maven default -->
+        <pluginRepository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </pluginRepository>
+
+
+    </pluginRepositories>
+
 
 
     <dependencies>

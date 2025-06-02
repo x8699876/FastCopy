@@ -16,13 +16,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="FastCopy" />
         <module name="vfsjfilechooser2" />
+        <module name="FastCopy" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="FastCopy" target="1.8" />
-      <module name="vfsjfilechooser2" target="1.6" />
-    </bytecodeTargetLevel>
   </component>
 </project>
