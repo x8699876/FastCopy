@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.github.fracpete</groupId>
             <artifactId>vfsjfilechooser2</artifactId>
-            <version>0.2.7</version>
+            <version>0.2.9</version>
         </dependency>
 
         <dependency>
