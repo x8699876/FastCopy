@@ -3,27 +3,25 @@ package org.mhisoft.fc;
 /**
  * Run time properties
  */
-public class RunTimeProperties {
+public class RunTimeProperties  implements  java.io.Serializable{
 
 	public static final int DEFAULT_THREAD_NUM = 2;
 	public static final int DEFAULT_PACKAGE_SMALL_FILES_THREAD_NUM = 5;
 	public static String userHome = System.getProperty("user.home") ;
-
 	public static String zip_prefix ="_fastcopy_auto_create_";
 
-
-	private static boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "false"));
-	private  static boolean debug = Boolean.getBoolean("debug");
-
+	private static boolean debug = Boolean.getBoolean("debug");
 	private static boolean stopThreads = false;
-	private boolean running;
-	private boolean keepOriginalFileDates = Boolean.valueOf(System.getProperty("keepOriginalFileDates", "false"));;
-
-
-	private LogLevel logLevel=LogLevel.info;;
-
 
 	public static RunTimeProperties instance = new RunTimeProperties();
+
+
+
+	private transient  boolean running;
+
+	private transient LogLevel logLevel=LogLevel.info;;
+
+
 
 	private RunTimeProperties() {
 		//
@@ -31,17 +29,24 @@ public class RunTimeProperties {
 
 
 	String sourceDir = null;
-	String destDir = null;
-	boolean success;
-	boolean verbose;
+	transient String destDir = null;
+	transient boolean success;
+
+	transient boolean debugArg;
+
+   //the below will be saved along with the  UserPreferences
+    boolean verifyAfterCopy = Boolean.valueOf(System.getProperty("verify", "false"));
+    boolean verbose; //show info, details
 	int numOfThreads=1;
-	boolean overwrite;
+	boolean overrideTarget;
 	boolean overwriteIfNewerOrDifferent;
 	boolean flatCopy;
-	boolean debugArg;
 	boolean createTheSameSourceFolderUnderTarget;
+	boolean keepOriginalFileDates = Boolean.valueOf(System.getProperty("keepOriginalFileDates", "false"));;
 	boolean skipEmptyDirs=Boolean.valueOf(System.getProperty("skipEmptyDirs", "true"));;;
 	boolean packageSmallFiles = Boolean.valueOf(System.getProperty("packageSmallFiles", "true"));
+
+
 
 	public  boolean isStopThreads() {
 		return stopThreads;
@@ -115,12 +120,12 @@ public class RunTimeProperties {
 		this.numOfThreads = numOfThreads;
 	}
 
-	public boolean isOverwrite() {
-		return overwrite;
+	public boolean isOverrideTarget() {
+		return overrideTarget;
 	}
 
-	public void setOverwrite(boolean overwrite) {
-		this.overwrite = overwrite;
+	public void setOverrideTarget(boolean overrideTarget) {
+		this.overrideTarget = overrideTarget;
 	}
 
 	public boolean isFlatCopy() {
@@ -156,7 +161,7 @@ public class RunTimeProperties {
 	}
 
 	public  void setVerifyAfterCopy(boolean verifyAfterCopy) {
-		RunTimeProperties.verifyAfterCopy = verifyAfterCopy;
+		this.verifyAfterCopy = verifyAfterCopy;
 	}
 
 
@@ -199,13 +204,13 @@ public class RunTimeProperties {
 		sb.append(", destDir='").append(destDir).append('\'');
 		sb.append(", verbose=").append(verbose);
 		sb.append(", numOfThreads=").append(numOfThreads);
-		sb.append(", overwrite=").append(overwrite);
+		sb.append(", overwrite=").append(overrideTarget);
 		sb.append(", overwriteIfNewerOrDifferent=").append(overwriteIfNewerOrDifferent);
 		sb.append(", createTheSameSourceFolderUnderTarget=").append(createTheSameSourceFolderUnderTarget);
 		sb.append(", flatCopy=").append(flatCopy);
 		sb.append(", debugArg=").append(debugArg);
 		sb.append(", compressSmallFiles=").append(RunTimeProperties.instance.isPackageSmallFiles());
-		sb.append(", verifyAfterCopy=").append(RunTimeProperties.verifyAfterCopy);
+		sb.append(", verifyAfterCopy=").append(this.verifyAfterCopy);
 		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isKeepOriginalFileDates());
 		sb.append(", skipEmptyDirs=").append(RunTimeProperties.instance.isSkipEmptyDirs());
 		sb.append('}');

@@ -652,7 +652,7 @@ public class FileUtils {
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
 			boolean include = true;
-			if (!RunTimeProperties.instance.isOverwrite()) {
+			if (!RunTimeProperties.instance.isOverrideTarget()) {
 				//target file
 				File _targetFile = new File(targetDir + File.separator + file.getFileName().toString());
 				if (_targetFile.exists()) {
@@ -887,7 +887,7 @@ public class FileUtils {
 	 */
 	public static boolean overrideTargetFile(final File srcFile, final File targetFile) {
 
-		if (RunTimeProperties.instance.overwrite)
+		if (RunTimeProperties.instance.overrideTarget)
 			return true;
 
 		if (RunTimeProperties.instance.isOverwriteIfNewerOrDifferent()) {

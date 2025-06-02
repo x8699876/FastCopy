@@ -177,7 +177,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				props.setNumOfThreads(4);
 			}
 			else if (arg.equalsIgnoreCase("-o")) {
-				props.setOverwrite(true);
+				props.setOverrideTarget(true);
 			}else if (arg.equalsIgnoreCase("-pack")) {
 				props.setPackageSmallFiles(true);
 			}

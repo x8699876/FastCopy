@@ -185,8 +185,6 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 	@Override
 	public RunTimeProperties parseCommandLineArguments(String[] args) {
 		List<String> noneHyfenArgs = new ArrayList<String>();
-
-
 		RunTimeProperties props = RunTimeProperties.instance;
 
 		if (args.length < 1 || args[0] == null || args[0].trim().length() == 0) {

@@ -23,6 +23,8 @@
 
 package org.mhisoft.fc.preference;
 
+import org.mhisoft.fc.RunTimeProperties;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +32,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Description:
@@ -58,7 +62,15 @@ public class UserPreference implements Serializable {
 	private int dimensionX;
 	private int dimensionY;
 
+	private RunTimeProperties runTimeProperties;
 
+	public RunTimeProperties getRunTimeProperties() {
+		return runTimeProperties;
+	}
+
+	public void setRunTimeProperties(RunTimeProperties runTimeProperties) {
+		this.runTimeProperties = runTimeProperties;
+	}
 
 	public int getFontSize() {
 		return fontSize == 0 ? 20 : fontSize;
@@ -106,7 +118,7 @@ public class UserPreference implements Serializable {
 	public void saveSettingsToFile() {
 		ObjectOutputStream outputStream = null;
 		try {
-			outputStream = new ObjectOutputStream(new FileOutputStream(UserPreference.settingsFile));
+			outputStream = new ObjectOutputStream(Files.newOutputStream(Paths.get(UserPreference.settingsFile)));
 			outputStream.writeObject(UserPreference.getInstance());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -124,7 +136,7 @@ public class UserPreference implements Serializable {
 		ObjectInputStream stream = null;
 		try {
 
-			stream = new ObjectInputStream(new FileInputStream(UserPreference.settingsFile));
+			stream = new ObjectInputStream(Files.newInputStream(Paths.get(UserPreference.settingsFile)));
 			instance = (UserPreference) stream.readObject();
 
 		}

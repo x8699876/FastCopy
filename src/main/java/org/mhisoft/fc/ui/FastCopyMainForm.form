@@ -159,7 +159,7 @@
           <toolTipText value="Help"/>
         </properties>
       </component>
-      <component id="6aa6d" class="javax.swing.JCheckBox" binding="chkFlat">
+      <component id="6aa6d" class="javax.swing.JCheckBox" binding="ckFlatCopy">
         <constraints>
           <grid row="7" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -212,7 +212,7 @@
               <text value="&amp;Start Copy"/>
             </properties>
           </component>
-          <component id="88319" class="javax.swing.JButton" binding="btnCancel">
+          <component id="88319" class="javax.swing.JButton" binding="btnCloseApp">
             <constraints/>
             <properties>
               <text value="&amp;Close"/>
@@ -229,7 +229,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="d753" class="javax.swing.JCheckBox" binding="chkOverrideAlways">
+          <component id="d753" class="javax.swing.JCheckBox" binding="ckOverrideAlways">
             <constraints border-constraint="West"/>
             <properties>
               <font size="11" style="0"/>
@@ -237,7 +237,7 @@
               <text value="Override always if checked"/>
             </properties>
           </component>
-          <component id="3788a" class="javax.swing.JCheckBox" binding="overrideOnlyIfNewerCheckBox" default-binding="true">
+          <component id="3788a" class="javax.swing.JCheckBox" binding="ckOverrideOnlyIfNewerCheckBox" default-binding="true">
             <constraints border-constraint="Center"/>
             <properties>
               <font size="11" style="0"/>
@@ -255,7 +255,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="4a0a5" class="javax.swing.JCheckBox" binding="chkCreateTheSameSourceCheckBox">
+          <component id="4a0a5" class="javax.swing.JCheckBox" binding="ckCreateTheSameSourceCheckBox">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -293,7 +293,7 @@
           </hspacer>
         </children>
       </grid>
-      <component id="dbc8a" class="javax.swing.JCheckBox" binding="cbPackageSmallFiles">
+      <component id="dbc8a" class="javax.swing.JCheckBox" binding="ckPackageSmallFiles">
         <constraints>
           <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>

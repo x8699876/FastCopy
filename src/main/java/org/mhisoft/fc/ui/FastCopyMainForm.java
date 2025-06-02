@@ -78,24 +78,24 @@ public class FastCopyMainForm {
 	JTextArea outputTextArea;
 	JScrollPane outputTextAreaScrollPane;
 	private JButton btnOk;
-	private JButton btnCancel;
+	private JButton btnCloseApp;
 	private JButton btnHelp;
 	private JTextField fldTargetDir;
 	private JLabel labelStatus;
 	private JTextField fldSourceDir;
-	private JCheckBox chkOverrideAlways;
+	private JCheckBox ckOverrideAlways;
 	private JProgressBar progressBar1;
-	private JCheckBox chkFlat;
-	private JCheckBox overrideOnlyIfNewerCheckBox;
+	private JCheckBox ckFlatCopy;
+	private JCheckBox ckOverrideOnlyIfNewerCheckBox;
 	private JPanel progressPanel;
 	private JButton btnSourceBrowse;
 	private JButton btnTargetBrowse;
-	private JCheckBox chkCreateTheSameSourceCheckBox;
+	private JCheckBox ckCreateTheSameSourceCheckBox;
 	private JSpinner fldFontSize;
 	private JLabel labelFontSize;
 	private JCheckBox ckVerify;
 	private JLabel labelCurrentDir;
-	private JCheckBox cbPackageSmallFiles;
+	private JCheckBox ckPackageSmallFiles;
 	private JCheckBox ckKeepOriginalFileTimestamp;
 	private JLabel labelWallClock;
 
@@ -121,7 +121,7 @@ public class FastCopyMainForm {
 
 		//set running false only afer all threads are shutdown.
 		RunTimeProperties.instance.setRunning(false);
-		btnCancel.setText("Close");
+		btnCloseApp.setText("Close");
 
 	}
 
@@ -143,7 +143,7 @@ public class FastCopyMainForm {
 			}
 		});
 
-		btnCancel.addActionListener(new ActionListener() {
+		btnCloseApp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (RunTimeProperties.instance.isRunning()) {
@@ -191,11 +191,11 @@ public class FastCopyMainForm {
 
 			}
 		});
-		overrideOnlyIfNewerCheckBox.addActionListener(new ActionListener() {
+		ckOverrideOnlyIfNewerCheckBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (overrideOnlyIfNewerCheckBox.isSelected())
-					chkOverrideAlways.setSelected(false);
+				if (ckOverrideOnlyIfNewerCheckBox.isSelected())
+					ckOverrideAlways.setSelected(false);
 			}
 
 
@@ -364,6 +364,25 @@ public class FastCopyMainForm {
 		setupFontSpinner();
 		ViewHelper.setFontSize(componentsList, UserPreference.getInstance().getFontSize());
 
+		//initialize the preferences
+
+		if (UserPreference.getInstance().getRunTimeProperties()!=null) {
+			fldSourceDir.setText(props.getSourceDir());
+			fldTargetDir.setText(props.getDestDir());
+
+			ckOverrideAlways.setSelected(props.isOverrideTarget());
+			ckFlatCopy.setSelected(props.isFlatCopy());
+			ckCreateTheSameSourceCheckBox.setSelected(props.isCreateTheSameSourceFolderUnderTarget());
+			ckVerify.setSelected(props.isVerifyAfterCopy());
+			ckOverrideOnlyIfNewerCheckBox.setSelected(props.isOverwriteIfNewerOrDifferent());
+			ckKeepOriginalFileTimestamp.setSelected(props.isKeepOriginalFileDates());
+			ckPackageSmallFiles.setSelected(props.isPackageSmallFiles());
+			chkMultiThread.setSelected(props.getNumOfThreads() > 1);
+			chkShowInfo.setSelected(props.isVerbose());
+		}
+
+
+
 
 
 	}
@@ -381,15 +400,15 @@ public class FastCopyMainForm {
 		}
 	}
 
-
-	public boolean refreshDataModel() {
-		if (fldSourceDir.getText() == null || fldSourceDir.getText().trim().length() == 0) {
+	//load from UI to the runtime properties.
+	public boolean refreshDataModel(boolean validate) {
+		if ((fldSourceDir.getText() == null || fldSourceDir.getText().trim().length() == 0)&& validate) {
 			JOptionPane.showMessageDialog(null, "Specify the source directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		} else
 			props.setSourceDir(fldSourceDir.getText());
 
-		if (fldTargetDir.getText() == null || fldTargetDir.getText().trim().length() == 0) {
+		if ((fldTargetDir.getText() == null || fldTargetDir.getText().trim().length() == 0)&&validate) {
 			JOptionPane.showMessageDialog(null, "Specify the target directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		} else
@@ -408,25 +427,27 @@ public class FastCopyMainForm {
 			props.setVerifyAfterCopy(false);
 		}
 		
-		props.setOverwrite(chkOverrideAlways.isSelected());
-		props.setOverwriteIfNewerOrDifferent(overrideOnlyIfNewerCheckBox.isSelected());
-		props.setPackageSmallFiles(cbPackageSmallFiles.isSelected());
+		props.setOverrideTarget(ckOverrideAlways.isSelected());
+		props.setOverwriteIfNewerOrDifferent(ckOverrideOnlyIfNewerCheckBox.isSelected());
+		props.setPackageSmallFiles(ckPackageSmallFiles.isSelected());
 		props.setVerbose(chkShowInfo.isSelected());
-		props.setFlatCopy(chkFlat.isSelected());
-		props.setCreateTheSameSourceFolderUnderTarget(chkCreateTheSameSourceCheckBox.isSelected());
+		props.setFlatCopy(ckFlatCopy.isSelected());
+		props.setCreateTheSameSourceFolderUnderTarget(ckCreateTheSameSourceCheckBox.isSelected());
 		props.setKeepOriginalFileDates(ckKeepOriginalFileTimestamp.isSelected());
+		props.setVerifyAfterCopy(ckVerify.isSelected());
+
 		return true;
 
 	}
 
 
 	public void doit() {
-		if (refreshDataModel()) {
+		if (refreshDataModel(true)) {
 
 			fastCopy.getRdProUI().println("working...");
 			labelStatus.setText("Working...");
 			labelStatus.setText("");
-			btnCancel.setText("Cancel");
+			btnCloseApp.setText("Cancel");
 			btnOk.setEnabled(false);
 			progressPanel.setVisible(true);
 			Long startTime = System.currentTimeMillis();
@@ -449,7 +470,7 @@ public class FastCopyMainForm {
 			progressPanel.setVisible(false);
 
 			btnOk.setEnabled(true);
-			btnCancel.setText("Close");
+			btnCloseApp.setText("Close");
 
 			//labelStatus.setText("Dir copied:" + fastCopy.getStatistics().getDirCount() + ", Files copied:" + fastCopy.getStatistics().getFilesCount());
 		}
@@ -484,9 +505,16 @@ public class FastCopyMainForm {
 	}
 
 	public static void main(String[] args) {
+
 		UserPreference.getInstance().readSettingsFromFile();
+		if (UserPreference.getInstance().getRunTimeProperties()!=null) {
+			// if the run time selections /checkboxes were saved in the earlier session
+			//load into the RunTimeProperties
+			RunTimeProperties.instance = UserPreference.getInstance().getRunTimeProperties();
+		}
+
 		FastCopyMainForm main = new FastCopyMainForm();
-		main.init();
+
 		GraphicsUIImpl uiImpl = new GraphicsUIImpl();
 		main.setRdProUI(uiImpl);
 		FileUtils.instance.setRdProUI(uiImpl);
@@ -501,6 +529,8 @@ public class FastCopyMainForm {
 		//default it to current dir
 		main.fastCopy = new FastCopy(uiImpl);
 
+		// the same handle to the  	RunTimeProperties.instance
+		// props loaded from user preferences can be overridden by the arguments.
 		main.props = uiImpl.parseCommandLineArguments(args);
 
 
@@ -512,8 +542,9 @@ public class FastCopyMainForm {
 			}
 		}
 
-		main.fldSourceDir.setText(main.props.getSourceDir());
-		main.fldTargetDir.setText(main.props.getDestDir());
+		//INIT the UI, requires the user preferences such as the font and window sizes.
+		main.init();
+
 
 		uiImpl.help();
 
@@ -522,6 +553,9 @@ public class FastCopyMainForm {
 
 
 	public void updateAndSavePreferences() {
+		RunTimeProperties props = RunTimeProperties.instance;
+		refreshDataModel(false); //load the props
+
 		//save the settings
 		Dimension d = frame.getSize();
 		UserPreference.getInstance().setDimensionX(d.width);
@@ -529,6 +563,8 @@ public class FastCopyMainForm {
 		SpinnerModel spinnerModel = fldFontSize.getModel();
 		int newFontSize = (Integer) spinnerModel.getValue();
 		UserPreference.getInstance().setFontSize(newFontSize);
+		UserPreference.getInstance().setRunTimeProperties(props);
+		//save
 		UserPreference.getInstance().saveSettingsToFile();
 	}
 
