@@ -58,11 +58,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 
-import org.mhisoft.fc.ui.ConsoleRdProUIImpl;
 import org.mhisoft.fc.ui.UI;
 import org.mhisoft.fc.utils.StrUtils;
-
-import junit.framework.Assert;
 
 /**
  * Description:
@@ -90,7 +87,7 @@ public class FileUtils {
 
 
 	public void copyFile(final File source, final File target, FileCopyStatistics statistics, final UI rdProUI
-			, final FileUtils.CompressedackageVO compressedackageVO) {
+			, final CompressedPackageVO compressedPackageVO) {
 
 		CopyFileResultVO vo;
 		try {
@@ -138,14 +135,14 @@ public class FileUtils {
 
 		try {
 			//exploded it  the target zip file on the dest dir
-			if (compressedackageVO != null) {
+			if (compressedPackageVO != null) {
 
 
 				try {
 					//create destdir
-					File destZipDir = new File(compressedackageVO.getDestDir());
+					File destZipDir = new File(compressedPackageVO.getDestDir());
 					//+File.separator + compressedackageVO.originalDirname);
-					FileUtils.createDir(compressedackageVO.originalDirLastModified, destZipDir, rdProUI, statistics);
+					FileUtils.createDir(compressedPackageVO.originalDirLastModified, destZipDir, rdProUI, statistics);
 
 					unzipFile(target, destZipDir, statistics);
 
@@ -167,7 +164,7 @@ public class FileUtils {
 			rdProUI.printError("Exploding the zip failed", e);
 		}
 
-		if (compressedackageVO == null) { //
+		if (compressedPackageVO == null) { //
 			try {
 				setFileLastModified(target.getAbsolutePath(), source.lastModified());
 			} catch (Exception e) {
@@ -533,7 +530,7 @@ public class FileUtils {
 	}
 
 
-	public static class CompressedackageVO {
+	public static class CompressedPackageVO {
 		String zipName; //  _originalDirname.zip
 		String originalDirname;
 		long originalDirLastModified;
@@ -542,7 +539,7 @@ public class FileUtils {
 		long zipFileSizeBytes;
 		int numberOfFiles = 0;
 
-		public CompressedackageVO(String zipName, String originalDirname, String zipFileWithPath) {
+		public CompressedPackageVO(String zipName, String originalDirname, String zipFileWithPath) {
 			this.zipName = zipName;
 			this.originalDirname = originalDirname;
 			this.sourceZipFileWithPath = zipFileWithPath;
@@ -578,7 +575,7 @@ public class FileUtils {
 	 * @return zip file name without path
 	 */
 
-	public CompressedackageVO compressDirectory(final String dirPath, final String targetDir, final boolean recursive
+	public CompressedPackageVO compressDirectory(final String dirPath, final String targetDir, final boolean recursive
 			, final long smallFileSizeThreashold) throws IOException {
 		Path sourcePath = Paths.get(dirPath);
 
@@ -586,15 +583,15 @@ public class FileUtils {
 		String zipName = RunTimeProperties.zip_prefix + sourcePath.getFileName().toString() + ".zip";
 		final String zipFileName = dirPath.concat(File.separator).concat(zipName);
 
-		CompressedackageVO compressedackageVO = new CompressedackageVO(zipName, sourcePath.getFileName().toString(), zipFileName);
-		compressedackageVO.originalDirLastModified = sourcePath.toFile().lastModified();
+		CompressedPackageVO compressedPackageVO = new CompressedPackageVO(zipName, sourcePath.getFileName().toString(), zipFileName);
+		compressedPackageVO.originalDirLastModified = sourcePath.toFile().lastModified();
 		ZipOutputStream outputStream = null;
 
 		try {
 			outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
 			outputStream.setLevel(Deflater.BEST_COMPRESSION);
 
-			MyZipFileVisitor visitor = new MyZipFileVisitor(compressedackageVO, targetDir, smallFileSizeThreashold, zipName, sourcePath, outputStream, false);
+			MyZipFileVisitor visitor = new MyZipFileVisitor(compressedPackageVO, targetDir, smallFileSizeThreashold, zipName, sourcePath, outputStream, false);
 
 			Files.walkFileTree(sourcePath, visitor);
 
@@ -619,18 +616,18 @@ public class FileUtils {
 				}
 			}
 
-			if (compressedackageVO.getNumberOfFiles() == 0) {
+			if (compressedPackageVO.getNumberOfFiles() == 0) {
 				deleteFile(zipFileName, rdProUI);
 			}
 
 		}
-		return compressedackageVO;
+		return compressedPackageVO;
 	}
 
 
 	class MyZipFileVisitor extends SimpleFileVisitor<Path> {
 
-		CompressedackageVO compressedackageVO;
+		CompressedPackageVO compressedPackageVO;
 		String targetDir;
 		long smallFileSizeThreashold;
 		String zipName;
@@ -638,9 +635,9 @@ public class FileUtils {
 		ZipOutputStream outputStream;
 		boolean recursive;
 
-		public MyZipFileVisitor(CompressedackageVO compressedackageVO, String targetDir, long smallFileSizeThreashold, String zipName, Path sourcePath, ZipOutputStream outputStream
+		public MyZipFileVisitor(CompressedPackageVO compressedPackageVO, String targetDir, long smallFileSizeThreashold, String zipName, Path sourcePath, ZipOutputStream outputStream
 				, boolean recursive) {
-			this.compressedackageVO = compressedackageVO;
+			this.compressedPackageVO = compressedPackageVO;
 			this.targetDir = targetDir;
 			this.smallFileSizeThreashold = smallFileSizeThreashold;
 			this.zipName = zipName;
@@ -671,14 +668,14 @@ public class FileUtils {
 				if ((smallFileSizeThreashold == -1 || file.toFile().length() <= smallFileSizeThreashold) //
 						&& !file.getFileName().toString().equals(zipName)) { //exclude the zip file itself.
 
-					compressedackageVO.incrementFileCount(1);
+					compressedPackageVO.incrementFileCount(1);
 
 					Path targetFile = sourcePath.relativize(file);
 					ZipEntry ze = new ZipEntry(targetFile.toString());
 					ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
 					//note read whole file into memory. it is what we wanted for small size files.
 					byte[] bytes = Files.readAllBytes(file);
-					compressedackageVO.zipFileSizeBytes = bytes.length;
+					compressedPackageVO.zipFileSizeBytes = bytes.length;
 
 					//set the MD5 to the extra of the entry. this is source MD5. 
 					if (RunTimeProperties.instance.isVerifyAfterCopy()) {
@@ -904,25 +901,6 @@ public class FileUtils {
 	}
 
 
-	public static void main(String[] args) {
-		try {
-			long t1 = System.currentTimeMillis();
-			byte[] md51 = FileUtils.readFileContentHash(new File("D:\\temp\\test2\\Local\\Resmon.ResmonCfg")
-					, new ConsoleRdProUIImpl());
-			String s = StrUtils.toHexString(md51);
-			System.out.println(s);
-			System.out.println("took " + (System.currentTimeMillis() - t1));
-			Assert.assertTrue(Arrays.equals(md51, StrUtils.toByteArray(s)));
-
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 
 }
-
-
-
