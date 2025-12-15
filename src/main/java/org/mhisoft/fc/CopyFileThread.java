@@ -38,18 +38,18 @@ public class CopyFileThread implements Runnable {
 
 	private File sourceFile;
 	private File targetFile;
-	private FileUtils.CompressedackageVO compressedackageVO;
+	private FileUtils.CompressedPackageVO compressedPackageVO;
 
 
 	public CopyFileThread(UI rdProUI
 			, File sourceFile, File targetFile
-			, FileUtils.CompressedackageVO compressedackageVO
+			, FileUtils.CompressedPackageVO compressedPackageVO
 			, FileCopyStatistics frs) {
 		this.sourceFile = sourceFile;
 		this.targetFile = targetFile;
 		this.statistics = frs;
 		this.rdProUI = rdProUI;
-		this.compressedackageVO = compressedackageVO;
+		this.compressedPackageVO = compressedPackageVO;
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class CopyFileThread implements Runnable {
 				rdProUI.println(Thread.currentThread().getName() + " Starts");
 			long t1 = System.currentTimeMillis();
 
-			FileUtils.instance.copyFile(sourceFile, targetFile, statistics, rdProUI, compressedackageVO);
+			FileUtils.instance.copyFile(sourceFile, targetFile, statistics, rdProUI, compressedPackageVO);
 
 
 			if (RunTimeProperties.instance.isDebug())

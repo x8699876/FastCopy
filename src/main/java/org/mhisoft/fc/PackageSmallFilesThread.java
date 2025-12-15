@@ -56,9 +56,9 @@ public class PackageSmallFilesThread implements Runnable {
 
 		if (!RunTimeProperties.instance.isStopThreads()) {
 
-			FileUtils.CompressedackageVO compressedackageVO = null;
+			FileUtils.CompressedPackageVO compressedPackageVO = null;
 			try {
-				compressedackageVO = FileUtils.instance.compressDirectory(sSourceDir, sTargetDir, false, FileCopierService.SMALL_FILE_SIZE);
+				compressedPackageVO = FileUtils.instance.compressDirectory(sSourceDir, sTargetDir, false, FileCopierService.SMALL_FILE_SIZE);
 			} catch (Exception e) {
 				rdProUI.printError("compressDirectory failed for " + sSourceDir, e);
 				fallbackToCopyFilesDirectly();
@@ -67,26 +67,26 @@ public class PackageSmallFilesThread implements Runnable {
 			}
 
 
-			if (compressedackageVO.getNumberOfFiles() > 0) {
+			if (compressedPackageVO.getNumberOfFiles() > 0) {
 
 				if (RunTimeProperties.instance.isDebug())
 					rdProUI.println("[PackageSmallFilesThread] " + Thread.currentThread().getName() + " Starts");
 				long t1 = System.currentTimeMillis();
 
 
-				compressedackageVO.setDestDir(sTargetDir);
-				File targetZipFile = new File(sTargetDir + File.separator + compressedackageVO.zipName);
+				compressedPackageVO.setDestDir(sTargetDir);
+				File targetZipFile = new File(sTargetDir + File.separator + compressedPackageVO.zipName);
 
 				if (RunTimeProperties.instance.isDebug()) {
-					rdProUI.println("[PackageSmallFilesThread] Ziped up the " + sSourceDir + " dir to zip:" + targetZipFile + ", size=" + compressedackageVO.zipFileSizeBytes + " Bytes");
+					rdProUI.println("[PackageSmallFilesThread] Ziped up the " + sSourceDir + " dir to zip:" + targetZipFile + ", size=" + compressedPackageVO.zipFileSizeBytes + " Bytes");
 				}
 
 
 				//FileUtils.copyFile(new File(vo.sourceZipFileWithPath), targetZipFile, statistics, rdProUI, vo);
 				/* then send it to the copier  thread */
 				CopyFileThread t = new CopyFileThread(rdProUI //
-						, new File(compressedackageVO.sourceZipFileWithPath), targetZipFile //
-						, compressedackageVO //
+						, new File(compressedPackageVO.sourceZipFileWithPath), targetZipFile //
+						, compressedPackageVO //
 						, statistics);
 
 				fileCopyWorkersPool.addTask(t);
