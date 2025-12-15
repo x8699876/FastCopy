@@ -485,7 +485,7 @@ public class FileUtils {
 			ui.printError("createDir() failed", e);
 			throw new RuntimeException(e);
 		}
-        
+
 	}
 
 
@@ -565,7 +565,7 @@ public class FileUtils {
 			outputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
 			outputStream.setLevel(Deflater.BEST_COMPRESSION);
 
-			MyZipFileVisitor visitor = new MyZipFileVisitor(compressedPackageVO, targetDir, smallFileSizeThreashold, zipName, sourcePath, outputStream, false);
+			MyZipFileVisitor visitor = new MyZipFileVisitor(compressedPackageVO, targetDir, smallFileSizeThreashold, zipName, sourcePath, outputStream, recursive);
 
 			Files.walkFileTree(sourcePath, visitor);
 
@@ -694,9 +694,22 @@ public class FileUtils {
 			while (entries.hasMoreElements()) {
 				ZipEntry zipEntry = entries.nextElement();
 
-
-				filesCount++;
 				File destFile = new File(destDir, zipEntry.getName());
+
+				// Create parent directories if they don't exist
+				File parentDir = destFile.getParentFile();
+				if (parentDir != null && !parentDir.exists()) {
+					parentDir.mkdirs();
+				}
+
+				// Skip directory entries (they end with /)
+				if (zipEntry.isDirectory()) {
+					destFile.mkdirs();
+					continue;
+				}
+
+				// Only count actual files, not directories
+				filesCount++;
 
 				FileOutputStream fos = new FileOutputStream(destFile);
 				InputStream inputStream = zipFile.getInputStream(zipEntry);
@@ -731,7 +744,7 @@ public class FileUtils {
 		}
 
 
-		statistics.addFileCount(filesCount - 1);//exclude the zip file itself.
+		statistics.addFileCount(filesCount);
 
 	}
 

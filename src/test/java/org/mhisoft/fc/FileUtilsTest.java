@@ -23,6 +23,7 @@
 package org.mhisoft.fc;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -362,6 +364,378 @@ public class FileUtilsTest {
         } finally {
             // Clean up test directory
             deleteDirectory(testDir);
+        }
+    }
+
+    @Test
+    public void testUnzipFile() throws IOException, NoSuchAlgorithmException {
+        // Create a temporary directory with test files
+        Path tempSourceDir = Files.createTempDirectory("testUnzipSource");
+        File sourceDir = tempSourceDir.toFile();
+
+        // Create target extraction directory
+        Path tempTargetDir = Files.createTempDirectory("testUnzipTarget");
+        File targetDir = tempTargetDir.toFile();
+
+        try {
+            // Create test files in source directory
+            File file1 = new File(sourceDir, "file1.txt");
+            String content1 = "Content of file 1";
+            Files.write(file1.toPath(), content1.getBytes());
+
+            File file2 = new File(sourceDir, "file2.dat");
+            String content2 = "Content of file 2 with more data";
+            Files.write(file2.toPath(), content2.getBytes());
+
+            // Create a subdirectory with a file
+            File subDir = new File(sourceDir, "subdir");
+            subDir.mkdir();
+            File file3 = new File(subDir, "file3.txt");
+            String content3 = "Content in subdirectory";
+            Files.write(file3.toPath(), content3.getBytes());
+
+            // Setup FileUtils and compress the directory to create a zip
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+            RunTimeProperties.instance.setOverrideTarget(true);
+            RunTimeProperties.instance.setVerifyAfterCopy(false); // Disable verify for this test
+
+            // Compress the directory
+            FileUtils.CompressedPackageVO compressVO = fileUtils.compressDirectory(
+                    sourceDir.getAbsolutePath(),
+                    targetDir.getAbsolutePath(),
+                    true,
+                    -1
+            );
+
+            File zipFile = new File(compressVO.sourceZipFileWithPath);
+            assertTrue("Zip file should exist", zipFile.exists());
+
+            // Copy zip file to a safe location before we start cleaning up
+            // because the zip is created IN the source directory
+            Path safeZipLocation = Files.createTempFile("testZip", ".zip");
+            Files.copy(zipFile.toPath(), safeZipLocation, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            File safeZipFile = safeZipLocation.toFile();
+
+            // Create a fresh extraction directory
+            Path extractDir = Files.createTempDirectory("testExtract");
+            File extractDirFile = extractDir.toFile();
+
+            // Create statistics
+            FileCopyStatistics statistics = new FileCopyStatistics();
+
+            // Test unzipFile
+            fileUtils.unzipFile(safeZipFile, extractDirFile, statistics);
+
+            // Verify extracted files exist
+            File extractedFile1 = new File(extractDirFile, "file1.txt");
+            File extractedFile2 = new File(extractDirFile, "file2.dat");
+            File extractedFile3 = new File(extractDirFile, "subdir" + File.separator + "file3.txt");
+
+            assertTrue("file1.txt should be extracted", extractedFile1.exists());
+            assertTrue("file2.dat should be extracted", extractedFile2.exists());
+            assertTrue("file3.txt should be extracted", extractedFile3.exists());
+
+            // Verify file contents
+            assertEquals("file1.txt content should match",
+                    content1, new String(Files.readAllBytes(extractedFile1.toPath())));
+            assertEquals("file2.dat content should match",
+                    content2, new String(Files.readAllBytes(extractedFile2.toPath())));
+            assertEquals("file3.txt content should match",
+                    content3, new String(Files.readAllBytes(extractedFile3.toPath())));
+
+            // Verify statistics
+            assertEquals("Statistics should track 3 files", 3, statistics.getFilesCount());
+
+            // Clean up
+            safeZipFile.delete();
+            deleteDirectory(extractDirFile);
+            deleteDirectory(targetDir);
+
+        } finally {
+            // Clean up test directories
+            deleteDirectory(sourceDir);
+        }
+    }
+
+    @Test
+    public void testUnzipFileWithVerification() throws IOException, NoSuchAlgorithmException {
+        // Create a temporary directory with test files
+        Path tempSourceDir = Files.createTempDirectory("testUnzipVerifySource");
+        File sourceDir = tempSourceDir.toFile();
+
+        // Create target extraction directory
+        Path tempTargetDir = Files.createTempDirectory("testUnzipVerifyTarget");
+        File targetDir = tempTargetDir.toFile();
+
+        try {
+            // Create test files
+            File file1 = new File(sourceDir, "verify1.txt");
+            String content1 = "Verify content 1";
+            Files.write(file1.toPath(), content1.getBytes());
+
+            File file2 = new File(sourceDir, "verify2.txt");
+            String content2 = "Verify content 2";
+            Files.write(file2.toPath(), content2.getBytes());
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+            RunTimeProperties.instance.setOverrideTarget(true);
+            RunTimeProperties.instance.setVerifyAfterCopy(true); // Enable verification
+
+            // Compress the directory (with verification enabled, hashes will be stored)
+            FileUtils.CompressedPackageVO compressVO = fileUtils.compressDirectory(
+                    sourceDir.getAbsolutePath(),
+                    targetDir.getAbsolutePath(),
+                    true,
+                    -1
+            );
+
+            File zipFile = new File(compressVO.sourceZipFileWithPath);
+            assertTrue("Zip file should exist", zipFile.exists());
+
+            // Copy zip file to a safe location before cleanup
+            Path safeZipLocation = Files.createTempFile("testZipVerify", ".zip");
+            Files.copy(zipFile.toPath(), safeZipLocation, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            File safeZipFile = safeZipLocation.toFile();
+
+            // Create extraction directory
+            Path extractDir = Files.createTempDirectory("testExtractVerify");
+            File extractDirFile = extractDir.toFile();
+
+            // Create statistics
+            FileCopyStatistics statistics = new FileCopyStatistics();
+
+            // Test unzipFile with verification
+            fileUtils.unzipFile(safeZipFile, extractDirFile, statistics);
+
+            // Verify extracted files exist
+            File extractedFile1 = new File(extractDirFile, "verify1.txt");
+            File extractedFile2 = new File(extractDirFile, "verify2.txt");
+
+            assertTrue("verify1.txt should be extracted", extractedFile1.exists());
+            assertTrue("verify2.txt should be extracted", extractedFile2.exists());
+
+            // Verify file contents match
+            assertEquals("verify1.txt content should match",
+                    content1, new String(Files.readAllBytes(extractedFile1.toPath())));
+            assertEquals("verify2.txt content should match",
+                    content2, new String(Files.readAllBytes(extractedFile2.toPath())));
+
+            // Clean up
+            safeZipFile.delete();
+            deleteDirectory(extractDirFile);
+            deleteDirectory(targetDir);
+
+        } finally {
+            // Clean up test directories
+            deleteDirectory(sourceDir);
+            // Reset verification setting
+            RunTimeProperties.instance.setVerifyAfterCopy(false);
+        }
+    }
+
+    @Test
+    public void testUnzipFilePreservesTimestamps() throws IOException, NoSuchAlgorithmException {
+        // Create a temporary directory with test files
+        Path tempSourceDir = Files.createTempDirectory("testUnzipTimestamp");
+        File sourceDir = tempSourceDir.toFile();
+
+        // Create target directory
+        Path tempTargetDir = Files.createTempDirectory("testUnzipTimestampTarget");
+        File targetDir = tempTargetDir.toFile();
+
+        try {
+            // Create test file with specific timestamp
+            File file1 = new File(sourceDir, "timestamp.txt");
+            Files.write(file1.toPath(), "Timestamp test content".getBytes());
+
+            // Set a specific timestamp
+            long specificTime = System.currentTimeMillis() - 200000; // 200 seconds ago
+            file1.setLastModified(specificTime);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+            RunTimeProperties.instance.setOverrideTarget(true);
+            RunTimeProperties.instance.setVerifyAfterCopy(false);
+            RunTimeProperties.instance.setKeepOriginalFileDates(true);
+
+            // Compress the directory
+            FileUtils.CompressedPackageVO compressVO = fileUtils.compressDirectory(
+                    sourceDir.getAbsolutePath(),
+                    targetDir.getAbsolutePath(),
+                    true,
+                    -1
+            );
+
+            File zipFile = new File(compressVO.sourceZipFileWithPath);
+
+            // Copy zip file to a safe location before cleanup
+            Path safeZipLocation = Files.createTempFile("testZipTimestamp", ".zip");
+            Files.copy(zipFile.toPath(), safeZipLocation, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            File safeZipFile = safeZipLocation.toFile();
+
+            // Create extraction directory
+            Path extractDir = Files.createTempDirectory("testExtractTimestamp");
+            File extractDirFile = extractDir.toFile();
+
+            // Create statistics
+            FileCopyStatistics statistics = new FileCopyStatistics();
+
+            // Test unzipFile
+            fileUtils.unzipFile(safeZipFile, extractDirFile, statistics);
+
+            // Verify extracted file
+            File extractedFile = new File(extractDirFile, "timestamp.txt");
+            assertTrue("File should be extracted", extractedFile.exists());
+
+            // Verify timestamp is preserved (allow small difference for file system precision)
+            long extractedTime = extractedFile.lastModified();
+            long timeDiff = Math.abs(extractedTime - specificTime);
+            assertTrue("Timestamp should be preserved (diff: " + timeDiff + " ms)",
+                    timeDiff < 2000); // Within 2 seconds
+
+            // Clean up
+            safeZipFile.delete();
+            deleteDirectory(extractDirFile);
+            deleteDirectory(targetDir);
+
+        } finally {
+            // Clean up test directories
+            deleteDirectory(sourceDir);
+            RunTimeProperties.instance.setKeepOriginalFileDates(false);
+        }
+    }
+
+    @Test
+    public void testUnzipEmptyZipFile() throws IOException, NoSuchAlgorithmException {
+        // Create an empty zip file manually
+        Path tempZipPath = Files.createTempFile("emptyTest", ".zip");
+        File emptyZipFile = tempZipPath.toFile();
+
+        // Create extraction directory
+        Path extractDir = Files.createTempDirectory("testExtractEmpty");
+        File extractDirFile = extractDir.toFile();
+
+        try {
+            // Create an empty zip file
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(emptyZipFile));
+            zos.close();
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+            RunTimeProperties.instance.setVerifyAfterCopy(false);
+
+            // Create statistics
+            FileCopyStatistics statistics = new FileCopyStatistics();
+
+            // Test unzipFile on empty zip
+            fileUtils.unzipFile(emptyZipFile, extractDirFile, statistics);
+
+            // Verify no files were extracted
+            assertEquals("No files should be counted for empty zip", 0, statistics.getFilesCount());
+
+            // Verify extraction directory is still empty
+            File[] files = extractDirFile.listFiles();
+            assertNotNull("Directory should exist", files);
+            assertEquals("Directory should be empty", 0, files.length);
+
+            // Clean up
+            deleteDirectory(extractDirFile);
+
+        } finally {
+            emptyZipFile.delete();
+        }
+    }
+
+    @Test
+    public void testUnzipFileWithNestedDirectories() throws IOException, NoSuchAlgorithmException {
+        // Create a temporary directory with nested structure
+        Path tempSourceDir = Files.createTempDirectory("testUnzipNested");
+        File sourceDir = tempSourceDir.toFile();
+
+        // Create target directory
+        Path tempTargetDir = Files.createTempDirectory("testUnzipNestedTarget");
+        File targetDir = tempTargetDir.toFile();
+
+        try {
+            // Create nested directory structure
+            File level1 = new File(sourceDir, "level1");
+            level1.mkdir();
+            File file1 = new File(level1, "file1.txt");
+            Files.write(file1.toPath(), "Level 1 content".getBytes());
+
+            File level2 = new File(level1, "level2");
+            level2.mkdir();
+            File file2 = new File(level2, "file2.txt");
+            Files.write(file2.toPath(), "Level 2 content".getBytes());
+
+            File level3 = new File(level2, "level3");
+            level3.mkdir();
+            File file3 = new File(level3, "file3.txt");
+            Files.write(file3.toPath(), "Level 3 content".getBytes());
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+            RunTimeProperties.instance.setOverrideTarget(true);
+            RunTimeProperties.instance.setVerifyAfterCopy(false);
+
+            // Compress the directory
+            FileUtils.CompressedPackageVO compressVO = fileUtils.compressDirectory(
+                    sourceDir.getAbsolutePath(),
+                    targetDir.getAbsolutePath(),
+                    true,
+                    -1
+            );
+
+            File zipFile = new File(compressVO.sourceZipFileWithPath);
+            assertTrue("Zip file should exist after compression", zipFile.exists());
+
+            // Copy zip file to a safe location before we start cleaning up source directory
+            // because the zip is created IN the source directory
+            Path safeZipLocation = Files.createTempFile("testZip", ".zip");
+            Files.copy(zipFile.toPath(), safeZipLocation, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            File safeZipFile = safeZipLocation.toFile();
+
+            // Create extraction directory
+            Path extractDir = Files.createTempDirectory("testExtractNested");
+            File extractDirFile = extractDir.toFile();
+
+            // Create statistics
+            FileCopyStatistics statistics = new FileCopyStatistics();
+
+            // Test unzipFile using the safe copy
+            fileUtils.unzipFile(safeZipFile, extractDirFile, statistics);
+
+            // Verify all nested files were extracted
+            File extractedFile1 = new File(extractDirFile, "level1" + File.separator + "file1.txt");
+            File extractedFile2 = new File(extractDirFile, "level1" + File.separator + "level2" + File.separator + "file2.txt");
+            File extractedFile3 = new File(extractDirFile, "level1" + File.separator + "level2" + File.separator + "level3" + File.separator + "file3.txt");
+
+            assertTrue("Level 1 file should be extracted", extractedFile1.exists());
+            assertTrue("Level 2 file should be extracted", extractedFile2.exists());
+            assertTrue("Level 3 file should be extracted", extractedFile3.exists());
+
+            // Verify content
+            assertEquals("Level 1 content should match",
+                    "Level 1 content", new String(Files.readAllBytes(extractedFile1.toPath())));
+            assertEquals("Level 2 content should match",
+                    "Level 2 content", new String(Files.readAllBytes(extractedFile2.toPath())));
+            assertEquals("Level 3 content should match",
+                    "Level 3 content", new String(Files.readAllBytes(extractedFile3.toPath())));
+
+            // Clean up
+            safeZipFile.delete();
+            deleteDirectory(extractDirFile);
+            deleteDirectory(targetDir);
+
+        } finally {
+            // Clean up test directories (this will also delete the original zip file)
+            deleteDirectory(sourceDir);
         }
     }
 
