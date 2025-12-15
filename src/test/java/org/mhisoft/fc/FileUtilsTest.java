@@ -25,8 +25,13 @@ package org.mhisoft.fc;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.junit.After;
 import org.junit.Before;
@@ -111,5 +116,271 @@ public class FileUtilsTest {
 
         assertTrue("Reading the same file should produce the same hash",
                 Arrays.equals(hash1, hash2));
+    }
+
+    @Test
+    public void testCompressDirectory() throws IOException {
+        // Create a temporary directory with test files
+        Path tempDir = Files.createTempDirectory("testCompressDir");
+        File testDir = tempDir.toFile();
+
+        try {
+            // Create test files in the directory
+            File file1 = new File(testDir, "test1.txt");
+            Files.write(file1.toPath(), "Test content 1".getBytes());
+
+            File file2 = new File(testDir, "test2.txt");
+            Files.write(file2.toPath(), "Test content 2 with more data".getBytes());
+
+            File file3 = new File(testDir, "test3.dat");
+            Files.write(file3.toPath(), "Binary test content".getBytes());
+
+            // Create a subdirectory with a file
+            File subDir = new File(testDir, "subdir");
+            subDir.mkdir();
+            File file4 = new File(subDir, "test4.txt");
+            Files.write(file4.toPath(), "Test content in subdirectory".getBytes());
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Setup RunTimeProperties
+            RunTimeProperties.instance.setOverrideTarget(true);
+
+            // Create target directory (not used in this case, but required by method)
+            Path targetDir = Files.createTempDirectory("testTarget");
+
+            // Test compress with all files (smallFileSizeThreashold = -1)
+            FileUtils.CompressedPackageVO result = fileUtils.compressDirectory(
+                    testDir.getAbsolutePath(),
+                    targetDir.toFile().getAbsolutePath(),
+                    false,  // recursive
+                    -1     // include all files
+            );
+
+            // Verify the result
+            assertNotNull("CompressedPackageVO should not be null", result);
+            assertNotNull("Zip name should not be null", result.zipName);
+            assertTrue("Zip name should start with prefix",
+                    result.zipName.startsWith(RunTimeProperties.zip_prefix));
+            assertTrue("Zip name should end with .zip", result.zipName.endsWith(".zip"));
+            assertEquals("Original dirname should match",
+                    testDir.getName(), result.originalDirname);
+            assertEquals("Should have compressed 3 files", 3, result.getNumberOfFiles());
+            assertTrue("Original directory last modified should be set",
+                    result.originalDirLastModified > 0);
+
+            // Verify the zip file was created
+            File zipFile = new File(result.sourceZipFileWithPath);
+            assertTrue("Zip file should exist", zipFile.exists());
+            assertTrue("Zip file should have content", zipFile.length() > 0);
+
+            // Verify the contents of the zip file
+            try (ZipFile zip = new ZipFile(zipFile)) {
+                assertEquals("Zip should contain 3 entries of the root folder", 3, zip.size());
+
+                // Check for expected files
+                assertNotNull("Should contain test1.txt", zip.getEntry("test1.txt"));
+                assertNotNull("Should contain test2.txt", zip.getEntry("test2.txt"));
+                assertNotNull("Should contain test3.dat", zip.getEntry("test3.dat"));
+//                assertNotNull("Should contain subdir/test4.txt",
+//                        zip.getEntry("subdir" + File.separator + "test4.txt"));
+            }
+
+            // Clean up the zip file
+            zipFile.delete();
+
+            // Clean up target directory
+            deleteDirectory(targetDir.toFile());
+
+        } finally {
+            // Clean up test directory
+            deleteDirectory(testDir);
+        }
+    }
+
+    @Test
+    public void testCompressDirectoryWithSizeThreshold() throws IOException {
+        // Create a temporary directory with test files
+        Path tempDir = Files.createTempDirectory("testCompressDirThreshold");
+        File testDir = tempDir.toFile();
+
+        try {
+            // Create small test file (under threshold)
+            File smallFile = new File(testDir, "small.txt");
+            Files.write(smallFile.toPath(), "Small".getBytes());
+
+            // Create large test file (over threshold)
+            File largeFile = new File(testDir, "large.txt");
+            byte[] largeContent = new byte[1000];
+            Arrays.fill(largeContent, (byte) 'X');
+            Files.write(largeFile.toPath(), largeContent);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Setup RunTimeProperties
+            RunTimeProperties.instance.setOverrideTarget(true);
+
+            // Create target directory
+            Path targetDir = Files.createTempDirectory("testTargetThreshold");
+
+            // Test compress with size threshold (only files <= 100 bytes)
+            FileUtils.CompressedPackageVO result = fileUtils.compressDirectory(
+                    testDir.getAbsolutePath(),
+                    targetDir.toFile().getAbsolutePath(),
+                    true,   // recursive
+                    100     // only include files <= 100 bytes
+            );
+
+            // Verify the result
+            assertNotNull("CompressedPackageVO should not be null", result);
+            assertEquals("Should have compressed only 1 small file", 1, result.getNumberOfFiles());
+
+            // Verify the zip file was created
+            File zipFile = new File(result.sourceZipFileWithPath);
+            assertTrue("Zip file should exist", zipFile.exists());
+
+            // Verify the contents of the zip file
+            try (ZipFile zip = new ZipFile(zipFile)) {
+                assertEquals("Zip should contain 1 entry", 1, zip.size());
+                assertNotNull("Should contain small.txt", zip.getEntry("small.txt"));
+                assertNull("Should not contain large.txt", zip.getEntry("large.txt"));
+            }
+
+            // Clean up the zip file
+            zipFile.delete();
+
+            // Clean up target directory
+            deleteDirectory(targetDir.toFile());
+
+        } finally {
+            // Clean up test directory
+            deleteDirectory(testDir);
+        }
+    }
+
+    @Test
+    public void testCompressEmptyDirectory() throws IOException {
+        // Create an empty temporary directory
+        Path tempDir = Files.createTempDirectory("testCompressEmpty");
+        File testDir = tempDir.toFile();
+
+        try {
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Setup RunTimeProperties
+            RunTimeProperties.instance.setOverrideTarget(true);
+
+            // Create target directory
+            Path targetDir = Files.createTempDirectory("testTargetEmpty");
+
+            // Test compress empty directory
+            FileUtils.CompressedPackageVO result = fileUtils.compressDirectory(
+                    testDir.getAbsolutePath(),
+                    targetDir.toFile().getAbsolutePath(),
+                    true,
+                    -1
+            );
+
+            // Verify the result
+            assertNotNull("CompressedPackageVO should not be null", result);
+            assertEquals("Should have compressed 0 files", 0, result.getNumberOfFiles());
+
+            // Verify the zip file was NOT created (empty directories are cleaned up)
+            File zipFile = new File(result.sourceZipFileWithPath);
+            assertFalse("Zip file should not exist for empty directory", zipFile.exists());
+
+            // Clean up target directory
+            deleteDirectory(targetDir.toFile());
+
+        } finally {
+            // Clean up test directory
+            deleteDirectory(testDir);
+        }
+    }
+
+    @Test
+    public void testCompressDirectoryPreservesTimestamps() throws IOException, InterruptedException {
+        // Create a temporary directory with test files
+        Path tempDir = Files.createTempDirectory("testCompressTimestamp");
+        File testDir = tempDir.toFile();
+
+        try {
+            // Create test file with specific timestamp
+            File file1 = new File(testDir, "timestampTest.txt");
+            Files.write(file1.toPath(), "Timestamp test".getBytes());
+
+            // Set a specific last modified time
+            long specificTime = System.currentTimeMillis() - 100000; // 100 seconds ago
+            file1.setLastModified(specificTime);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Setup RunTimeProperties
+            RunTimeProperties.instance.setOverrideTarget(true);
+
+            // Create target directory
+            Path targetDir = Files.createTempDirectory("testTargetTimestamp");
+
+            // Compress the directory
+            FileUtils.CompressedPackageVO result = fileUtils.compressDirectory(
+                    testDir.getAbsolutePath(),
+                    targetDir.toFile().getAbsolutePath(),
+                    true,
+                    -1
+            );
+
+            // Verify the zip file was created
+            File zipFile = new File(result.sourceZipFileWithPath);
+            assertTrue("Zip file should exist", zipFile.exists());
+
+            // Verify the timestamp is preserved in the zip entry
+            try (ZipFile zip = new ZipFile(zipFile)) {
+                ZipEntry entry = zip.getEntry("timestampTest.txt");
+                assertNotNull("Entry should exist", entry);
+
+                long entryTime = entry.getLastModifiedTime().toMillis();
+                // Allow small difference due to file system precision
+                long timeDiff = Math.abs(entryTime - specificTime);
+                assertTrue("Timestamp should be preserved (diff: " + timeDiff + " ms)",
+                        timeDiff < 2000); // Within 2 seconds
+            }
+
+            // Clean up the zip file
+            zipFile.delete();
+
+            // Clean up target directory
+            deleteDirectory(targetDir.toFile());
+
+        } finally {
+            // Clean up test directory
+            deleteDirectory(testDir);
+        }
+    }
+
+    /**
+     * Helper method to recursively delete a directory
+     */
+    private void deleteDirectory(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+            directory.delete();
+        }
     }
 }

@@ -485,33 +485,7 @@ public class FileUtils {
 			ui.printError("createDir() failed", e);
 			throw new RuntimeException(e);
 		}
-
-
-	/*	if (!targetDir.exists()) {
-			//ui.println("creating directory: " + theDir.getName());
-			boolean result = false;
-			try {
-				targetDir.mkdir();
-				result = true;
-
-//				if (originalDirLastModified != -1) {
-//					try {
-//						boolean b = targetDir.setLastModified(originalDirLastModified);
-//					} catch (Exception e) {
-//						ui.printError("error in createDir()", e);
-//					}
-//				}
-
-
-			} catch (SecurityException se) {
-				ui.println(String.format("[error] Failed to create directory: %s", targetDir.getName()));
-			}
-			if (result) {
-				if (RunTimeProperties.instance.isVerbose() && RunTimeProperties.instance.isDebug())
-					ui.println(String.format("Directory created: %s", targetDir.getName()));
-				frs.incrementDirCount();
-			}
-		}*/
+        
 	}
 
 
