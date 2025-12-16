@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="IdProvider" IDEtalkID="9655D28492657F91588C7B2F5B1B968F" />
-  <component name="IvyProjectSettings">
-    <dependencies />
-  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
-        <option value="$PROJECT_DIR$/../vfsjfilechooser2/pom.xml" />
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_12" project-jdk-name="sap-21" project-jdk-type="JavaSDK">
-    <output url="file://$PROJECT_DIR$/classes" />
-  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="sapmachine-21" project-jdk-type="JavaSDK" />
 </project>
