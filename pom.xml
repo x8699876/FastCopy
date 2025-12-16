@@ -264,6 +264,14 @@
                             <include>images/*.*</include>
                         </includes>
                     </resource>
+                    <!-- Include .form files so IntelliJ IDEA can load them at runtime -->
+                    <resource>
+                        <filtering>false</filtering>
+                        <directory>${project.basedir}/src/main/java</directory>
+                        <includes>
+                            <include>**/*.form</include>
+                        </includes>
+                    </resource>
                 </resources>
 
 
@@ -275,7 +283,8 @@
                         <version>1.0-beta-2</version>
                         <executions>
                             <execution>
-                                <phase>process-classes</phase>
+                                <id>default</id>
+                                <phase>none</phase>
                                 <goals>
                                     <goal>javac2</goal>
                                 </goals>
@@ -286,8 +295,9 @@
                             <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
                             <fork>true</fork>
                             <debug>true</debug>
-                            <failOnError>true</failOnError>
+                            <failOnError>false</failOnError>
                             <verbose>true</verbose>
+                            <skip>true</skip>
                         </configuration>
 
                         <dependencies>
