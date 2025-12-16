@@ -128,149 +128,6 @@ public class FastCopyMainForm {
 
 	public FastCopyMainForm() {
 
-		chkMultiThread.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				//outputTextArea.append("Value of the checkbox:" + chkForceDelete.isSelected());
-			}
-		});
-
-		chkShowInfo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				//showHideInfo(chkShowInfo.isSelected());
-				RunTimeProperties.instance.setVerbose(chkShowInfo.isSelected());
-			}
-		});
-
-		btnCloseApp.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (RunTimeProperties.instance.isRunning()) {
-					stopIt();
-
-				} else {
-					updateAndSavePreferences();
-					frame.dispose();
-					System.exit(0);
-				}
-			}
-		});
-
-
-		btnOk.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				//Don't block the EDT
-				//probably using the Swing thread which is waiting
-				// for your code to execute before it can update the UI. Try using a separate thread for that loop.
-				//just do invokeLater() as below does not work.
-
-
-//				SwingUtilities.invokeLater(new Runnable() {
-//					@Override
-//					public void run() {
-				//doit();
-//					}
-//				});
-
-				doItJobThread = new DoItJobThread();
-				doItJobThread.setDaemon(true);
-				doItJobThread.start();
-
-			}
-		});
-
-		btnHelp.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				outputTextArea.setText("");
-				showHideInfo(true);
-				fastCopy.getRdProUI().help();
-				scrollToTop();
-
-			}
-		});
-		ckOverrideOnlyIfNewerCheckBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (ckOverrideOnlyIfNewerCheckBox.isSelected())
-					ckOverrideAlways.setSelected(false);
-			}
-
-
-		});
-
-
-
-		btnSourceBrowse.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-
-				String dir = fldSourceDir.getText().trim();
-
-				if (dir.length()==0)
-					dir = RunTimeProperties.userHome;
-
-				int k = dir.indexOf(";");
-				if (k > 0)
-					dir = dir.substring(0, k);
-
-				if (lastSrourceFileLocation ==null)
-					lastSrourceFileLocation = new File(dir);
-
-				File[] files = chooseFiles(lastSrourceFileLocation
-						, VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES);
-
-				if (files != null && files.length > 0) {
-					StringBuilder builder = new StringBuilder();
-
-					//append to existing
-					if (fldSourceDir.getText() != null && fldSourceDir.getText().length() > 0) {
-						builder.append(fldSourceDir.getText()) ;
-					}
-
-					//now append the new directories. 
-					for (File file : files) {
-						if (builder.length() > 0)
-							builder.append(";");
-						builder.append(file.getAbsolutePath());
-						lastSrourceFileLocation =   file;
-
-					}
-
-
-					props.setSourceDir(builder.toString());
-					fldSourceDir.setText(props.getSourceDir());
-				}
-
-
-			}
-		});
-
-
-		btnTargetBrowse.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-
-				String dir = fldTargetDir.getText().trim();
-				int k = dir.indexOf(";");
-				if (k > 0)
-					dir = dir.substring(0, k);
-
-				if (lastTargetFileLocation==null)
-					lastTargetFileLocation =new File(dir);
-
-				File[] files = chooseFiles(lastTargetFileLocation, VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY);
-				if (files != null && files.length > 0) {
-					props.setDestDir(files[0].getAbsolutePath().toString());
-					fldTargetDir.setText(props.getDestDir());
-					lastTargetFileLocation = files[0];
-				}
-
-
-			}
-		});
 
 
 	}
@@ -334,58 +191,203 @@ public class FastCopyMainForm {
 
 
 	public void init() {
-		frame = new JFrame("MHISoft FastCopy " + UI.version);
-		frame.setContentPane(layoutPanel1);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//progressBar1.setVisible(false);
-		progressBar1.setMaximum(100);
-		progressBar1.setMinimum(0);
+        frame = new JFrame("MHISoft FastCopy " + UI.version);
+        frame.setContentPane(layoutPanel1);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //progressBar1.setVisible(false);
+        progressBar1.setMaximum(100);
+        progressBar1.setMinimum(0);
 
-		progressPanel.setVisible(false);
-		//frame.setPreferredSize(new Dimension(1200, 800));
-		frame.setPreferredSize(new Dimension(UserPreference.getInstance().getDimensionX(), UserPreference.getInstance().getDimensionY()));
+        progressPanel.setVisible(false);
+        //frame.setPreferredSize(new Dimension(1200, 800));
+        frame.setPreferredSize(new Dimension(UserPreference.getInstance().getDimensionX(), UserPreference.getInstance().getDimensionY()));
 
-		frame.pack();
+        frame.pack();
 
-		/*position it*/
-		//frame.setLocationRelativeTo(null);  // *** this will center your app ***
-		PointerInfo a = MouseInfo.getPointerInfo();
-		Point b = a.getLocation();
-		int x = (int) b.getX();
-		int y = (int) b.getY();
-		frame.setLocation(x + 100, y);
+        /*position it*/
+        //frame.setLocationRelativeTo(null);  // *** this will center your app ***
+        PointerInfo a = MouseInfo.getPointerInfo();
+        Point b = a.getLocation();
+        int x = (int) b.getX();
+        int y = (int) b.getY();
+        frame.setLocation(x + 100, y);
 
-		btnHelp.setBorder(null);
+        btnHelp.setBorder(null);
 
-		frame.setVisible(true);
-
-
-		componentsList = ViewHelper.getAllComponents(frame);
-		setupFontSpinner();
-		ViewHelper.setFontSize(componentsList, UserPreference.getInstance().getFontSize());
-
-		//initialize the preferences
-
-		if (UserPreference.getInstance().getRunTimeProperties()!=null) {
-			fldSourceDir.setText(props.getSourceDir());
-			fldTargetDir.setText(props.getDestDir());
-
-			ckOverrideAlways.setSelected(props.isOverrideTarget());
-			ckFlatCopy.setSelected(props.isFlatCopy());
-			ckCreateTheSameSourceCheckBox.setSelected(props.isCreateTheSameSourceFolderUnderTarget());
-			ckVerify.setSelected(props.isVerifyAfterCopy());
-			ckOverrideOnlyIfNewerCheckBox.setSelected(props.isOverwriteIfNewerOrDifferent());
-			ckKeepOriginalFileTimestamp.setSelected(props.isKeepOriginalFileDates());
-			ckPackageSmallFiles.setSelected(props.isPackageSmallFiles());
-			chkMultiThread.setSelected(props.getNumOfThreads() > 1);
-			chkShowInfo.setSelected(props.isVerbose());
-		}
+        frame.setVisible(true);
 
 
+        componentsList = ViewHelper.getAllComponents(frame);
+        setupFontSpinner();
+        ViewHelper.setFontSize(componentsList, UserPreference.getInstance().getFontSize());
+
+        //initialize the preferences
+
+        if (UserPreference.getInstance().getRunTimeProperties() != null) {
+            fldSourceDir.setText(props.getSourceDir());
+            fldTargetDir.setText(props.getDestDir());
+
+            ckOverrideAlways.setSelected(props.isOverrideTarget());
+            ckFlatCopy.setSelected(props.isFlatCopy());
+            ckCreateTheSameSourceCheckBox.setSelected(props.isCreateTheSameSourceFolderUnderTarget());
+            ckVerify.setSelected(props.isVerifyAfterCopy());
+            ckOverrideOnlyIfNewerCheckBox.setSelected(props.isOverwriteIfNewerOrDifferent());
+            ckKeepOriginalFileTimestamp.setSelected(props.isPreserveFileTimesAndAccessAttributes());
+            ckPackageSmallFiles.setSelected(props.isPackageSmallFiles());
+            chkMultiThread.setSelected(props.getNumOfThreads() > 1);
+            chkShowInfo.setSelected(props.isVerbose());
+        }
+    }
 
 
 
-	}
+    void setupListeners() {
+            chkMultiThread.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //outputTextArea.append("Value of the checkbox:" + chkForceDelete.isSelected());
+                }
+            });
+
+            chkShowInfo.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //showHideInfo(chkShowInfo.isSelected());
+                    RunTimeProperties.instance.setVerbose(chkShowInfo.isSelected());
+                }
+            });
+
+            btnCloseApp.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (RunTimeProperties.instance.isRunning()) {
+                        stopIt();
+
+                    } else {
+                        updateAndSavePreferences();
+                        frame.dispose();
+                        System.exit(0);
+                    }
+                }
+            });
+
+
+            btnOk.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //Don't block the EDT
+                    //probably using the Swing thread which is waiting
+                    // for your code to execute before it can update the UI. Try using a separate thread for that loop.
+                    //just do invokeLater() as below does not work.
+
+
+                    //				SwingUtilities.invokeLater(new Runnable() {
+                    //					@Override
+                    //					public void run() {
+                    //doit();
+                    //					}
+                    //				});
+
+                    doItJobThread = new DoItJobThread();
+                    doItJobThread.setDaemon(true);
+                    doItJobThread.start();
+
+                }
+            });
+
+            btnHelp.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    outputTextArea.setText("");
+                    showHideInfo(true);
+                    fastCopy.getRdProUI().help();
+                    scrollToTop();
+
+                }
+            });
+            ckOverrideOnlyIfNewerCheckBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (ckOverrideOnlyIfNewerCheckBox.isSelected())
+                        ckOverrideAlways.setSelected(false);
+                }
+
+
+            });
+
+
+
+            btnSourceBrowse.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+
+                    String dir = fldSourceDir.getText().trim();
+
+                    if (dir.length()==0)
+                        dir = RunTimeProperties.userHome;
+
+                    int k = dir.indexOf(";");
+                    if (k > 0)
+                        dir = dir.substring(0, k);
+
+                    if (lastSrourceFileLocation ==null)
+                        lastSrourceFileLocation = new File(dir);
+
+                    File[] files = chooseFiles(lastSrourceFileLocation
+                            , VFSJFileChooser.SELECTION_MODE.FILES_AND_DIRECTORIES);
+
+                    if (files != null && files.length > 0) {
+                        StringBuilder builder = new StringBuilder();
+
+                        //append to existing
+                        if (fldSourceDir.getText() != null && fldSourceDir.getText().length() > 0) {
+                            builder.append(fldSourceDir.getText()) ;
+                        }
+
+                        //now append the new directories.
+                        for (File file : files) {
+                            if (builder.length() > 0)
+                                builder.append(";");
+                            builder.append(file.getAbsolutePath());
+                            lastSrourceFileLocation =   file;
+
+                        }
+
+
+                        props.setSourceDir(builder.toString());
+                        fldSourceDir.setText(props.getSourceDir());
+                    }
+
+
+                }
+            });
+
+
+            btnTargetBrowse.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+
+                    String dir = fldTargetDir.getText().trim();
+                    int k = dir.indexOf(";");
+                    if (k > 0)
+                        dir = dir.substring(0, k);
+
+                    if (lastTargetFileLocation==null)
+                        lastTargetFileLocation =new File(dir);
+
+                    File[] files = chooseFiles(lastTargetFileLocation, VFSJFileChooser.SELECTION_MODE.DIRECTORIES_ONLY);
+                    if (files != null && files.length > 0) {
+                        props.setDestDir(files[0].getAbsolutePath().toString());
+                        fldTargetDir.setText(props.getDestDir());
+                        lastTargetFileLocation = files[0];
+                    }
+
+
+                }
+            });
+
+        }
+        
 
 
 	private void createUIComponents() {
@@ -433,7 +435,7 @@ public class FastCopyMainForm {
 		props.setVerbose(chkShowInfo.isSelected());
 		props.setFlatCopy(ckFlatCopy.isSelected());
 		props.setCreateTheSameSourceFolderUnderTarget(ckCreateTheSameSourceCheckBox.isSelected());
-		props.setKeepOriginalFileDates(ckKeepOriginalFileTimestamp.isSelected());
+		props.setPreserveFileTimesAndAccessAttributes(ckKeepOriginalFileTimestamp.isSelected());
 		props.setVerifyAfterCopy(ckVerify.isSelected());
 
 		return true;
@@ -544,7 +546,9 @@ public class FastCopyMainForm {
 
 		//INIT the UI, requires the user preferences such as the font and window sizes.
 		main.init();
-
+		
+		//Setup all the button and checkbox listeners
+		main.setupListeners();
 
 		uiImpl.help();
 

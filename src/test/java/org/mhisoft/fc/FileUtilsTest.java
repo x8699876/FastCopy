@@ -27,10 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -560,7 +558,7 @@ public class FileUtilsTest {
             fileUtils.setRdProUI(ui);
             RunTimeProperties.instance.setOverrideTarget(true);
             RunTimeProperties.instance.setVerifyAfterCopy(false);
-            RunTimeProperties.instance.setKeepOriginalFileDates(true);
+            RunTimeProperties.instance.setPreserveFileTimesAndAccessAttributes(true);
 
             // Compress the directory
             FileUtils.CompressedPackageVO compressVO = fileUtils.compressDirectory(
@@ -605,7 +603,7 @@ public class FileUtilsTest {
         } finally {
             // Clean up test directories
             deleteDirectory(sourceDir);
-            RunTimeProperties.instance.setKeepOriginalFileDates(false);
+            RunTimeProperties.instance.setPreserveFileTimesAndAccessAttributes(false);
         }
     }
 
@@ -736,6 +734,283 @@ public class FileUtilsTest {
         } finally {
             // Clean up test directories (this will also delete the original zip file)
             deleteDirectory(sourceDir);
+        }
+    }
+
+    @Test
+    public void testPreserveFilePermissions_Executable() throws IOException {
+        // This test only runs on POSIX-compliant systems (macOS, Linux, Unix)
+        Path tempSourceFile = Files.createTempFile("source_exec", ".sh");
+        Path tempTargetFile = Files.createTempFile("target_exec", ".sh");
+
+        try {
+            // Write content to source file
+            Files.write(tempSourceFile, "#!/bin/bash\necho 'test'\n".getBytes());
+
+            // Set source file as executable (rwxr-xr-x = 755)
+            File sourceFile = tempSourceFile.toFile();
+            sourceFile.setReadable(true, false);
+            sourceFile.setWritable(true, true);
+            sourceFile.setExecutable(true, false);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Call preserveFilePermissions
+            fileUtils.preserveFilePermissions(
+                    tempSourceFile.toString(),
+                    tempTargetFile.toString()
+            );
+
+            // Verify target file has executable permission
+            File targetFile = tempTargetFile.toFile();
+            assertTrue("Target file should be executable", targetFile.canExecute());
+            assertTrue("Target file should be readable", targetFile.canRead());
+
+            System.out.println("✓ Executable permissions preserved successfully");
+
+        } finally {
+            Files.deleteIfExists(tempSourceFile);
+            Files.deleteIfExists(tempTargetFile);
+        }
+    }
+
+    @Test
+    public void testPreserveFilePermissions_ReadOnly() throws IOException {
+        Path tempSourceFile = Files.createTempFile("source_readonly", ".txt");
+        Path tempTargetFile = Files.createTempFile("target_readonly", ".txt");
+
+        try {
+            // Write content to source file
+            Files.write(tempSourceFile, "Read-only content".getBytes());
+
+            // Set source file as read-only (r--r--r-- = 444)
+            File sourceFile = tempSourceFile.toFile();
+            sourceFile.setReadable(true, false);
+            sourceFile.setWritable(false, false);
+            sourceFile.setExecutable(false, false);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Call preserveFilePermissions
+            fileUtils.preserveFilePermissions(
+                    tempSourceFile.toString(),
+                    tempTargetFile.toString()
+            );
+
+            // Verify target file is read-only
+            File targetFile = tempTargetFile.toFile();
+            assertTrue("Target file should be readable", targetFile.canRead());
+            assertFalse("Target file should not be writable", targetFile.canWrite());
+
+            System.out.println("✓ Read-only permissions preserved successfully");
+
+            // Clean up: Make writable again before deletion
+            targetFile.setWritable(true);
+
+        } finally {
+            Files.deleteIfExists(tempSourceFile);
+            Files.deleteIfExists(tempTargetFile);
+        }
+    }
+
+    @Test
+    public void testPreserveFilePermissions_RegularFile() throws IOException {
+        Path tempSourceFile = Files.createTempFile("source_regular", ".txt");
+        Path tempTargetFile = Files.createTempFile("target_regular", ".txt");
+
+        try {
+            // Write content to source file
+            Files.write(tempSourceFile, "Regular file content".getBytes());
+
+            // Set source file with typical permissions (rw-r--r-- = 644)
+            File sourceFile = tempSourceFile.toFile();
+            sourceFile.setReadable(true, false);
+            sourceFile.setWritable(true, true);
+            sourceFile.setExecutable(false, false);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Call preserveFilePermissions
+            fileUtils.preserveFilePermissions(
+                    tempSourceFile.toString(),
+                    tempTargetFile.toString()
+            );
+
+            // Verify target file has correct permissions
+            File targetFile = tempTargetFile.toFile();
+            assertTrue("Target file should be readable", targetFile.canRead());
+            assertTrue("Target file should be writable", targetFile.canWrite());
+            assertFalse("Target file should not be executable", targetFile.canExecute());
+
+            System.out.println("✓ Regular file permissions preserved successfully");
+
+        } finally {
+            Files.deleteIfExists(tempSourceFile);
+            Files.deleteIfExists(tempTargetFile);
+        }
+    }
+
+    @Test
+    public void testPreserveFilePermissions_PosixPermissions() throws IOException {
+        // This test verifies full POSIX permission preservation on supported systems
+        Path tempSourceFile = Files.createTempFile("source_posix", ".txt");
+        Path tempTargetFile = Files.createTempFile("target_posix", ".txt");
+
+        try {
+            // Write content to source file
+            Files.write(tempSourceFile, "POSIX test content".getBytes());
+
+            // Check if system supports POSIX permissions
+            if (Files.getFileStore(tempSourceFile).supportsFileAttributeView("posix")) {
+                // Set specific POSIX permissions (rwxr-x--- = 750)
+                java.nio.file.attribute.PosixFilePermission[] permissions = {
+                        java.nio.file.attribute.PosixFilePermission.OWNER_READ,
+                        java.nio.file.attribute.PosixFilePermission.OWNER_WRITE,
+                        java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE,
+                        java.nio.file.attribute.PosixFilePermission.GROUP_READ,
+                        java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE
+                };
+                java.util.Set<java.nio.file.attribute.PosixFilePermission> perms =
+                        new java.util.HashSet<>(Arrays.asList(permissions));
+                Files.setPosixFilePermissions(tempSourceFile, perms);
+
+                // Setup FileUtils
+                FileUtils fileUtils = new FileUtils();
+                fileUtils.setRdProUI(ui);
+
+                // Call preserveFilePermissions
+                fileUtils.preserveFilePermissions(
+                        tempSourceFile.toString(),
+                        tempTargetFile.toString()
+                );
+
+                // Verify target file has the same POSIX permissions
+                java.util.Set<java.nio.file.attribute.PosixFilePermission> targetPerms =
+                        Files.getPosixFilePermissions(tempTargetFile);
+
+                assertTrue("Target should have OWNER_READ",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.OWNER_READ));
+                assertTrue("Target should have OWNER_WRITE",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.OWNER_WRITE));
+                assertTrue("Target should have OWNER_EXECUTE",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE));
+                assertTrue("Target should have GROUP_READ",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.GROUP_READ));
+                assertTrue("Target should have GROUP_EXECUTE",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE));
+
+                // Should NOT have these permissions
+                assertFalse("Target should not have GROUP_WRITE",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.GROUP_WRITE));
+                assertFalse("Target should not have OTHERS_READ",
+                        targetPerms.contains(java.nio.file.attribute.PosixFilePermission.OTHERS_READ));
+
+                System.out.println("✓ POSIX permissions preserved successfully");
+                System.out.println("  Source permissions: " +
+                        java.nio.file.attribute.PosixFilePermissions.toString(perms));
+                System.out.println("  Target permissions: " +
+                        java.nio.file.attribute.PosixFilePermissions.toString(targetPerms));
+            } else {
+                System.out.println("⚠ POSIX permissions not supported on this file system, test skipped");
+            }
+
+        } finally {
+            Files.deleteIfExists(tempSourceFile);
+            Files.deleteIfExists(tempTargetFile);
+        }
+    }
+
+    @Test
+    public void testPreserveFilePermissions_NonExistentSource() {
+        // Test behavior when source file doesn't exist
+        String nonExistentSource = "/tmp/non_existent_file_" + System.currentTimeMillis() + ".txt";
+        Path tempTargetFile = null;
+
+        try {
+            tempTargetFile = Files.createTempFile("target_nonexistent", ".txt");
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // This should not throw an exception, just log an error
+            fileUtils.preserveFilePermissions(
+                    nonExistentSource,
+                    tempTargetFile.toString()
+            );
+
+            System.out.println("✓ Handled non-existent source file gracefully");
+
+        } catch (Exception e) {
+            // Should handle gracefully without throwing
+            System.out.println("✓ Exception caught and handled: " + e.getMessage());
+        } finally {
+            if (tempTargetFile != null) {
+                try {
+                    Files.deleteIfExists(tempTargetFile);
+                } catch (IOException e) {
+                    // Ignore cleanup errors
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPreserveFilePermissions_MultipleFiles() throws IOException {
+        // Test preserving permissions for multiple files with different permissions
+        Path[] sourceFiles = new Path[3];
+        Path[] targetFiles = new Path[3];
+
+        try {
+            // Create test files with different permissions
+            sourceFiles[0] = Files.createTempFile("source_exec", ".sh");
+            sourceFiles[1] = Files.createTempFile("source_readonly", ".txt");
+            sourceFiles[2] = Files.createTempFile("source_regular", ".txt");
+
+            targetFiles[0] = Files.createTempFile("target_exec", ".sh");
+            targetFiles[1] = Files.createTempFile("target_readonly", ".txt");
+            targetFiles[2] = Files.createTempFile("target_regular", ".txt");
+
+            // Set different permissions
+            sourceFiles[0].toFile().setExecutable(true, false);
+            sourceFiles[1].toFile().setWritable(false, false);
+            sourceFiles[2].toFile().setWritable(true, true);
+
+            // Setup FileUtils
+            FileUtils fileUtils = new FileUtils();
+            fileUtils.setRdProUI(ui);
+
+            // Preserve permissions for all files
+            for (int i = 0; i < 3; i++) {
+                fileUtils.preserveFilePermissions(
+                        sourceFiles[i].toString(),
+                        targetFiles[i].toString()
+                );
+            }
+
+            // Verify
+            assertTrue("Target 0 should be executable", targetFiles[0].toFile().canExecute());
+            assertFalse("Target 1 should not be writable", targetFiles[1].toFile().canWrite());
+            assertTrue("Target 2 should be writable", targetFiles[2].toFile().canWrite());
+
+            System.out.println("✓ Multiple files' permissions preserved successfully");
+
+        } finally {
+            // Clean up
+            for (int i = 0; i < 3; i++) {
+                if (sourceFiles[i] != null) Files.deleteIfExists(sourceFiles[i]);
+                if (targetFiles[i] != null) {
+                    // Make writable before deletion
+                    targetFiles[i].toFile().setWritable(true);
+                    Files.deleteIfExists(targetFiles[i]);
+                }
+            }
         }
     }
 

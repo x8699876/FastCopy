@@ -42,7 +42,7 @@ public class RunTimeProperties  implements  java.io.Serializable{
 	boolean overwriteIfNewerOrDifferent;
 	boolean flatCopy;
 	boolean createTheSameSourceFolderUnderTarget;
-	boolean keepOriginalFileDates = Boolean.valueOf(System.getProperty("keepOriginalFileDates", "false"));;
+	boolean preserveFileTimesAndAccessAttributes = Boolean.valueOf(System.getProperty("keepOriginalFileDates", "false"));;
 	boolean skipEmptyDirs=Boolean.valueOf(System.getProperty("skipEmptyDirs", "true"));;;
 	boolean packageSmallFiles = Boolean.valueOf(System.getProperty("packageSmallFiles", "true"));
 
@@ -169,12 +169,12 @@ public class RunTimeProperties  implements  java.io.Serializable{
 		return verifyAfterCopy;
 	}
 
-	public boolean isKeepOriginalFileDates() {
-		return keepOriginalFileDates;
+	public boolean isPreserveFileTimesAndAccessAttributes() {
+		return preserveFileTimesAndAccessAttributes;
 	}
 
-	public void setKeepOriginalFileDates(boolean keepOriginalFileDates) {
-		this.keepOriginalFileDates = keepOriginalFileDates;
+	public void setPreserveFileTimesAndAccessAttributes(boolean preserveFileTimesAndAccessAttributes) {
+		this.preserveFileTimesAndAccessAttributes = preserveFileTimesAndAccessAttributes;
 	}
 
 	public LogLevel getLogLevel() {
@@ -211,7 +211,7 @@ public class RunTimeProperties  implements  java.io.Serializable{
 		sb.append(", debugArg=").append(debugArg);
 		sb.append(", compressSmallFiles=").append(RunTimeProperties.instance.isPackageSmallFiles());
 		sb.append(", verifyAfterCopy=").append(this.verifyAfterCopy);
-		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isKeepOriginalFileDates());
+		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isPreserveFileTimesAndAccessAttributes());
 		sb.append(", skipEmptyDirs=").append(RunTimeProperties.instance.isSkipEmptyDirs());
 		sb.append('}');
 		return sb.toString();

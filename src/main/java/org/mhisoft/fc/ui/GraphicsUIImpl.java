@@ -44,7 +44,7 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 	JLabel labelWallClock;
 
 	JProgressBar progressBar;
-	public static int bufferLineThreshold = 3000;
+	public static int bufferLineThreshold = 5000;
 	private int lineNumber = 0;
 
 

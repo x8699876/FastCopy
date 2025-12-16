@@ -182,7 +182,7 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				props.setPackageSmallFiles(true);
 			}
 			else if (arg.equalsIgnoreCase("-k")) {
-				props.setKeepOriginalFileDates(true);
+				props.setPreserveFileTimesAndAccessAttributes(true);
 			}
 			else if (arg.equalsIgnoreCase("-n")) {
 				props.setOverwriteIfNewerOrDifferent(true);

@@ -52,6 +52,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 import java.security.DigestInputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
@@ -147,7 +150,8 @@ public class FileUtils {
 					unzipFile(target, destZipDir, statistics);
 
 					if (RunTimeProperties.instance.isVerbose()) {
-						rdProUI.println("\tUnzipped under " + destZipDir);
+						rdProUI.println("\tUnzipped under " + destZipDir + ",("
+                                + compressedPackageVO.getNumberOfFiles()  + " files).");
 					}
 
 				} finally {
@@ -164,34 +168,444 @@ public class FileUtils {
 			rdProUI.printError("Exploding the zip failed", e);
 		}
 
-		if (compressedPackageVO == null) { //
+		if (compressedPackageVO == null) { // Not zipped
 			try {
-				setFileLastModified(target.getAbsolutePath(), source.lastModified());
-			} catch (Exception e) {
-				rdProUI.printError("setLastModified() failed.", e);
+                preserveFileTImesAndAttributes(source, target);
+            } catch (Exception e) {
+				rdProUI.printError("Failed to preserve file attributes.", e);
 			}
 		}
 
 	}
 
-	public  BasicFileAttributes getFileAttributes(Path sourceFile) throws IOException {
-		BasicFileAttributes attr = Files.readAttributes(sourceFile, BasicFileAttributes.class);
-		return attr;
+    private void preserveFileTImesAndAttributes(File source, File target) {
+        // Preserve all file times and permissions
+        if (RunTimeProperties.instance.isPreserveFileTimesAndAccessAttributes()) {
+            preserveAllFileTimes(source.getAbsolutePath(), target.getAbsolutePath());
+            preserveFilePermissions(source.getAbsolutePath(), target.getAbsolutePath());
+        }
+    }
+
+
+    /**
+	 * Preserve all three file times (modified, access, creation) from source to target.
+	 * This provides complete timestamp preservation for accurate file copying.
+	 * @param sourceFile the source file path
+	 * @param targetFile the target file path
+	 */
+	public void preserveAllFileTimes(String sourceFile, String targetFile) {
+		if (RunTimeProperties.instance.isPreserveFileTimesAndAccessAttributes()) {
+			try {
+				Path sourcePath = Paths.get(sourceFile);
+				Path targetPath = Paths.get(targetFile);
+
+				// Read all time attributes from source file
+				BasicFileAttributes sourceAttrs = Files.readAttributes(sourcePath, BasicFileAttributes.class);
+
+				// Get the attribute view for target file
+				BasicFileAttributeView targetAttrs = Files.getFileAttributeView(targetPath, BasicFileAttributeView.class);
+
+				// Set all three times: modified, access, and creation
+				targetAttrs.setTimes(
+					sourceAttrs.lastModifiedTime(),
+					sourceAttrs.lastAccessTime(),
+					sourceAttrs.creationTime()
+				);
+
+                if (RunTimeProperties.instance.isDebug()) {
+					rdProUI.println(LogLevel.debug, "\tPreserved all file times for " + targetFile);
+				}
+			} catch (IOException e) {
+				rdProUI.printError("\tFailed to preserve file times for " + targetFile + ": " + e.getMessage());
+			}
+		}
+
 	}
 
-
-	public  void setFileLastModified(String targetFile, long millis)  {
-		if (RunTimeProperties.instance.isKeepOriginalFileDates()) {
+	/**
+	 * Set only the last modified time on a file.
+	 * This is used when only a single timestamp is available (e.g., from ZIP entries).
+	 * @param targetFile the target file path
+	 * @param millis the last modified time in milliseconds
+	 */
+	public void setFileLastModified(String targetFile, long millis) {
+		if (RunTimeProperties.instance.isPreserveFileTimesAndAccessAttributes()) {
 			Path tPath = Paths.get(targetFile);
 			BasicFileAttributeView attributes = Files.getFileAttributeView(tPath, BasicFileAttributeView.class);
 			FileTime time = FileTime.fromMillis(millis);
 			try {
-				attributes.setTimes(time, time, null);
+				// Only set modified time, leave access and creation times unchanged
+				attributes.setTimes(time, null, null);
 			} catch (IOException e) {
-				rdProUI.print(LogLevel.debug, "Failed to set last modified timestamp for " + targetFile);
+				rdProUI.printError( "Failed to set last modified timestamp for " + targetFile);
 			}
 		}
+	}
 
+	/**
+	 * Preserve file permissions including executable attributes from source to target.
+	 * Works on POSIX-compliant systems (macOS, Linux, Unix).
+	 * @param sourceFile the source file path
+	 * @param targetFile the target file path
+	 */
+	public void preserveFilePermissions(String sourceFile, String targetFile) {
+		try {
+			Path sourcePath = Paths.get(sourceFile);
+			Path targetPath = Paths.get(targetFile);
+
+			// Check if the file system supports POSIX permissions (macOS, Linux, Unix)
+			if (Files.getFileStore(sourcePath).supportsFileAttributeView("posix")) {
+				// Get permissions from source file
+				Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(sourcePath);
+
+				// Set permissions on target file
+				Files.setPosixFilePermissions(targetPath, permissions);
+
+				if (RunTimeProperties.instance.isDebug()) {
+					rdProUI.println(LogLevel.debug, "\tPreserved permissions for " + targetFile + ": " + PosixFilePermissions.toString(permissions));
+				}
+			} else {
+				// Fallback for non-POSIX systems (Windows)
+				File source = new File(sourceFile);
+				File target = new File(targetFile);
+
+				if (source.canExecute()) {
+					target.setExecutable(true, false);
+				}
+				if (source.canRead()) {
+					target.setReadable(true, false);
+				}
+				if (source.canWrite()) {
+					target.setWritable(true, false);
+				}
+			}
+		} catch (IOException e) {
+			rdProUI.printError( "\tFailed to preserve permissions for " + targetFile + ": " + e.getMessage());
+		} catch (UnsupportedOperationException e) {
+			// POSIX not supported, silently ignore
+			rdProUI.printError("\tFile permissions preservation not supported on this file system");
+		}
+	}
+
+	/**
+	 * Preserve file permissions from a ZIP entry to the extracted file.
+	 * ZIP entries can store Unix file permissions in extra field with custom header 0x504D.
+	 * @param zipEntry the ZIP entry containing permission information
+	 * @param targetFile the extracted file to apply permissions to
+	 */
+	public void preserveZipEntryPermissions(ZipEntry zipEntry, File targetFile) {
+		try {
+			byte[] extraData = zipEntry.getExtra();
+
+			if (extraData != null && extraData.length >= 8) {
+				// Search for our custom header ID (0x504D = "PM") in the extra field
+				int offset = 0;
+				Integer unixPerms = null;
+
+				while (offset + 8 <= extraData.length) {
+					int headerId = (extraData[offset] & 0xFF) | ((extraData[offset + 1] & 0xFF) << 8);
+					int dataSize = (extraData[offset + 2] & 0xFF) | ((extraData[offset + 3] & 0xFF) << 8);
+
+					if (headerId == 0x504D && dataSize == 4 && offset + 8 <= extraData.length) {
+						// Found our permission header, read unix mode (4 bytes, little-endian)
+						unixPerms = (extraData[offset + 4] & 0xFF)
+							| ((extraData[offset + 5] & 0xFF) << 8)
+							| ((extraData[offset + 6] & 0xFF) << 16)
+							| ((extraData[offset + 7] & 0xFF) << 24);
+						break;
+					}
+
+					// Move to next extra field block
+					offset += 4 + dataSize;
+				}
+
+				if (unixPerms != null && unixPerms != 0) {
+					Path targetPath = targetFile.toPath();
+
+					// Check if the file system supports POSIX permissions
+					if (Files.getFileStore(targetPath).supportsFileAttributeView("posix")) {
+						Set<PosixFilePermission> permissions = permissionsFromUnixMode(unixPerms);
+						Files.setPosixFilePermissions(targetPath, permissions);
+
+						if (RunTimeProperties.instance.isDebug()) {
+							rdProUI.println(LogLevel.debug, "\tPreserved ZIP permissions for " + targetFile.getName() + ": " + PosixFilePermissions.toString(permissions));
+						}
+					} else {
+						// Fallback for non-POSIX systems (Windows)
+						// Check if owner has execute permission (bit 6)
+						if ((unixPerms & 0100) != 0) {
+							targetFile.setExecutable(true, false);
+						}
+						// Check if owner has read permission (bit 8)
+						if ((unixPerms & 0400) != 0) {
+							targetFile.setReadable(true, false);
+						}
+						// Check if owner has write permission (bit 7)
+						if ((unixPerms & 0200) != 0) {
+							targetFile.setWritable(true, false);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			rdProUI.printError( "Failed to preserve ZIP entry permissions for " + targetFile.getName() + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Convert Unix permission mode (octal) to Java PosixFilePermission set.
+	 * @param mode Unix permission mode (e.g., 0755, 0644)
+	 * @return Set of PosixFilePermission
+	 */
+	private Set<PosixFilePermission> permissionsFromUnixMode(int mode) {
+		Set<PosixFilePermission> permissions = new java.util.HashSet<>();
+
+		// Owner permissions
+		if ((mode & 0400) != 0) permissions.add(PosixFilePermission.OWNER_READ);
+		if ((mode & 0200) != 0) permissions.add(PosixFilePermission.OWNER_WRITE);
+		if ((mode & 0100) != 0) permissions.add(PosixFilePermission.OWNER_EXECUTE);
+
+		// Group permissions
+		if ((mode & 040) != 0) permissions.add(PosixFilePermission.GROUP_READ);
+		if ((mode & 020) != 0) permissions.add(PosixFilePermission.GROUP_WRITE);
+		if ((mode & 010) != 0) permissions.add(PosixFilePermission.GROUP_EXECUTE);
+
+		// Others permissions
+		if ((mode & 04) != 0) permissions.add(PosixFilePermission.OTHERS_READ);
+		if ((mode & 02) != 0) permissions.add(PosixFilePermission.OTHERS_WRITE);
+		if ((mode & 01) != 0) permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+
+		return permissions;
+	}
+
+	/**
+	 * Store file permissions in a ZIP entry's extra field.
+	 * This allows permissions to be preserved when the ZIP is extracted.
+	 * Uses custom extra field format with header ID 0x504D ("PM" for Permission Mode).
+	 * Format: Header ID (2 bytes) + Data Size (2 bytes) + Unix Mode (4 bytes)
+	 * @param filePath the source file path
+	 * @param zipEntry the ZIP entry to store permissions in
+	 */
+	private void storeFilePermissionsInZipEntry(Path filePath, ZipEntry zipEntry) {
+		try {
+			int unixMode = 0;
+
+			// Check if the file system supports POSIX permissions
+			if (Files.getFileStore(filePath).supportsFileAttributeView("posix")) {
+				Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(filePath);
+				unixMode = unixModeFromPermissions(permissions);
+
+				if (RunTimeProperties.instance.isVerbose()) {
+					rdProUI.println(LogLevel.debug, "\tStoring permissions in ZIP for " + filePath.getFileName() + ": " + PosixFilePermissions.toString(permissions) + " (0" + Integer.toOctalString(unixMode) + ")");
+				}
+			} else {
+				// Fallback for non-POSIX systems (Windows)
+				File file = filePath.toFile();
+				unixMode = 0644; // default readable/writable
+
+				if (file.canExecute()) {
+					unixMode = 0755; // executable
+				}
+			}
+
+			// Create extra field data with custom header 0x504D ("PM")
+			byte[] permExtraData = new byte[8]; // 2 (header) + 2 (size) + 4 (mode)
+			permExtraData[0] = 0x4D; // 'M' (little-endian: 0x504D)
+			permExtraData[1] = 0x50; // 'P'
+			permExtraData[2] = 0x04; // data size = 4 bytes (low byte)
+			permExtraData[3] = 0x00; // data size = 4 bytes (high byte)
+			// Store unix mode as 4 bytes in little-endian
+			permExtraData[4] = (byte) (unixMode & 0xFF);
+			permExtraData[5] = (byte) ((unixMode >> 8) & 0xFF);
+			permExtraData[6] = (byte) ((unixMode >> 16) & 0xFF);
+			permExtraData[7] = (byte) ((unixMode >> 24) & 0xFF);
+
+			// Append to existing extra field if present
+			byte[] existingExtra = zipEntry.getExtra();
+			if (existingExtra != null && existingExtra.length > 0) {
+				byte[] combinedExtra = new byte[existingExtra.length + permExtraData.length];
+				System.arraycopy(existingExtra, 0, combinedExtra, 0, existingExtra.length);
+				System.arraycopy(permExtraData, 0, combinedExtra, existingExtra.length, permExtraData.length);
+				zipEntry.setExtra(combinedExtra);
+			} else {
+				zipEntry.setExtra(permExtraData);
+			}
+
+		} catch (Exception e) {
+			rdProUI.printError( "Failed to store permissions in ZIP entry for " + filePath.getFileName() + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Convert Java PosixFilePermission set to Unix permission mode (octal).
+	 * @param permissions Set of PosixFilePermission
+	 * @return Unix permission mode (e.g., 0755, 0644)
+	 */
+	private int unixModeFromPermissions(Set<PosixFilePermission> permissions) {
+		int mode = 0;
+
+		// Owner permissions
+		if (permissions.contains(PosixFilePermission.OWNER_READ)) mode |= 0400;
+		if (permissions.contains(PosixFilePermission.OWNER_WRITE)) mode |= 0200;
+		if (permissions.contains(PosixFilePermission.OWNER_EXECUTE)) mode |= 0100;
+
+		// Group permissions
+		if (permissions.contains(PosixFilePermission.GROUP_READ)) mode |= 040;
+		if (permissions.contains(PosixFilePermission.GROUP_WRITE)) mode |= 020;
+		if (permissions.contains(PosixFilePermission.GROUP_EXECUTE)) mode |= 010;
+
+		// Others permissions
+		if (permissions.contains(PosixFilePermission.OTHERS_READ)) mode |= 04;
+		if (permissions.contains(PosixFilePermission.OTHERS_WRITE)) mode |= 02;
+		if (permissions.contains(PosixFilePermission.OTHERS_EXECUTE)) mode |= 01;
+
+		return mode;
+	}
+
+	/**
+	 * Store all three file times (modified, access, creation) in ZIP entry extra field.
+	 * Uses proper ZIP extra field format with custom tag ID.
+	 * Format: Header ID (2 bytes) + Data Size (2 bytes) + Data (24 bytes: 3 longs)
+	 *
+	 * @param filePath the source file path
+	 * @param zipEntry the ZIP entry to store times in
+	 */
+	private void storeAllFileTimesInZipEntry(Path filePath, ZipEntry zipEntry) {
+		try {
+			// Read all three times from source file
+			BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
+
+			long modifiedMillis = attrs.lastModifiedTime().toMillis();
+			long accessMillis = attrs.lastAccessTime().toMillis();
+			long creationMillis = attrs.creationTime().toMillis();
+
+			// Create our custom extra field data
+			// Format: Header ID (0x5449 = "TI") + Size (24) + Modified (8) + Access (8) + Creation (8)
+			byte[] ourExtraData = new byte[28]; // 2 + 2 + 8 + 8 + 8
+
+			// Header ID: 0x5449 ("TI" for Time Info) - custom tag
+			ourExtraData[0] = 0x49;
+			ourExtraData[1] = 0x54;
+
+			// Data size: 24 bytes (3 longs)
+			ourExtraData[2] = 24;
+			ourExtraData[3] = 0;
+
+			// Modified time (8 bytes)
+			writeLong(ourExtraData, 4, modifiedMillis);
+
+			// Access time (8 bytes)
+			writeLong(ourExtraData, 12, accessMillis);
+
+			// Creation time (8 bytes)
+			writeLong(ourExtraData, 20, creationMillis);
+
+			// Get existing extra field (may contain extended timestamp, etc.)
+			byte[] existingExtra = zipEntry.getExtra();
+
+			if (existingExtra != null && existingExtra.length > 0) {
+				// Append our data to existing extra field
+				byte[] combinedExtra = new byte[existingExtra.length + ourExtraData.length];
+				System.arraycopy(existingExtra, 0, combinedExtra, 0, existingExtra.length);
+				System.arraycopy(ourExtraData, 0, combinedExtra, existingExtra.length, ourExtraData.length);
+				zipEntry.setExtra(combinedExtra);
+			} else {
+				// No existing extra field, use ours
+				zipEntry.setExtra(ourExtraData);
+			}
+
+			if (RunTimeProperties.instance.isDebug()) {
+				rdProUI.println(LogLevel.debug, "\tStored all file times in ZIP for " + filePath.getFileName());
+		}
+	} catch (Exception e) {
+		rdProUI.printError("\tFailed to store file times in ZIP entry for " + filePath.getFileName() + ": " + e.getMessage());
+	}
+}
+
+	/**
+	 * Helper method to write a long value to a byte array in little-endian format.
+	 */
+	private void writeLong(byte[] buffer, int offset, long value) {
+		buffer[offset] = (byte) (value & 0xFF);
+		buffer[offset + 1] = (byte) ((value >> 8) & 0xFF);
+		buffer[offset + 2] = (byte) ((value >> 16) & 0xFF);
+		buffer[offset + 3] = (byte) ((value >> 24) & 0xFF);
+		buffer[offset + 4] = (byte) ((value >> 32) & 0xFF);
+		buffer[offset + 5] = (byte) ((value >> 40) & 0xFF);
+		buffer[offset + 6] = (byte) ((value >> 48) & 0xFF);
+		buffer[offset + 7] = (byte) ((value >> 56) & 0xFF);
+	}
+
+	/**
+	 * Helper method to read a long value from a byte array in little-endian format.
+	 */
+	private long readLong(byte[] buffer, int offset) {
+		return (buffer[offset] & 0xFFL)
+			| ((buffer[offset + 1] & 0xFFL) << 8)
+			| ((buffer[offset + 2] & 0xFFL) << 16)
+			| ((buffer[offset + 3] & 0xFFL) << 24)
+			| ((buffer[offset + 4] & 0xFFL) << 32)
+			| ((buffer[offset + 5] & 0xFFL) << 40)
+			| ((buffer[offset + 6] & 0xFFL) << 48)
+			| ((buffer[offset + 7] & 0xFFL) << 56);
+	}
+
+	/**
+	 * Restore all three file times from ZIP entry extra field.
+	 * Reads the custom format stored by storeAllFileTimesInZipEntry.
+	 * Falls back to using only lastModifiedTime if extra data not found.
+	 *
+	 * @param zipEntry the ZIP entry containing time data
+	 * @param targetFile the extracted file to apply times to
+	 */
+	private void restoreAllFileTimesFromZipEntry(ZipEntry zipEntry, File targetFile) {
+		try {
+			byte[] extraData = zipEntry.getExtra();
+
+			if (extraData != null && extraData.length >= 28) {
+				// Search for our custom header ID (0x5449 = "TI") in the extra field
+				// Extra field can contain multiple blocks with different header IDs
+				int offset = 0;
+				while (offset + 28 <= extraData.length) {
+					int headerId = (extraData[offset] & 0xFF) | ((extraData[offset + 1] & 0xFF) << 8);
+					int dataSize = (extraData[offset + 2] & 0xFF) | ((extraData[offset + 3] & 0xFF) << 8);
+
+					// Check if this is our custom time info block (0x5449)
+					if (headerId == 0x5449 && dataSize == 24) {
+						// Read the three timestamps
+						long modifiedMillis = readLong(extraData, offset + 4);
+						long accessMillis = readLong(extraData, offset + 12);
+						long creationMillis = readLong(extraData, offset + 20);
+
+						// Apply all three times
+						Path targetPath = targetFile.toPath();
+						BasicFileAttributeView targetAttrs = Files.getFileAttributeView(targetPath, BasicFileAttributeView.class);
+
+						targetAttrs.setTimes(
+							FileTime.fromMillis(modifiedMillis),
+							FileTime.fromMillis(accessMillis),
+							FileTime.fromMillis(creationMillis)
+						);
+
+						if (RunTimeProperties.instance.isDebug()) {
+							rdProUI.print(LogLevel.debug, "\tRestored all three file times for " + targetFile.getName());
+						}
+						return; // Success!
+					}
+
+					// Move to next block (header + size + data)
+					offset += 4 + dataSize;
+				}
+			}
+
+			// Fallback: Use only the standard ZIP lastModifiedTime
+			setFileLastModified(targetFile.getAbsolutePath(), zipEntry.getTime());
+
+	} catch (Exception e) {
+		// If anything fails, fall back to basic timestamp
+		rdProUI.printError("\tFailed to restore all file times for " + targetFile.getName() + ", using modified time only: " + e.getMessage());
+		setFileLastModified(targetFile.getAbsolutePath(), zipEntry.getTime());
+	}
 	}
 
 	public void deleteFile(String file, final UI rdProUI) {
@@ -644,9 +1058,16 @@ public class FileUtils {
 
 					compressedPackageVO.incrementFileCount(1);
 
-					Path targetFile = sourcePath.relativize(file);
-					ZipEntry ze = new ZipEntry(targetFile.toString());
-					ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
+				Path targetFile = sourcePath.relativize(file);
+				ZipEntry ze = new ZipEntry(targetFile.toString());
+				ze.setLastModifiedTime(FileTime.fromMillis(file.toFile().lastModified()));
+
+				// Store all three file times in ZIP entry for complete preservation
+				storeAllFileTimesInZipEntry(file, ze);
+
+				// Store Unix file permissions in ZIP entry for later extraction
+				storeFilePermissionsInZipEntry(file, ze);
+
 					//note read whole file into memory. it is what we wanted for small size files.
 					byte[] bytes = Files.readAllBytes(file);
 					compressedPackageVO.zipFileSizeBytes = bytes.length;
@@ -681,72 +1102,78 @@ public class FileUtils {
 	 * @param destDir
 	 * @throws IOException
 	 */
-	protected void unzipFile(File file, File destDir, FileCopyStatistics statistics) throws NoSuchAlgorithmException, IOException {
+    protected void unzipFile(File file, File destDir, FileCopyStatistics statistics) throws NoSuchAlgorithmException, IOException {
 
-		long filesCount = 0;
-		byte[] buffer = new byte[4096];
-		//zip input stream does not read zip entry comments. use ZipFile.
-		//ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
-		ZipFile zipFile = new ZipFile(file);
+        long filesCount = 0;
+        byte[] buffer = new byte[4096];
+        //zip input stream does not read zip entry comments. use ZipFile.
+        //ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+        ZipFile zipFile = new ZipFile(file);
 
-		try {
-			Enumeration<? extends ZipEntry> entries = zipFile.entries();
-			while (entries.hasMoreElements()) {
-				ZipEntry zipEntry = entries.nextElement();
+        try {
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry zipEntry = entries.nextElement();
 
-				File destFile = new File(destDir, zipEntry.getName());
+                File destFile = new File(destDir, zipEntry.getName());
 
-				// Create parent directories if they don't exist
-				File parentDir = destFile.getParentFile();
-				if (parentDir != null && !parentDir.exists()) {
-					parentDir.mkdirs();
-				}
+                // Create parent directories if they don't exist
+                File parentDir = destFile.getParentFile();
+                if (parentDir != null && !parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
 
-				// Skip directory entries (they end with /)
-				if (zipEntry.isDirectory()) {
-					destFile.mkdirs();
-					continue;
-				}
+                // Skip directory entries (they end with /)
+                if (zipEntry.isDirectory()) {
+                    destFile.mkdirs();
+                    continue;
+                }
 
-				// Only count actual files, not directories
-				filesCount++;
+                // Only count actual files, not directories
+                filesCount++;
 
-				FileOutputStream fos = new FileOutputStream(destFile);
-				InputStream inputStream = zipFile.getInputStream(zipEntry);
-				int len;
-				while ((len = inputStream.read(buffer)) > 0) {
-					fos.write(buffer, 0, len);
-				}
-				fos.close();
+                FileOutputStream fos = new FileOutputStream(destFile);
+                InputStream inputStream = zipFile.getInputStream(zipEntry);
+                int len;
+                while ((len = inputStream.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+			fos.close();
 
-				setFileLastModified(destFile.getAbsolutePath(), zipEntry.getTime());
+			// Restore file times and permissions from ZIP entry
+			if (RunTimeProperties.instance.isPreserveFileTimesAndAccessAttributes()) {
+				// Restore all three file times (modified, access, creation)
+				restoreAllFileTimesFromZipEntry(zipEntry, destFile);
 
-
-				//verify
-				if (RunTimeProperties.instance.isVerifyAfterCopy()) {
-					byte[] sourceHash = StrUtils.toByteArray(zipEntry.getComment());
-					byte[] targetHash = readFileContentHash(destFile, this.rdProUI);
-					if (!Arrays.equals(sourceHash, targetHash)) {
-						rdProUI.printError("\tVerify file failed:" + destFile.getAbsolutePath());
-						//delete it. 
-						destFile.delete();
-					} else {
-						rdProUI.println(LogLevel.debug, "\tVerified file:" + destFile.getAbsolutePath());
-					}
-				}
-
-
+				// Preserve file permissions (Unix attributes stored in external file attributes)
+				preserveZipEntryPermissions(zipEntry, destFile);
 			}
 
+			//verify
+                if (RunTimeProperties.instance.isVerifyAfterCopy()) {
+                    byte[] sourceHash = StrUtils.toByteArray(zipEntry.getComment());
+                    byte[] targetHash = readFileContentHash(destFile, this.rdProUI);
+                    if (!Arrays.equals(sourceHash, targetHash)) {
+                        rdProUI.printError("\tVerify file failed:" + destFile.getAbsolutePath());
+                        //delete it.
+                        destFile.delete();
+                    } else {
+                        rdProUI.println(LogLevel.debug, "\tVerified file:" + destFile.getAbsolutePath());
+                    }
+                }
 
-		} finally {
-			zipFile.close();
-		}
+
+            }
 
 
-		statistics.addFileCount(filesCount);
+        } finally {
+            zipFile.close();
+        }
 
-	}
+
+        statistics.addFileCount(filesCount);
+
+    }
 
 	/**
 	 * Split the file with full patch into three tokens. 1. dir, 2.filename, 3. extension
