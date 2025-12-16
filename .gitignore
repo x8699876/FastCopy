@@ -8,3 +8,8 @@ dist/Fastcopy(1.2.7).app/
 dist/Fastcopy(*).app/Contents/Info.plist
 Fastcopy(*).app
 mhisoft-fastcopy-v*-binaries.zip
+
+# IntelliJ IDEA project files (legacy format)
+*.ipr
+*.iws
+*.iml
