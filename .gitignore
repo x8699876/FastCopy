@@ -13,3 +13,9 @@ mhisoft-fastcopy-v*-binaries.zip
 *.iws
 *.iml
 ./idea
+/.idea/checkstyle-idea.xml
+/.idea/copilot.data.migration.agent.xml
+/.idea/copilot.data.migration.ask2agent.xml
+/.idea/copilot.data.migration.edit.xml
+/.idea/copilotDiffState.xml
+/.idea/jarRepositories.xml
