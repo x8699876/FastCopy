@@ -3,9 +3,14 @@
 
 <project name="Bundle the Java into Mac App" default="build" >
 
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="lib/ant/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
 
-    <property name="AppVersion" value="1.4"/>
+<!--    version number , also change in UI.java -->
+    <property name="AppVersion" value="1.4.1"/>
     <property name="repository.dir" value="~/repository"/>
 
     <!-- set the operating system test properties -->
@@ -38,10 +43,17 @@
         </sequential>
     </macrodef>
 
-    <target name="build" description="make the full build ">
-        <maven dir="." argline="clean" />
-        <maven dir="." argline="-P fastcopy-ui package"/>
-        <maven dir="." argline="-P fastcopy-console package"/>
+<!--    build calls package -->
+    <target name="build" description="make the full build, package the jars into dist/ folder">
+
+        <delete dir="dist" includes="*.jar, *.exe"/>
+<!--            even maven does not compile now. relies on the IDE to make the build. -->
+        <echo>Running tests once...</echo>
+        <maven dir="." argline="test"/>
+
+        <echo>Packaging JARs (skipping tests)...</echo>
+        <maven dir="." argline="-P fastcopy-ui package -DskipTests"/>
+        <maven dir="." argline="-P fastcopy-console package -DskipTests"/>
 
         <!--copy the jar to the dist folder -->
         <!--copy the jar to the dist folder -->
@@ -67,7 +79,23 @@
 
     </target>
 
-    <target name="release">
+
+    <target name="rebuild-ui-jar" description="Rebuild just the UI JAR without clean - validates IntelliJ compilation first">
+        <echo>========================================</echo>
+        <echo>Validating IntelliJ compilation...</echo>
+        <echo>========================================</echo>
+        <maven dir="." argline="-P fastcopy-ui validate"/>
+        <echo>========================================</echo>
+        <echo>Validation passed! Packaging JAR...</echo>
+        <echo>========================================</echo>
+        <maven dir="." argline="-P fastcopy-ui package -DskipTests"/>
+        <copy file="target/fastcopy-ui.jar" todir="dist" overwrite="true"/>
+        <echo>========================================</echo>
+        <echo>✓ fastcopy-ui.jar built and copied to dist/</echo>
+        <echo>========================================</echo>
+    </target>
+
+    <target name="release" description="make the release zip ">
 
         <delete dir="dist" includes="*.jar, *.exe"/>
 
@@ -98,8 +126,64 @@
                    identifier="${AppMainClass}"
                    mainclassname="${AppMainClass}">
             <classpath dir="dist" includes="fastcopy-ui.jar,lib/*.jar"/>
-
+            <option value="-Xmx512m"/>
         </bundleapp>
+
+        <!-- Create custom launcher script to fix Java runtime loading issues -->
+        <property name="app.macos.dir" value="dist/Fastcopy(${AppVersion}).app/Contents/MacOS"/>
+        <echo file="${app.macos.dir}/FastCopy">#!/bin/bash
+
+# FastCopy Mac App Launcher
+
+# Get the directory where this script is located (MacOS directory)
+SCRIPT_DIR="$(cd "$(dirname "$0")" &amp;&amp; pwd)"
+# Go up one level to Contents directory
+CONTENTS_DIR="$(cd "$SCRIPT_DIR/.." &amp;&amp; pwd)"
+JAVA_DIR="$CONTENTS_DIR/Java"
+
+# Find Java
+if [ -n "$JAVA_HOME" ]; then
+    JAVA="$JAVA_HOME/bin/java"
+elif [ -x /usr/libexec/java_home ]; then
+    JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null)
+    if [ -n "$JAVA_HOME" ]; then
+        JAVA="$JAVA_HOME/bin/java"
+    fi
+fi
+
+# Fallback to system java
+if [ -z "$JAVA" ] || [ ! -x "$JAVA" ]; then
+    JAVA=$(which java 2>/dev/null)
+fi
+
+# Check if Java was found
+if [ -z "$JAVA" ] || [ ! -x "$JAVA" ]; then
+    osascript -e 'display dialog "Java is not installed. Please install Java 8 or later." buttons {"OK"} default button "OK" with icon stop with title "FastCopy"'
+    exit 1
+fi
+
+# Build classpath from all JARs in the Java directory
+CLASSPATH=""
+for jar in "$JAVA_DIR"/*.jar; do
+    if [ -f "$jar" ]; then
+        if [ -z "$CLASSPATH" ]; then
+            CLASSPATH="$jar"
+        else
+            CLASSPATH="$CLASSPATH:$jar"
+        fi
+    fi
+done
+
+# Launch the application
+cd "$JAVA_DIR"
+exec "$JAVA" -Xmx512m -Xdock:name="FastCopy" -Xdock:icon="$CONTENTS_DIR/Resources/GenericApp.icns" -cp "$CLASSPATH" org.mhisoft.fc.ui.FastCopyMainForm "$@"
+</echo>
+        <chmod file="${app.macos.dir}/FastCopy" perm="755"/>
+
+        <!-- Update Info.plist to use the custom launcher -->
+        <replace file="dist/Fastcopy(${AppVersion}).app/Contents/Info.plist"
+                 token="&lt;string&gt;JavaAppLauncher&lt;/string&gt;"
+                 value="&lt;string&gt;FastCopy&lt;/string&gt;"/>
     </target>
 
 

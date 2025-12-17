@@ -201,7 +201,81 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+                <!-- Skip compilation - IntelliJ IDEA handles all compilation -->
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
 
+            <!-- Validate that IntelliJ has compiled the classes before packaging -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>validate-compilation</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo message="===================================="/>
+                                <echo message="Validating IntelliJ compilation..."/>
+                                <echo message="===================================="/>
+
+                                <!-- Check if classes directory exists -->
+                                <fail message="ERROR: ${project.build.outputDirectory} does not exist! Please build the project in IntelliJ IDEA first (Build -> Build Project).">
+                                    <condition>
+                                        <not>
+                                            <available file="${project.build.outputDirectory}" type="dir"/>
+                                        </not>
+                                    </condition>
+                                </fail>
+
+                                <!-- Check if FastCopyMainForm.class exists -->
+                                <fail message="ERROR: FastCopyMainForm.class not found! Please build the project in IntelliJ IDEA first.">
+                                    <condition>
+                                        <not>
+                                            <available file="${project.build.outputDirectory}/org/mhisoft/fc/ui/FastCopyMainForm.class"/>
+                                        </not>
+                                    </condition>
+                                </fail>
+
+                                <echo message="✓ Classes directory exists: ${project.build.outputDirectory}"/>
+                                <echo message="✓ FastCopyMainForm.class found"/>
+
+                                <!-- Use javap to check if GUI initialization methods exist -->
+                                <exec executable="javap" outputproperty="javap.output" failonerror="false">
+                                    <arg value="-private"/>
+                                    <arg value="-classpath"/>
+                                    <arg value="${project.build.outputDirectory}"/>
+                                    <arg value="org.mhisoft.fc.ui.FastCopyMainForm"/>
+                                </exec>
+
+                                <!-- Check if $$$setupUI$$$ method exists (IntelliJ form initialization) -->
+                                <condition property="forms.compiled">
+                                    <contains string="${javap.output}" substring="$$$setupUI$$$"/>
+                                </condition>
+
+                                <fail message="ERROR: IntelliJ GUI forms not compiled! The $$$setupUI$$$ method is missing. Please ensure IntelliJ's GUI Designer is enabled and rebuild the project." unless="forms.compiled"/>
+
+                                <echo message="✓ IntelliJ GUI forms are properly compiled ($$$setupUI$$$ method found)"/>
+                                <echo message="===================================="/>
+                                <echo message="Validation passed! Ready to package."/>
+                                <echo message="===================================="/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
 
@@ -297,7 +371,6 @@
                             <debug>true</debug>
                             <failOnError>false</failOnError>
                             <verbose>true</verbose>
-                            <skip>true</skip>
                         </configuration>
 
                         <dependencies>
