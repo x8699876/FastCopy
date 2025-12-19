@@ -109,7 +109,7 @@ public class FileUtils {
 
 		if (RunTimeProperties.instance.isVerbose()) {
 			if (source.length() < 4096)
-				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (bytes), took %s. %s"
+				rdProUI.println(String.format("Copied file %s-->%s, size:%s (bytes), took %s. %s"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length())
 						, StrUtils.getDisplayTime(vo.took)
@@ -118,7 +118,7 @@ public class FileUtils {
 						)
 				);
 			else
-				rdProUI.println(String.format("\tCopied file %s-->%s, size:%s (Kb), took %s. %s"
+				rdProUI.println(String.format("Copied file %s-->%s, size:%s (Kb), took %s. %s"
 						, source.getAbsolutePath(), target.getAbsolutePath()
 						, df.format(source.length() / 1024)
 						, StrUtils.getDisplayTime(vo.took)
@@ -395,7 +395,7 @@ public class FileUtils {
 				Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(filePath);
 				unixMode = unixModeFromPermissions(permissions);
 
-				if (RunTimeProperties.instance.isVerbose()) {
+				if (RunTimeProperties.instance.isDebug()) {
 					rdProUI.println(LogLevel.debug, "\tStoring permissions in ZIP for " + filePath.getFileName() + ": " + PosixFilePermissions.toString(permissions) + " (0" + Integer.toOctalString(unixMode) + ")");
 				}
 			} else {

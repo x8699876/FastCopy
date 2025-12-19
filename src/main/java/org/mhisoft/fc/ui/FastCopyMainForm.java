@@ -19,6 +19,7 @@
  */
 package org.mhisoft.fc.ui;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -98,8 +99,12 @@ public class FastCopyMainForm {
 	private JCheckBox ckPackageSmallFiles;
 	private JCheckBox ckKeepOriginalFileTimestamp;
 	private JLabel labelWallClock;
+    private JPanel panel1;
+    private JPanel panel2;
+    private JPanel btnStartClosePanel;
+    private JPanel padPanel;
 
-	GraphicsUIImpl uiImpl;
+    GraphicsUIImpl uiImpl;
 	DoItJobThread doItJobThread;
 
 	File lastSrourceFileLocation =null;
@@ -191,12 +196,27 @@ public class FastCopyMainForm {
 
 
 	public void init() {
+        // Set progress bar UIManager properties FIRST, before creating components
+        Color greenColor = new Color(34, 177, 76);
+        javax.swing.UIManager.put("ProgressBar.foreground", greenColor);
+        javax.swing.UIManager.put("ProgressBar.selectionForeground", Color.WHITE);
+        javax.swing.UIManager.put("ProgressBar.selectionBackground", Color.BLACK);
+
         frame = new JFrame("MHISoft FastCopy " + UI.version);
         frame.setContentPane(layoutPanel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //progressBar1.setVisible(false);
         progressBar1.setMaximum(100);
         progressBar1.setMinimum(0);
+        progressBar1.setPreferredSize(new Dimension(800, 42));
+        progressBar1.setMinimumSize(new Dimension(200, 42));
+
+        // Set progress bar colors - apply after UIManager settings
+        progressBar1.setForeground(greenColor);
+        progressBar1.setBackground(Color.LIGHT_GRAY);
+        progressBar1.setBorderPainted(true);
+        progressBar1.setStringPainted(true); // Show percentage text
+
 
         progressPanel.setVisible(false);
         //frame.setPreferredSize(new Dimension(1200, 800));
