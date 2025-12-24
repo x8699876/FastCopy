@@ -1,11 +1,16 @@
 ## FastCopy
 
-* A very handy tool for copying or backup a large set of directories and files, recursively, i.e. all the sub directories under will be copied over to the target. Support all the hidden and system files, long file names, file names of all languages. 
-* Fast! Use multiple workers to copy from/to the SSD drives. 
-* Support mounted external drives on Mac.
-* A Drive speed tester/Benchmark tool.  
-The fastcopy reports real life file copying speed for various file size groups. You will notice the transfering speed of large files and smaller files are quite different. Used in combination with the synthetic drive benchmark tools such as the CrystalDiskMark and Anvil's Storage Utilities, you'll have a better picture of your system's performance. 
-* Cross platform support: Windows, MacOS, Unix/Linux where JRE is supported. 
+A very handy tool for copying or backing up large sets of directories and files recursively—that is, all subdirectories are copied to the target. It supports hidden and system files, long file names, and file names in all languages.
+
+**Fast performance**: Uses multiple workers to copy data to and from SSD drives efficiently.
+
+**External drive support**: Works with mounted external drives on macOS.
+
+**Drive speed tester / benchmark tool**:  
+FastCopy reports real-world file transfer speeds across different file size groups. You’ll notice that transfer speeds for large files and small files can differ significantly. When used together with synthetic benchmark tools such as CrystalDiskMark and Anvil’s Storage Utilities, it provides a more complete picture of your system’s storage performance.
+
+**Cross-platform support**: Available on Windows, macOS, and Unix/Linux systems where a JRE is supported.
+
 
 
 ## Download
@@ -66,12 +71,24 @@ Examples:
 ![Screenshot](/doc/fastcopy-v1.2.6-screenshot-2018-11-19_23-31-58.png "screenshot")
 
 
-* The source can be a combination of multiple directories and files delimited by the semicolon ";". You can either use the browse button to choose directories or copy paste directly into the input box. The file choose supports multiple directories selections.
-* The target should always be one directory or drive. 
-* Check the muti workers for SSD drives for copying files simuteneously.  Usually it should speed things up if there no other bottlenecks on such as the network or cable, ports.  * The "override only if newer or a size difference is detected" is handy to when you need to stop and resume a copy task. say you stop a copying task in the middle , when you resume it by running again , it will skip the already copied files on the target directory and copies only the not yet copied over files. 
-* "Create the same source folder..." option, for example: 
-source is "/Users/myhome/Repository", target is "/Volumes/externaldrive/backup", with this option checked, a "Repository" diorectory will be created under /Volumes/externaldrive/backup and the contents under the source will be copied to /Volumes/externaldrive/backup/Repository
-* Package the small files first -- will sppeed up the overal copying if you plan to copy lots of small files in some directories. Those small filess files will be zipped up first and copied over to the target as one package. This will greatly help copying large amount small files over the network , or to external attached USB drives, because copying small files one by one to such external devies are the slowest no matter what software you use. 
+- **Source**: The source can be a combination of multiple directories and files, delimited by a semicolon (`;`). You can use the **Browse** button to select directories, or copy and paste paths directly into the input box. The file chooser supports selecting multiple directories.
+
+- **Target**: The target must always be a single directory or drive.
+
+- **Multi-workers**: Enable multiple workers for SSD drives to copy files simultaneously. This usually improves performance, as long as there are no other bottlenecks such as network speed, cables, or port limitations.
+
+- **“Override only if newer or size differs”**: This option is useful when you need to stop and resume a copy task. For example, if a copy operation is interrupted and later resumed, files that were already copied will be skipped, and only files that are new or incomplete will be copied to the target directory.
+
+- **“Create the same source folder…” option**:  
+  **Example:**  
+  - Source: `/Users/myhome/Repository`  
+  - Target: `/Volumes/externaldrive/backup`  
+
+  When this option is enabled, a `Repository` directory will be created under `/Volumes/externaldrive/backup`, and the source contents will be copied to:  
+  `/Volumes/externaldrive/backup/Repository`
+
+- **Package small files first**: This option speeds up the overall copy process when copying a large number of small files. Small files are zipped together first and then copied as a single package. This greatly improves performance when copying over a network or to externally attached USB drives, where copying many small files one by one is typically very slow regardless of the software used.
+
 
 
 ## Hook to the Windows Explorer Context menu
