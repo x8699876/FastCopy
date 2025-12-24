@@ -95,3 +95,9 @@ mvn clean package                      # Build the project
 ```
 
 The Maven build now works correctly!
+
+## so to build the project
+1. build in intelliJ first, with the forms built
+2. mvn packge
+3. run ant to package the jars, ext and mac app. result is under /dist\
+   
