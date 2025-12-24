@@ -25,17 +25,20 @@ package org.mhisoft.fc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 import org.mhisoft.fc.ui.ConsoleRdProUIImpl;
 import org.mhisoft.fc.utils.StrUtils;
 
@@ -51,6 +54,9 @@ public class FileUtilsTest {
 
     private File testFile;
     private ConsoleRdProUIImpl ui;
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws Exception {
@@ -775,21 +781,28 @@ public class FileUtilsTest {
             Files.deleteIfExists(tempTargetFile);
         }
     }
-
     @Test
     public void testPreserveFilePermissions_ReadOnly() throws IOException {
         Path tempSourceFile = Files.createTempFile("source_readonly", ".txt");
         Path tempTargetFile = Files.createTempFile("target_readonly", ".txt");
+        boolean isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
 
         try {
             // Write content to source file
             Files.write(tempSourceFile, "Read-only content".getBytes());
 
-            // Set source file as read-only (r--r--r-- = 444)
-            File sourceFile = tempSourceFile.toFile();
-            sourceFile.setReadable(true, false);
-            sourceFile.setWritable(false, false);
-            sourceFile.setExecutable(false, false);
+            // Set source file as read-only
+            if (isPosix) {
+                // Use POSIX permissions for Unix-like systems (r--r--r-- = 444)
+                Set<PosixFilePermission> readOnlyPerms = PosixFilePermissions.fromString("r--r--r--");
+                Files.setPosixFilePermissions(tempSourceFile, readOnlyPerms);
+            } else {
+                // Use basic permissions for non-POSIX systems (Windows)
+                File sourceFile = tempSourceFile.toFile();
+                sourceFile.setReadable(true, false);
+                sourceFile.setWritable(false, false);
+                // Don't set executable on Windows - it's unreliable
+            }
 
             // Setup FileUtils
             FileUtils fileUtils = new FileUtils();
@@ -803,17 +816,53 @@ public class FileUtilsTest {
 
             // Verify target file is read-only
             File targetFile = tempTargetFile.toFile();
-            assertTrue("Target file should be readable", targetFile.canRead());
-            assertFalse("Target file should not be writable", targetFile.canWrite());
+
+            if (isPosix) {
+                // Verify using POSIX permissions - can check all three attributes
+                Set<PosixFilePermission> targetPerms = Files.getPosixFilePermissions(tempTargetFile);
+                assertTrue("Target file should be readable",
+                        targetPerms.contains(PosixFilePermission.OWNER_READ));
+                assertFalse("Target file should not be writable",
+                        targetPerms.contains(PosixFilePermission.OWNER_WRITE));
+                assertFalse("Target file should not be executable",
+                        targetPerms.contains(PosixFilePermission.OWNER_EXECUTE));
+            } else {
+                // Verify using basic file permissions - only check readable/writable on Windows
+                // Note: canExecute() is unreliable on Windows, so we skip that check
+                assertTrue("Target file should be readable", targetFile.canRead());
+                assertFalse("Target file should not be writable", targetFile.canWrite());
+                // Skip executable check on Windows - it doesn't work reliably
+            }
 
             System.out.println("✓ Read-only permissions preserved successfully");
 
-            // Clean up: Make writable again before deletion
-            targetFile.setWritable(true);
-
         } finally {
-            Files.deleteIfExists(tempSourceFile);
-            Files.deleteIfExists(tempTargetFile);
+            // Clean up: Make writable again before deletion
+            if (isPosix) {
+                try {
+                    Set<PosixFilePermission> writablePerms = PosixFilePermissions.fromString("rw-r--r--");
+                    Files.setPosixFilePermissions(tempSourceFile, writablePerms);
+                    Files.setPosixFilePermissions(tempTargetFile, writablePerms);
+                } catch (IOException e) {
+                    // Ignore if already deleted or inaccessible
+                }
+            } else {
+                tempSourceFile.toFile().setWritable(true);
+                tempTargetFile.toFile().setWritable(true);
+            }
+
+            // Now delete
+            try {
+                Files.deleteIfExists(tempSourceFile);
+            } catch (IOException e) {
+                // Ignore cleanup errors
+            }
+
+            try {
+                Files.deleteIfExists(tempTargetFile);
+            } catch (IOException e) {
+                // Ignore cleanup errors
+            }
         }
     }
 
@@ -821,16 +870,24 @@ public class FileUtilsTest {
     public void testPreserveFilePermissions_RegularFile() throws IOException {
         Path tempSourceFile = Files.createTempFile("source_regular", ".txt");
         Path tempTargetFile = Files.createTempFile("target_regular", ".txt");
+        boolean isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
 
         try {
             // Write content to source file
             Files.write(tempSourceFile, "Regular file content".getBytes());
 
             // Set source file with typical permissions (rw-r--r-- = 644)
-            File sourceFile = tempSourceFile.toFile();
-            sourceFile.setReadable(true, false);
-            sourceFile.setWritable(true, true);
-            sourceFile.setExecutable(false, false);
+            if (isPosix) {
+                // Use POSIX permissions for Unix-like systems
+                Set<PosixFilePermission> regularPerms = PosixFilePermissions.fromString("rw-r--r--");
+                Files.setPosixFilePermissions(tempSourceFile, regularPerms);
+            } else {
+                // Use basic permissions for non-POSIX systems (Windows)
+                File sourceFile = tempSourceFile.toFile();
+                sourceFile.setReadable(true, false);
+                sourceFile.setWritable(true, true);
+            }
 
             // Setup FileUtils
             FileUtils fileUtils = new FileUtils();
@@ -844,15 +901,39 @@ public class FileUtilsTest {
 
             // Verify target file has correct permissions
             File targetFile = tempTargetFile.toFile();
-            assertTrue("Target file should be readable", targetFile.canRead());
-            assertTrue("Target file should be writable", targetFile.canWrite());
-            assertFalse("Target file should not be executable", targetFile.canExecute());
+
+            if (isPosix && !isWindows) {
+                // Verify using POSIX permissions (Unix/Linux/macOS)
+                Set<PosixFilePermission> targetPerms = Files.getPosixFilePermissions(tempTargetFile);
+                assertTrue("Target file should be readable",
+                        targetPerms.contains(PosixFilePermission.OWNER_READ));
+                assertTrue("Target file should be writable",
+                        targetPerms.contains(PosixFilePermission.OWNER_WRITE));
+                assertFalse("Target file should not be executable",
+                        targetPerms.contains(PosixFilePermission.OWNER_EXECUTE));
+            } else {
+                // Verify using basic file permissions (Windows or non-POSIX)
+                // Only check readable and writable - executable is unreliable on Windows
+                assertTrue("Target file should be readable", targetFile.canRead());
+                assertTrue("Target file should be writable", targetFile.canWrite());
+                System.out.println("Skipping executable check on Windows (unreliable)");
+            }
 
             System.out.println("✓ Regular file permissions preserved successfully");
 
         } finally {
-            Files.deleteIfExists(tempSourceFile);
-            Files.deleteIfExists(tempTargetFile);
+            // Clean up
+            try {
+                Files.deleteIfExists(tempSourceFile);
+            } catch (IOException e) {
+                // Ignore cleanup errors
+            }
+
+            try {
+                Files.deleteIfExists(tempTargetFile);
+            } catch (IOException e) {
+                // Ignore cleanup errors
+            }
         }
     }
 
@@ -963,57 +1044,63 @@ public class FileUtilsTest {
 
     @Test
     public void testPreserveFilePermissions_MultipleFiles() throws IOException {
-        // Test preserving permissions for multiple files with different permissions
-        Path[] sourceFiles = new Path[3];
-        Path[] targetFiles = new Path[3];
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
+
+        File[] sourceFiles = new File[3];
+        File[] targetFiles = new File[3];
 
         try {
-            // Create test files with different permissions
-            sourceFiles[0] = Files.createTempFile("source_exec", ".sh");
-            sourceFiles[1] = Files.createTempFile("source_readonly", ".txt");
-            sourceFiles[2] = Files.createTempFile("source_regular", ".txt");
+            // Create test files
+            sourceFiles[0] = tempFolder.newFile("source_exec.sh");
+            sourceFiles[1] = tempFolder.newFile("source_readonly.txt");
+            sourceFiles[2] = tempFolder.newFile("source_regular.txt");
 
-            targetFiles[0] = Files.createTempFile("target_exec", ".sh");
-            targetFiles[1] = Files.createTempFile("target_readonly", ".txt");
-            targetFiles[2] = Files.createTempFile("target_regular", ".txt");
+            targetFiles[0] = tempFolder.newFile("target_exec.sh");
+            targetFiles[1] = tempFolder.newFile("target_readonly.txt");
+            targetFiles[2] = tempFolder.newFile("target_regular.txt");
 
-            // Set different permissions
-            sourceFiles[0].toFile().setExecutable(true, false);
-            sourceFiles[1].toFile().setWritable(false, false);
-            sourceFiles[2].toFile().setWritable(true, true);
+            // Set permissions (adjusted for Windows)
+            if (!isWindows) {
+                sourceFiles[0].setExecutable(true, false);
+            }
+            sourceFiles[1].setWritable(false);
+            sourceFiles[2].setWritable(true);
 
-            // Setup FileUtils
             FileUtils fileUtils = new FileUtils();
             fileUtils.setRdProUI(ui);
 
-            // Preserve permissions for all files
+            // Preserve permissions
             for (int i = 0; i < 3; i++) {
                 fileUtils.preserveFilePermissions(
-                        sourceFiles[i].toString(),
-                        targetFiles[i].toString()
+                        sourceFiles[i].getAbsolutePath(),
+                        targetFiles[i].getAbsolutePath()
                 );
             }
 
-            // Verify
-            assertTrue("Target 0 should be executable", targetFiles[0].toFile().canExecute());
-            assertFalse("Target 1 should not be writable", targetFiles[1].toFile().canWrite());
-            assertTrue("Target 2 should be writable", targetFiles[2].toFile().canWrite());
+            // Verify (skip executable check on Windows)
+            if (!isWindows) {
+                assertTrue("Target should be executable", targetFiles[0].canExecute());
+            }
+            assertFalse("Target should not be writable", targetFiles[1].canWrite());
+            assertTrue("Target should be writable", targetFiles[2].canWrite());
 
-            System.out.println("✓ Multiple files' permissions preserved successfully");
+            System.out.println("✓ Permissions preserved successfully");
 
         } finally {
             // Clean up
             for (int i = 0; i < 3; i++) {
-                if (sourceFiles[i] != null) Files.deleteIfExists(sourceFiles[i]);
-                if (targetFiles[i] != null) {
-                    // Make writable before deletion
-                    targetFiles[i].toFile().setWritable(true);
-                    Files.deleteIfExists(targetFiles[i]);
-                }
+                cleanupFile(sourceFiles[i]);
+                cleanupFile(targetFiles[i]);
             }
         }
     }
 
+    private void cleanupFile(File file) throws IOException {
+        if (file != null && file.exists()) {
+            file.setWritable(true);
+            Files.deleteIfExists(file.toPath());
+        }
+    }
     /**
      * Helper method to recursively delete a directory
      */

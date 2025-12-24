@@ -34,7 +34,7 @@
             <echo message="******************************************************************************************  @{dir} @{argline}"/>
             <echo message="MAVEN_HOME=${env.MAVEN_HOME}"/>
             <exec executable="${env.MAVEN_HOME}/bin/mvn.cmd" osfamily="windows" dir="@{dir}" failonerror="true">
-                <arg line="@{argline} -T 1C -P dev -Ddev=true -ff"/>
+                <arg line="@{argline} -T 1C  -Ddev=true -ff"/>
             </exec>
             <!--<exec executable="/Users/i831964/bin/maven/bin/mvn" dir="@{dir}" failonerror="true">-->
             <exec executable="${env.MAVEN_HOME}/bin/mvn" osfamily="mac" dir="@{dir}" failonerror="true">

@@ -269,15 +269,14 @@ public class FileUtils {
 				File source = new File(sourceFile);
 				File target = new File(targetFile);
 
-				if (source.canExecute()) {
-					target.setExecutable(true, false);
-				}
-				if (source.canRead()) {
-					target.setReadable(true, false);
-				}
-				if (source.canWrite()) {
-					target.setWritable(true, false);
-				}
+				// Set executable
+				target.setExecutable(source.canExecute(), false);
+
+				// Set readable
+				target.setReadable(source.canRead(), false);
+
+				// Set writable - THIS WAS THE BUG
+				target.setWritable(source.canWrite(), false);
 			}
 		} catch (IOException e) {
 			rdProUI.printError( "\tFailed to preserve permissions for " + targetFile + ": " + e.getMessage());

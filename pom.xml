@@ -27,8 +27,12 @@
         </repository>
 
         <!-- use maven default -->
+            <repository>
+                <id>central</id>
+                <url>http://repo1.maven.org/maven2</url>
+            </repository>
         <repository>
-            <id>public-central</id>
+            <id>public-secure-central</id>
             <url>https://repo1.maven.org/maven2</url>
             <releases>
                 <enabled>true</enabled>
@@ -52,8 +56,14 @@
         </pluginRepository>
 
         <!-- use maven default -->
+
         <pluginRepository>
             <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>public-secure-central</id>
             <url>https://repo1.maven.org/maven2</url>
             <releases>
                 <enabled>true</enabled>
