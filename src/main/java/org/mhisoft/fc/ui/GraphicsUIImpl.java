@@ -20,6 +20,7 @@
 package org.mhisoft.fc.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -219,6 +220,15 @@ public class GraphicsUIImpl extends AbstractUIImpl {
 
 				} else if (arg.equalsIgnoreCase("-to")) {
 					props.setDestDir(args[i + 1]);
+					i++; //skip the next arg
+
+				} else if (arg.equalsIgnoreCase("-ignore")) {
+					List<String> ignoredDirs = new ArrayList<String>();
+					for (String v : Arrays.asList(args[i + 1].split(","))) {
+						if (v != null && v.trim().length() > 0)
+							ignoredDirs.add(v.trim());
+					}
+					props.setIgnoredDirs(ignoredDirs);
 					i++; //skip the next arg
 
 				} else {

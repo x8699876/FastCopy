@@ -1,5 +1,8 @@
 package org.mhisoft.fc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Run time properties
  */
@@ -45,6 +48,7 @@ public class RunTimeProperties  implements  java.io.Serializable{
 	boolean preserveFileTimesAndAccessAttributes = Boolean.valueOf(System.getProperty("keepOriginalFileDates", "false"));;
 	boolean skipEmptyDirs=Boolean.valueOf(System.getProperty("skipEmptyDirs", "true"));;;
 	boolean packageSmallFiles = Boolean.valueOf(System.getProperty("packageSmallFiles", "true"));
+	List<String> ignoredDirs = new ArrayList<String>();
 
 
 
@@ -197,6 +201,28 @@ public class RunTimeProperties  implements  java.io.Serializable{
 		this.skipEmptyDirs = skipEmptyDirs;
 	}
 
+	public List<String> getIgnoredDirs() {
+		return ignoredDirs;
+	}
+
+	public void setIgnoredDirs(List<String> ignoredDirs) {
+		this.ignoredDirs = ignoredDirs;
+	}
+
+	public boolean shouldIgnore(String dirName) {
+		if (dirName == null || ignoredDirs == null || ignoredDirs.isEmpty()) {
+			return false;
+		}
+
+		for (String ignoredDir : ignoredDirs) {
+			if (ignoredDir != null && ignoredDir.trim().equalsIgnoreCase(dirName.trim())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RunTimeProperties{");
@@ -213,6 +239,7 @@ public class RunTimeProperties  implements  java.io.Serializable{
 		sb.append(", verifyAfterCopy=").append(this.verifyAfterCopy);
 		sb.append(", keepOriginalFileDates=").append(RunTimeProperties.instance.isPreserveFileTimesAndAccessAttributes());
 		sb.append(", skipEmptyDirs=").append(RunTimeProperties.instance.isSkipEmptyDirs());
+		sb.append(", ignoredDirs=").append(ignoredDirs);
 		sb.append('}');
 		return sb.toString();
 	}

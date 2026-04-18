@@ -98,6 +98,13 @@ public class FileCopierService {
 				File[] childFiles = rootDir.listFiles(new FilenameFilter() {
 					@Override
 					public boolean accept(File dir, String name) {
+						File file = new File(dir, name);
+						if (file.isDirectory() && RunTimeProperties.instance.shouldIgnore(name)) {
+							if (RunTimeProperties.instance.isVerbose()) {
+								rdProUI.println("Skipping ignored directory: " + file.getAbsolutePath());
+							}
+							return false;
+						}
 						return true; //filters
 					}
 				});
@@ -203,6 +210,12 @@ public class FileCopierService {
 				}
 
 				if (childDir.isDirectory()) {
+					if (RunTimeProperties.instance.shouldIgnore(childDir.getName())) {
+						if (RunTimeProperties.instance.isVerbose()) {
+							rdProUI.println("Skipping ignored directory: " + childDir.getAbsolutePath());
+						}
+						continue;
+					}
 
 					String targeChildDir = _targetDir + File.separator + childDir.getName();
 					walkTreeAndCopy(level + 1, new String[]{childDir.getAbsolutePath()}, targeChildDir, childDir.lastModified());

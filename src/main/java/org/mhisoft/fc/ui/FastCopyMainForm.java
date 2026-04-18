@@ -20,6 +20,8 @@
 package org.mhisoft.fc.ui;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -99,6 +101,7 @@ public class FastCopyMainForm {
 	private JCheckBox ckPackageSmallFiles;
 	private JCheckBox ckKeepOriginalFileTimestamp;
 	private JLabel labelWallClock;
+    private JTextField fldIgnoreDirs;
     private JPanel panel1;
     private JPanel panel2;
     private JPanel btnStartClosePanel;
@@ -205,6 +208,13 @@ public class FastCopyMainForm {
         frame = new JFrame("MHISoft FastCopy " + UI.version);
         frame.setContentPane(layoutPanel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Add ignore list input to GUI (comma-separated directory names)
+        panel2.add(new JLabel("Ignore dirs"));
+        fldIgnoreDirs = new JTextField(30);
+        fldIgnoreDirs.setToolTipText("Comma-separated directory names to skip, e.g. node_modules,vendor,.git");
+        panel2.add(fldIgnoreDirs);
+
         //progressBar1.setVisible(false);
         progressBar1.setMaximum(100);
         progressBar1.setMinimum(0);
@@ -256,6 +266,10 @@ public class FastCopyMainForm {
             ckPackageSmallFiles.setSelected(props.isPackageSmallFiles());
             chkMultiThread.setSelected(props.getNumOfThreads() > 1);
             chkShowInfo.setSelected(props.isVerbose());
+
+            if (props.getIgnoredDirs() != null && !props.getIgnoredDirs().isEmpty()) {
+                fldIgnoreDirs.setText(String.join(",", props.getIgnoredDirs()));
+            }
         }
     }
 
@@ -457,6 +471,19 @@ public class FastCopyMainForm {
 		props.setCreateTheSameSourceFolderUnderTarget(ckCreateTheSameSourceCheckBox.isSelected());
 		props.setPreserveFileTimesAndAccessAttributes(ckKeepOriginalFileTimestamp.isSelected());
 		props.setVerifyAfterCopy(ckVerify.isSelected());
+
+		String ignoreText = fldIgnoreDirs == null ? "" : fldIgnoreDirs.getText();
+		if (ignoreText != null && ignoreText.trim().length() > 0) {
+			List<String> ignoredDirs = new ArrayList<String>();
+			for (String item : Arrays.asList(ignoreText.split(","))) {
+				if (item != null && item.trim().length() > 0) {
+					ignoredDirs.add(item.trim());
+				}
+			}
+			props.setIgnoredDirs(ignoredDirs);
+		} else {
+			props.setIgnoredDirs(new ArrayList<String>());
+		}
 
 		return true;
 
