@@ -20,6 +20,7 @@
 package org.mhisoft.fc.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -143,9 +144,11 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 		println("\t\t -pack   Package the small files first to speed up the copy, requires write access on the source folder or drive.");
 		println("\t\t -k      Keep the original file timestamp.");
 		println("\t\t -sf     Create the same source folder under the target and copies to it.");
+		println("\t\t -ignore Ignore directories by name, comma-separated. Example: -ignore node_modules,vendor");
 		println("Examples:");
 		println("\t\t copy from current dir to the backup directory: fastcopy t:\\backup");
 		println("\t\t fastcopy -from s:\\projects\\dir1;s:\\projects\\dir2 -to t:\\backup");
+		println("\t\t fastcopy -from s:\\projects -to t:\\backup -ignore node_modules,vendor");
 	}
 
 
@@ -192,6 +195,21 @@ public class ConsoleRdProUIImpl extends AbstractUIImpl {
 				props.setVerifyAfterCopy(true);
 			}else if (arg.equalsIgnoreCase("-sf")) {
 				props.setCreateTheSameSourceFolderUnderTarget(true);
+			} else if (arg.equalsIgnoreCase("-ignore")) {
+				if (args.length > i + 1) {
+					List<String> ignoredDirs = new ArrayList<String>();
+					for (String v : Arrays.asList(args[i + 1].split(","))) {
+						if (v != null && v.trim().length() > 0) {
+							ignoredDirs.add(v.trim());
+						}
+					}
+					props.setIgnoredDirs(ignoredDirs);
+				} else {
+					System.err.println("No value for -ignore is specified");
+					props.setSuccess(false);
+					return props;
+				}
+				i++; //skip the next arg
 			}
 			else if (arg.equalsIgnoreCase("-w")) {
 
